@@ -68,13 +68,15 @@
   </footer>
 
   <!-- JavaScript Files -->
+  <script src="js/debug.js"></script>
   <script src="js/env.js"></script>
   <script src="js/config.js"></script>
+  <!-- Import components first -->
+  <script type="module" src="components/index.js"></script>
+  <!-- Then load dependent scripts -->
   <script src="js/supabase.js"></script>
   <script src="js/api-service.js"></script>
-  <!-- Import components -->
-  <script type="module" src="components/index.js"></script>
-  <!-- App initialization -->
+  <!-- App initialization last -->
   <script src="js/app.js"></script>
 
   <script>

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: isiStory
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    repo: https://github.com/isiezb/isiStory.git
+    branch: main
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+    autoDeploy: true 
