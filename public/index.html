@@ -106,5 +106,39 @@
       });
     });
   </script>
+
+  <!-- Add visible debug button for Safari users -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Create the debug button
+      const debugButton = document.createElement('button');
+      debugButton.id = 'debug-panel-trigger';
+      debugButton.innerHTML = '🐞 Debug';
+      debugButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #6c757d;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        cursor: pointer;
+        z-index: 9999;
+      `;
+      
+      // Add click handler
+      debugButton.addEventListener('click', () => {
+        if (window.showDebugPanel) {
+          window.showDebugPanel();
+        }
+      });
+      
+      // Add to body
+      document.body.appendChild(debugButton);
+    });
+  </script>
 </body>
 </html> 
