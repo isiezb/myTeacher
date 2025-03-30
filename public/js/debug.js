@@ -1457,6 +1457,79 @@ function addResponseAnalyzer() {
   }, 100);
 }
 
+// Function to check the proxy service methods
+function addProxyServiceCheck() {
+  const apiTestResults = document.getElementById('api-test-results');
+  if (!apiTestResults) return;
+  
+  const html = apiTestResults.innerHTML || '';
+  
+  apiTestResults.innerHTML = html + `
+    <h4 style="margin-top: 15px;">Proxy Service Check:</h4>
+    <button id="check-proxy-service-btn" style="padding: 8px 16px; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer;">Check Proxy Service</button>
+    <div id="proxy-service-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
+  `;
+  
+  setTimeout(() => {
+    const checkBtn = document.getElementById('check-proxy-service-btn');
+    const resultsDiv = document.getElementById('proxy-service-results');
+    
+    if (checkBtn && resultsDiv) {
+      checkBtn.addEventListener('click', () => {
+        if (!window.proxyService) {
+          resultsDiv.innerHTML = '<p style="color: red;">❌ Error: Proxy service is not available</p>';
+          return;
+        }
+        
+        // Check methods
+        const methods = {
+          'fetchViaProxy': typeof window.proxyService.fetchViaProxy === 'function',
+          'generateStory': typeof window.proxyService.generateStory === 'function'
+        };
+        
+        // Generate HTML
+        let resultHtml = '<h4>Proxy Service Methods:</h4>';
+        resultHtml += '<ul>';
+        
+        for (const [method, exists] of Object.entries(methods)) {
+          resultHtml += `<li style="color: ${exists ? 'green' : 'red'}">${method}: ${exists ? '✅ Available' : '❌ Missing'}</li>`;
+        }
+        
+        resultHtml += '</ul>';
+        
+        // Add configuration
+        resultHtml += '<h4>Proxy Service Configuration:</h4>';
+        resultHtml += '<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">';
+        
+        // Clean up the config for display (remove circular references and functions)
+        const config = {...window.proxyService};
+        delete config.fetchViaProxy;
+        delete config.generateStory;
+        
+        resultHtml += JSON.stringify(config, null, 2);
+        resultHtml += '</pre>';
+        
+        // Recommendations
+        resultHtml += '<h4>Recommendations:</h4>';
+        
+        if (!methods.generateStory) {
+          resultHtml += `<p style="color: red;">The 'generateStory' method is missing from the proxy service. This will cause errors when the app tries to fall back to the proxy service.</p>`;
+          resultHtml += `<p>To fix this issue:</p>`;
+          resultHtml += `<ol>`;
+          resultHtml += `<li>Check the proxy-service.js file to ensure the generateStory function is being exported correctly</li>`;
+          resultHtml += `<li>Make sure the init() function is returning all required methods</li>`;
+          resultHtml += `<li>Try reloading the page after making changes</li>`;
+          resultHtml += `</ol>`;
+        } else {
+          resultHtml += `<p style="color: green;">✅ The proxy service appears to be correctly configured with all required methods.</p>`;
+        }
+        
+        resultsDiv.innerHTML = resultHtml;
+      });
+    }
+  }, 100);
+}
+
 // Use existing add* functions from the Components tab
 setTimeout(() => {
   addDirectUrlCheck();
@@ -1464,4 +1537,5 @@ setTimeout(() => {
   addStoryGenerationTest();
   addServerConfigCheck();
   addResponseAnalyzer();
+  addProxyServiceCheck();
 }, 200); 

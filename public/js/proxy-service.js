@@ -22,7 +22,12 @@ const proxyService = (function() {
   function init(options = {}) {
     const config = {...defaultOptions, ...options};
     console.log('Proxy service initialized with options:', config);
-    return config;
+    return {
+      // Return both config and methods
+      ...config,
+      fetchViaProxy,
+      generateStory
+    };
   }
   
   // Fetch via proxy
@@ -141,11 +146,9 @@ const proxyService = (function() {
     }
   }
   
-  // Public API
+  // The return in init() replaces this now that we're returning methods there
   return {
-    init,
-    fetchViaProxy,
-    generateStory
+    init
   };
 })();
 
