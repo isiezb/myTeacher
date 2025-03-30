@@ -162,54 +162,65 @@
 
   // Generate a story using form data
   async function generateStory(formData) {
-    // If API service is available, use it
+    // Default API base URL
+    const baseUrl = window.ENV_API_URL || "https://quiz-story-1.onrender.com";
+    console.log('Using base URL:', baseUrl);
+    
+    // First try direct API access
     if (window.apiService && typeof window.apiService.generateStory === 'function') {
       console.log('Using API service to generate story');
       try {
-        return await window.apiService.generateStory(formData);
+        const result = await window.apiService.generateStory(formData);
+        console.log('Direct API request successful');
+        return result;
       } catch (error) {
         console.error('API service error:', error);
         
-        // Try proxy service if available and it's a CORS or network error
+        // If this looks like a CORS or network error, try using proxy
         if (window.proxyService && 
             (error.message.includes('CORS') || 
              error.message.includes('Failed to fetch') ||
-             error.message.includes('Network'))) {
+             error.message.includes('Network') ||
+             error.message.includes('TypeError'))) {
           
           console.log('CORS/Network issue detected, trying proxy service...');
           try {
-            const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-            return await window.proxyService.generateStory(baseUrl, formData);
+            const proxyResult = await window.proxyService.generateStory(baseUrl, formData);
+            console.log('Proxy request successful');
+            return proxyResult;
           } catch (proxyError) {
             console.error('Proxy service error:', proxyError);
-            window.showToast?.('Proxy API error: ' + proxyError.message, 'error');
+            window.showToast?.('API Service Unavailable: Using mock data for demonstration', 'warning');
             
-            // Fall back to mock if both methods fail
-            console.log('Falling back to mock story generation');
+            // Fall back to mock data as last resort
+            console.log('All remote methods failed. Using mock story data.');
             return mockGenerateStory(formData);
           }
         } else {
           window.showToast?.('API error: ' + error.message, 'error');
           
-          // Fallback to mock if API fails
-          console.log('Falling back to mock story generation');
+          // Fallback to mock if API fails for non-CORS reasons
+          console.log('API error (non-CORS). Using mock story generation');
           return mockGenerateStory(formData);
         }
       }
     } else if (window.proxyService) {
       // Try proxy service if API service isn't available
-      console.log('No API service, trying proxy service');
+      console.log('API service not available, trying proxy service');
       try {
-        const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-        return await window.proxyService.generateStory(baseUrl, formData);
+        const proxyResult = await window.proxyService.generateStory(baseUrl, formData);
+        console.log('Proxy request successful');
+        return proxyResult;
       } catch (proxyError) {
         console.error('Proxy service error:', proxyError);
-        window.showToast?.('Proxy error: ' + proxyError.message, 'error');
+        window.showToast?.('Remote services unavailable. Using mock data.', 'warning');
         return mockGenerateStory(formData);
       }
+    } else {
+      // No API or proxy service available
+      console.log('No API or proxy service available. Using mock data.');
+      return mockGenerateStory(formData);
     }
-
-    return mockGenerateStory(formData);
   }
   
   // Mock story generation for testing

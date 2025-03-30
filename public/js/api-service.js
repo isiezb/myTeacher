@@ -1,131 +1,110 @@
 // ... existing code ...
   async function generateStory(formData) {
-    console.log(`Generating story... API URL: ${_baseUrl}/stories/generate`);
+    // Initialize with the configured base URL
+    const apiUrl = window.ENV_API_URL || "https://quiz-story-1.onrender.com";
+    console.log(`Generating story... API URL: ${apiUrl}`);
     
-    // Define multiple possible endpoints to try
-    const endpoints = [
-      '/stories/generate',  // Current endpoint that's getting 404
-      '/api/stories/generate',
-      '/generate-story',
-      '/story/generate',
-      '/api/v1/stories/generate'
-    ];
+    // Define the endpoint - based on the URL seen in the browser screenshot
+    const endpoint = '/stories/generate';
+    const fullUrl = `${apiUrl}${endpoint}`;
     
-    // Store errors for diagnostics
-    const endpointErrors = {};
-    
-    // Try each endpoint
-    for (const endpoint of endpoints) {
-      try {
-        console.log(`Attempting POST request to ${endpoint} with fetch`);
-        const postResponse = await fetch(`${_baseUrl}${endpoint}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Origin': window.location.origin
-          },
-          mode: 'cors',
-          credentials: 'omit',
-          body: JSON.stringify(formData)
-        });
-        
-        console.log(`POST response status for ${endpoint}:`, postResponse.status);
-        
-        if (postResponse.ok) {
-          try {
-            const data = await postResponse.json();
-            console.log(`Story generated successfully via POST to ${endpoint}`);
-            return data;
-          } catch (parseError) {
-            console.error(`Error parsing JSON from ${endpoint}:`, parseError);
-            endpointErrors[endpoint] = { error: 'JSON parse error', message: parseError.message };
-            continue; // Try next endpoint
-          }
+    try {
+      console.log(`Attempting POST request to ${fullUrl}`);
+      
+      // Set up proper headers to allow CORS
+      const headers = {
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin,
+        'Accept': 'application/json'
+      };
+      
+      // Make the POST request
+      const postResponse = await fetch(fullUrl, {
+        method: 'POST',
+        headers: headers,
+        mode: 'cors',
+        credentials: 'omit',
+        body: JSON.stringify(formData)
+      });
+      
+      console.log('POST response status:', postResponse.status);
+      
+      if (postResponse.ok) {
+        try {
+          const data = await postResponse.json();
+          console.log('Story generated successfully via POST');
+          return data;
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          
+          // Try to get the raw text
+          const responseClone = postResponse.clone();
+          const rawText = await responseClone.text();
+          console.log('Raw response text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
+          
+          // This might be a CORS issue - try falling back to proxy
+          throw new Error(`Failed to parse response: ${parseError.message}`);
+        }
+      } else {
+        // Log the error details
+        console.error(`POST request failed with status ${postResponse.status}`);
+        try {
+          const errorText = await postResponse.text();
+          console.error('Error response:', errorText.substring(0, 200));
+        } catch (e) {
+          console.error('Could not read error response');
         }
         
-        // If POST failed, we'll try an alternative method (GET with params)
-        console.log(`POST to ${endpoint} failed, trying GET...`);
-        
-        // Convert form data to query string for GET request
-        const params = new URLSearchParams();
-        Object.entries(formData).forEach(([key, value]) => {
-          params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
-        });
-        
-        const getUrl = `${_baseUrl}${endpoint}?${params.toString()}`;
-        console.log(`Attempting GET request to ${endpoint}:`, getUrl.substring(0, 100) + '...');
-        
-        const getResponse = await fetch(getUrl, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Origin': window.location.origin
-          },
-          mode: 'cors',
-          credentials: 'omit'
-        });
-        
-        console.log(`GET response status for ${endpoint}:`, getResponse.status);
-        
-        if (getResponse.ok) {
-          try {
-            const data = await getResponse.json();
-            console.log(`Story generated successfully via GET to ${endpoint}`);
-            return data;
-          } catch (parseError) {
-            console.error(`Error parsing JSON from GET to ${endpoint}:`, parseError);
-            
-            // Attempt to get the raw text to see what was returned
-            const responseClone = getResponse.clone();
-            
+        // If POST failed with 404, the endpoint might be wrong - try a GET request
+        if (postResponse.status === 404) {
+          console.log('Endpoint not found, trying GET request as fallback');
+          
+          // Build query string
+          const params = new URLSearchParams();
+          Object.entries(formData).forEach(([key, value]) => {
+            params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+          });
+          
+          const getUrl = `${fullUrl}?${params.toString()}`;
+          console.log('Attempting GET request:', getUrl.substring(0, 100) + '...');
+          
+          const getResponse = await fetch(getUrl, {
+            method: 'GET',
+            headers: headers,
+            mode: 'cors',
+            credentials: 'omit'
+          });
+          
+          console.log('GET response status:', getResponse.status);
+          
+          if (getResponse.ok) {
             try {
-              const rawText = await responseClone.text();
-              console.log(`Raw response text from ${endpoint}:`, rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
-              
-              // Store the error for diagnostics
-              endpointErrors[endpoint] = { 
-                error: 'JSON parse error (GET)', 
-                message: parseError.message,
-                rawText: rawText.substring(0, 200)
-              };
-            } catch (textError) {
-              endpointErrors[endpoint] = { 
-                error: 'Failed to get response text',
-                message: textError.message
-              };
+              const data = await getResponse.json();
+              console.log('Story generated successfully via GET');
+              return data;
+            } catch (parseError) {
+              console.error('Error parsing GET response:', parseError);
+              throw new Error(`Failed to parse GET response: ${parseError.message}`);
             }
-            
-            // Continue to next endpoint
-            continue;
           }
+          
+          throw new Error(`API request failed: ${getResponse.status}`);
         }
         
-        // Store the error for this endpoint
-        endpointErrors[endpoint] = { 
-          error: 'HTTP error',
-          postStatus: postResponse.status,
-          getStatus: getResponse.status
-        };
-      } catch (error) {
-        console.error(`Error trying endpoint ${endpoint}:`, error);
-        endpointErrors[endpoint] = { error: 'Request error', message: error.message };
+        throw new Error(`API request failed: ${postResponse.status}`);
       }
+    } catch (error) {
+      console.error('Error generating story:', error);
+      
+      // If this might be a CORS error, suggest using the proxy service
+      if (error.message.includes('Failed to fetch') || 
+          error.message.includes('NetworkError') ||
+          error.message.includes('CORS')) {
+        throw new Error('Network or CORS error detected. This could be fixed using a proxy service.');
+      }
+      
+      throw error;
     }
-    
-    // If we get here, all endpoints failed
-    console.error('All API endpoints failed. Errors:', endpointErrors);
-    
-    // Log helpful debugging info
-    console.error('Request details:', {
-      baseUrl: _baseUrl,
-      formData,
-      headers: _headers,
-      endpointErrors
-    });
-    
-    // Use fallback story instead of throwing error
-    console.log('Falling back to mock story generation');
-    return _createFallbackStory(formData);
   }
 
   // Helper for inspecting problematic responses
