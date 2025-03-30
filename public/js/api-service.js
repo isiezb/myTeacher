@@ -1,4 +1,7 @@
-// ... existing code ...
+// API Service module using IIFE pattern
+const apiService = (function() {
+  // Private variables or helper functions can go here if needed
+
   async function generateStory(formData) {
     // Initialize with the configured base URL from env.js
     const apiUrl = window.ENV_API_URL;
@@ -151,4 +154,15 @@
       }
     };
   }
-// ... existing code ...
+
+  // Public API: expose functions needed externally
+  return {
+    generateStory
+    // You could expose _createFallbackStory here too if needed elsewhere
+  };
+
+})(); // End of IIFE
+
+// Assign the returned public API to the window object
+window.apiService = apiService;
+console.log("API Service module loaded and assigned to window.apiService.");
