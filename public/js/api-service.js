@@ -67,6 +67,75 @@ const apiService = (function() {
     }
   }
 
+  async function continueStory(storyId, options) {
+    // Initialize with the configured base URL from env.js
+    // An empty string means use the current origin
+    const apiUrl = window.ENV_API_URL;
+    
+    console.log(`Continuing story... API Base URL (from env): '${apiUrl}'`);
+    
+    // Use POST /stories/{storyId}/continue for story continuation
+    const endpoint = `/stories/${storyId}/continue`;
+    const fullUrl = `${apiUrl}${endpoint}`;
+    
+    try {
+      console.log(`Attempting POST request to ${fullUrl}`);
+      
+      const headers = {
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin,
+        'Accept': 'application/json'
+      };
+      
+      const requestBody = {
+        length: options.length || 300,
+        difficulty: options.difficulty || 'same'
+      };
+      
+      console.log('Request Details:', {
+        url: fullUrl,
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(requestBody)
+      });
+      
+      const postResponse = await fetch(fullUrl, {
+        method: 'POST',
+        headers: headers,
+        mode: 'cors',
+        credentials: 'omit',
+        body: JSON.stringify(requestBody)
+      });
+      
+      console.log('POST response status:', postResponse.status);
+      
+      if (postResponse.ok) {
+        try {
+          const data = await postResponse.json();
+          console.log('Story continued successfully via POST');
+          return data;
+        } catch (parseError) {
+          console.error('Error parsing JSON response:', parseError);
+          const responseClone = postResponse.clone();
+          const rawText = await responseClone.text();
+          console.log('Raw response text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
+          throw new Error(`Failed to parse response: ${parseError.message}`);
+        }
+      } else {
+        console.error(`POST request failed with status ${postResponse.status}`);
+        let errorText = 'Could not read error response';
+        try {
+          errorText = await postResponse.text();
+          console.error('Error response:', errorText.substring(0, 200));
+        } catch (e) { /* Ignore */ }
+        throw new Error(`API request failed: ${postResponse.status} - ${errorText.substring(0, 50)}`);
+      }
+    } catch (error) {
+      console.error('Error continuing story (direct API):', error);
+      throw error;
+    }
+  }
+
   // Helper for inspecting problematic responses
   async function _inspectResponseContent(response, originalError) {
     console.log('Inspecting problematic response...');
@@ -156,7 +225,8 @@ const apiService = (function() {
 
   // Public API: expose functions needed externally
   return {
-    generateStory
+    generateStory,
+    continueStory
     // You could expose _createFallbackStory here too if needed elsewhere
   };
 

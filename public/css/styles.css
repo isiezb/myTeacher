@@ -387,4 +387,69 @@ Responsive
   main {
     padding: 3rem 0;
   }
+}
+
+/* 
+============================
+Story Continuation Styles
+============================
+*/
+.continuation-divider {
+    position: relative;
+    text-align: center;
+    margin: 2.5rem 0;
+    border-bottom: 1px solid #e0e0e0;
+    height: 0;
+}
+
+.continuation-divider span {
+    position: relative;
+    top: -0.7rem;
+    background: white;
+    padding: 0 1rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.story-continuation {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid #4285f4;
+    animation: fadeIn 0.8s ease;
+}
+
+.story-continuation p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Difficulty level indicators */
+.difficulty-much-easier {
+    border-left-color: #34a853; /* Green - easier */
+}
+
+.difficulty-slightly-easier {
+    border-left-color: #78c690; /* Light green - slightly easier */
+}
+
+.difficulty-same-level {
+    border-left-color: #4285f4; /* Blue - same level */
+}
+
+.difficulty-slightly-harder {
+    border-left-color: #ea8a4b; /* Orange - slightly harder */
+}
+
+.difficulty-much-harder {
+    border-left-color: #ea4335; /* Red - much harder */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 } 

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 
 class StoryGenerationRequest(BaseModel):
     academic_grade: str = Field(..., description="Target academic grade level (e.g., 'K', '5', '12')")
@@ -35,3 +35,26 @@ class StoryGenerationResponse(BaseModel):
     vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Generated vocabulary list, if requested")
     quiz: Optional[List[QuizItem]] = Field(None, description="Generated comprehension quiz, if requested")
     learning_objectives: Optional[List[str]] = Field(None, description="Potential learning objectives derived from the story") # Added this as it was in frontend display 
+
+class StoryContinuationRequest(BaseModel):
+    original_story_content: Optional[str] = Field(None, description="Content of the original story to continue")
+    length: int = Field(default=300, description="Target word count for the continuation")
+    difficulty: str = Field(
+        default="same_level", 
+        description="Desired difficulty level relative to the original story"
+    )
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "length": 300,
+                "difficulty": "slightly_harder"
+            }
+        }
+
+class StoryContinuationResponse(BaseModel):
+    story_id: str = Field(..., description="ID of the original story")
+    continuation_text: str = Field(..., description="The generated continuation text")
+    word_count: int = Field(..., description="Actual word count of the continuation")
+    difficulty: str = Field(..., description="The difficulty level that was applied")
+    vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Additional vocabulary items for the continuation") 

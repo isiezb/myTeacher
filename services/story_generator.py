@@ -2,7 +2,7 @@ import httpx
 import os
 import json
 from dotenv import load_dotenv
-from models.story import StoryGenerationRequest, StoryGenerationResponse, VocabularyItem, QuizItem
+from models.story import StoryGenerationRequest, StoryGenerationResponse, VocabularyItem, QuizItem, StoryContinuationRequest, StoryContinuationResponse
 from typing import Tuple, Optional, List, Dict
 
 load_dotenv() # Load environment variables from .env file
@@ -162,6 +162,126 @@ def _build_llm_prompt(request: StoryGenerationRequest) -> Tuple[str, str]:
         output_schema["quiz"] = '[{"question": "string", "options": ["string"], "correct_answer": int}] (List of quiz questions, each with an array of 4 options and the index of the correct answer (0-3))'
 
     prompt_lines.append("\nOutput the entire result as a single JSON object conforming exactly to the specified structure.")
+
+    # Describe the JSON structure for the system prompt
+    output_format_description = json.dumps(output_schema, indent=2)
+
+    return "\n".join(prompt_lines), output_format_description 
+
+async def continue_story_content(story_id: str, request: StoryContinuationRequest) -> StoryContinuationResponse:
+    """
+    Continues an existing story with specified length and difficulty.
+    """
+    if not OPENROUTER_API_KEY:
+        raise ValueError("OPENROUTER_API_KEY environment variable not set.")
+
+    # TODO: In a real implementation, we would fetch the original story from a database
+    # For now, we'll rely on the original_story_content field provided in the request
+    if not request.original_story_content:
+        raise ValueError("Original story content must be provided if story retrieval is not implemented.")
+
+    prompt, output_format_description = _build_continuation_prompt(story_id, request)
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost", # Optional, replace with your site URL
+        "X-Title": "EasyStory", # Optional, replace with your app name
+    }
+
+    payload = {
+        "model": OPENROUTER_MODEL,
+        "messages": [
+            {"role": "system", "content": f"You are an expert educational storyteller. Generate content exactly in the JSON format described below:\n{output_format_description}"},
+            {"role": "user", "content": prompt}
+        ],
+        "response_format": {"type": "json_object"} # Request JSON output
+    }
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        try:
+            print(f"--- Sending continuation request to OpenRouter (Model: {OPENROUTER_MODEL}) ---")
+            response = await client.post(OPENROUTER_API_URL, headers=headers, json=payload)
+            response.raise_for_status()
+            print("--- Received continuation response from OpenRouter ---")
+
+            result_json_str = response.json()['choices'][0]['message']['content']
+            # Attempt to parse the JSON string from the LLM response
+            generated_data = json.loads(result_json_str)
+
+            # Basic validation of received structure
+            if "continuation_text" not in generated_data:
+                raise ValueError("LLM response missing required key 'continuation_text'.")
+
+            continuation_text = generated_data.get("continuation_text", "")
+            actual_word_count = len(continuation_text.split())
+
+            # Process vocabulary if present
+            vocabulary_list = None
+            if "vocabulary" in generated_data:
+                try:
+                    raw_vocab = generated_data["vocabulary"]
+                    if isinstance(raw_vocab, list):
+                        vocabulary_list = [VocabularyItem(**item) for item in raw_vocab 
+                                          if isinstance(item, dict) and "term" in item and "definition" in item]
+                except Exception as e:
+                    print(f"Warning: Could not parse vocabulary list: {e}")
+                    vocabulary_list = None
+
+            return StoryContinuationResponse(
+                story_id=story_id,
+                continuation_text=continuation_text,
+                word_count=actual_word_count,
+                difficulty=request.difficulty,
+                vocabulary=vocabulary_list
+            )
+
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
+            raise Exception(f"LLM API request failed with status {e.response.status_code}.") from e
+        except httpx.RequestError as e:
+            print(f"An error occurred while requesting {e.request.url!r}.")
+            raise Exception("Could not connect to the LLM API.") from e
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON response from LLM: {e}")
+            print(f"Received text: {result_json_str}")
+            raise ValueError("Could not parse the JSON response from the language model.") from e
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            raise
+
+def _build_continuation_prompt(story_id: str, request: StoryContinuationRequest) -> Tuple[str, str]:
+    """Builds the prompt string and JSON format description for story continuation."""
+    
+    difficulty_instructions = {
+        "much_easier": "Use significantly simpler vocabulary and sentence structure. Reduce complexity considerably.",
+        "slightly_easier": "Use slightly simpler vocabulary and somewhat less complex sentences.",
+        "same_level": "Maintain the same level of vocabulary and sentence complexity as the original story.",
+        "slightly_harder": "Use slightly more advanced vocabulary and somewhat more complex sentences.",
+        "much_harder": "Use significantly more advanced vocabulary and more complex sentence structures."
+    }
+    
+    difficulty_instruction = difficulty_instructions.get(
+        request.difficulty, 
+        "Maintain the same level of vocabulary and sentence complexity as the original story."
+    )
+    
+    prompt_lines = [
+        f"Continue the following educational story with approximately {request.length} more words.",
+        f"Difficulty adjustment: {difficulty_instruction}",
+        "Ensure the continuation flows naturally from the original story and maintains the educational themes.",
+        "\nOriginal Story:",
+        f"{request.original_story_content}",
+        "\nRequirements:",
+        "- Generate a natural continuation of the story that picks up exactly where the original left off.",
+        "- Maintain consistent characters, setting, and educational themes.",
+        "- Include 3-5 relevant vocabulary items that align with the specified difficulty level."
+    ]
+
+    output_schema = {
+        "continuation_text": "string (The continuation of the story, with paragraphs separated by double line breaks '\\n\\n')",
+        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 3-5 vocabulary words used in the continuation)'
+    }
 
     # Describe the JSON structure for the system prompt
     output_format_description = json.dumps(output_schema, indent=2)

@@ -18,8 +18,9 @@ export class StoryContinuation extends LitElement {
     this._errorMessage = '';
     this._settings = {
       length: '300',
-      difficulty: 'same'
+      difficulty: 'same_level'
     };
+    this._vocabularyItems = [];
   }
 
   static get styles() {
@@ -153,6 +154,47 @@ export class StoryContinuation extends LitElement {
         margin-top: 1rem;
       }
 
+      .difficulty-description {
+        width: 100%;
+        margin: 1rem 0;
+        transition: all 0.3s ease;
+      }
+
+      .difficulty-description-content {
+        padding: 1rem;
+        border-radius: 8px;
+        background-color: var(--bg, #f8f9fa);
+        border-left: 4px solid var(--primary, #5e7ce6);
+        transition: all 0.3s ease;
+      }
+
+      .difficulty-description-content h4 {
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        color: var(--text, #212529);
+      }
+
+      .difficulty-description-content p {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        color: var(--text-secondary, #6c757d);
+      }
+
+      .difficulty-description-content.easier {
+        border-left-color: var(--info, #38b2ac);
+      }
+
+      .difficulty-description-content.same {
+        border-left-color: var(--primary, #5e7ce6);
+      }
+
+      .difficulty-description-content.harder {
+        border-left-color: var(--warning, #d69e2e);
+      }
+
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -168,6 +210,71 @@ export class StoryContinuation extends LitElement {
           width: 100%;
         }
       }
+
+      /* Vocabulary styling */
+      .vocabulary-section {
+        margin-top: 2rem;
+        background-color: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #4285f4;
+      }
+      
+      .vocabulary-section h3 {
+        color: #333;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.25rem;
+      }
+      
+      .vocabulary-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+      }
+      
+      .vocabulary-item {
+        background: white;
+        padding: 1rem;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease;
+      }
+      
+      .vocabulary-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+      
+      .vocabulary-term {
+        color: #4285f4;
+        margin: 0 0 0.5rem 0;
+        font-size: 1.1rem;
+      }
+      
+      .vocabulary-definition {
+        color: #555;
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+      
+      /* Continuation result styling */
+      .continuation-result {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      .continuation-content {
+        line-height: 1.6;
+        color: #333;
+      }
+      
+      .continuation-content p {
+        margin-bottom: 1rem;
+      }
     `;
   }
 
@@ -181,117 +288,222 @@ export class StoryContinuation extends LitElement {
   }
 
   async _handleContinue() {
-    if (!this.originalStory || !this.originalStory.id) {
-      this._showError = true;
-      this._errorMessage = 'No story to continue.';
-      return;
-    }
-
+    if (this.isSubmitting) return; 
+    
     this.isSubmitting = true;
+    this._continuationContent = '';
     this._showError = false;
     this._errorMessage = '';
-
-    try {
-      // Show loading indicator
-      window.showLoading?.('Continuing your story...');
-
-      // Get the API service
-      const apiService = window.apiService;
-      
-      if (apiService && typeof apiService.continueStory === 'function') {
-        // Call the API to continue the story
-        const result = await apiService.continueStory(this.originalStory.id, {
-          length: parseInt(this._settings.length, 10),
-          difficulty: this._settings.difficulty
+    this.render();
+    
+    const originalStory = this.originalStory || {};
+    const storyId = originalStory.id || 'unknown';
+    const originalContent = originalStory.content || '';
+    
+    // Map UI difficulty values to API values
+    const difficultyMap = {
+        'much_easier': 'much_easier',
+        'slightly_easier': 'slightly_easier', 
+        'same_level': 'same_level',
+        'slightly_harder': 'slightly_harder',
+        'much_harder': 'much_harder'
+    };
+    
+    const options = {
+        length: parseInt(this._settings.length, 10),
+        difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
+        original_story_content: originalContent
+    };
+    
+    // Log what we're about to do
+    console.log(`Continuing story ${storyId} with options:`, options);
+    
+    // Use the API service to continue the story
+    window.apiService.continueStory(storyId, options)
+        .then(data => {
+            this.isSubmitting = false;
+            
+            // Process the continuation response
+            if (data && data.continuation_text) {
+                this._continuationContent = data.continuation_text;
+                
+                // Process vocabulary items if available
+                if (data.vocabulary && Array.isArray(data.vocabulary)) {
+                    console.log('New vocabulary items:', data.vocabulary);
+                    this._vocabularyItems = data.vocabulary;
+                } else {
+                    this._vocabularyItems = [];
+                }
+                
+                // Dispatch event that continuation is ready
+                const event = new CustomEvent('story-continued', { 
+                    detail: { 
+                        continuation: data.continuation_text,
+                        difficulty: data.difficulty,
+                        wordCount: data.word_count,
+                        vocabulary: data.vocabulary
+                    } 
+                });
+                document.dispatchEvent(event);
+            } else {
+                throw new Error('Received empty or invalid continuation response');
+            }
+            
+            this.render();
+        })
+        .catch(error => {
+            console.error('Error continuing story:', error);
+            this.isSubmitting = false;
+            this._showError = true;
+            this._errorMessage = `Failed to continue the story: ${error.message || 'Unknown error'}`;
+            this.render();
+            
+            // Use mock data in development if API is unavailable
+            if (window.ENV_USE_MOCK_DATA === true) {
+                console.log('Using mock continuation data...');
+                setTimeout(() => {
+                    this._continuationContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
+                    this.isSubmitting = false;
+                    this._showError = false;
+                    this._errorMessage = '';
+                    this.render();
+                }, 1500);
+            }
         });
-        
-        // Set the continuation content
-        this._continuationContent = result.continuation || result.content;
-        
-        // Show success message
-        window.showToast?.('Story continued successfully!', 'success');
-        
-        // Dispatch event
-        this.dispatchEvent(new CustomEvent('story-continued', {
-          detail: { 
-            originalStory: this.originalStory,
-            continuation: this._continuationContent
-          },
-          bubbles: true,
-          composed: true
-        }));
-      } else {
-        // Mock response for testing
-        console.log('Using mock continuation (no API service available)');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        this._continuationContent = `This is a mock continuation of the story.\n\nThe ${this._settings.difficulty} difficulty continuation would be about ${this._settings.length} words long in the real implementation.\n\nIt would continue the narrative where the original story left off, maintaining the characters, setting, and educational focus.`;
-        
-        window.showToast?.('Story continued (mock data)', 'info');
-      }
-    } catch (error) {
-      console.error('Error continuing story:', error);
-      this._showError = true;
-      this._errorMessage = error.message || 'Failed to continue the story. Please try again.';
-      window.showToast?.('Failed to continue story.', 'error');
-    } finally {
-      this.isSubmitting = false;
-      window.hideLoading?.();
-    }
   }
 
   render() {
-    return html`
-      <h3>Continue the Story</h3>
+    if (this._showError) {
+      return `
+        <div class="continuation-error">
+          <p>${this._errorMessage}</p>
+        </div>
+      `;
+    }
+
+    if (this._continuationContent) {
+      const formattedContinuation = this._continuationContent.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
+      return `
+        <div class="continuation-result">
+          <h3>Story Continuation</h3>
+          <div class="continuation-content">
+            <p>${formattedContinuation}</p>
+          </div>
+          ${this._renderVocabulary()}
+        </div>
+      `;
+    }
+
+    return `
       <div class="continuation-form">
-        <div class="continuation-options">
-          <div class="continuation-option">
-            <label for="length">Length:</label>
-            <select id="length" name="length" 
-                    @change=${this._handleInputChange} 
-                    ?disabled=${this.isSubmitting}>
-              <option value="200" ?selected=${this._settings.length === '200'}>Short (200 words)</option>
-              <option value="300" ?selected=${this._settings.length === '300'}>Medium (300 words)</option>
-              <option value="500" ?selected=${this._settings.length === '500'}>Long (500 words)</option>
-            </select>
-          </div>
-          
-          <div class="continuation-option">
-            <label for="difficulty">Difficulty:</label>
-            <select id="difficulty" name="difficulty" 
-                    @change=${this._handleInputChange} 
-                    ?disabled=${this.isSubmitting}>
-              <option value="easier" ?selected=${this._settings.difficulty === 'easier'}>Easier</option>
-              <option value="same" ?selected=${this._settings.difficulty === 'same'}>Same Level</option>
-              <option value="harder" ?selected=${this._settings.difficulty === 'harder'}>More Challenging</option>
-            </select>
-          </div>
+        <h3>Continue the Story</h3>
+        
+        <div class="input-group">
+          <label for="length">Length</label>
+          <select 
+            id="length" 
+            name="length" 
+            @change="${this._handleInputChange}"
+            ?disabled="${this.isSubmitting}"
+          >
+            <option value="200" ${this._settings.length === '200' ? 'selected' : ''}>Short (200 words)</option>
+            <option value="300" ${this._settings.length === '300' ? 'selected' : ''}>Medium (300 words)</option>
+            <option value="500" ${this._settings.length === '500' ? 'selected' : ''}>Long (500 words)</option>
+          </select>
         </div>
         
-        <button @click=${this._handleContinue} ?disabled=${this.isSubmitting}>
-          ${this.isSubmitting 
-            ? html`<div class="spinner"></div> Continuing...` 
-            : 'Continue Story'}
+        <div class="input-group">
+          <label for="difficulty">Difficulty</label>
+          <select 
+            id="difficulty" 
+            name="difficulty" 
+            @change="${this._handleInputChange}"
+            ?disabled="${this.isSubmitting}"
+          >
+            <option value="much_easier" ${this._settings.difficulty === 'much_easier' ? 'selected' : ''}>Much Easier</option>
+            <option value="slightly_easier" ${this._settings.difficulty === 'slightly_easier' ? 'selected' : ''}>Slightly Easier</option>
+            <option value="same_level" ${this._settings.difficulty === 'same_level' ? 'selected' : ''}>Same Level</option>
+            <option value="slightly_harder" ${this._settings.difficulty === 'slightly_harder' ? 'selected' : ''}>Slightly Harder</option>
+            <option value="much_harder" ${this._settings.difficulty === 'much_harder' ? 'selected' : ''}>Much Harder</option>
+          </select>
+        </div>
+        
+        ${this._renderDifficultyDescription()}
+        
+        <button 
+          class="continue-button ${this.isSubmitting ? 'loading' : ''}" 
+          @click="${this._handleContinue}"
+          ?disabled="${this.isSubmitting}"
+        >
+          ${this.isSubmitting ? 
+            '<div class="spinner"></div> Generating...' : 
+            'Continue Story'
+          }
         </button>
       </div>
-      
-      ${this._continuationContent 
-        ? html`
-          <div class="continuation-output">
-            <div class="continuation-content">
-              ${this._continuationContent.split('\n').map(p => html`<p>${p}</p>`)}
+    `;
+  }
+
+  _renderDifficultyDescription() {
+    const descriptions = {
+      'much_easier': {
+        title: 'Much Easier',
+        description: 'Uses significantly simpler vocabulary and shorter sentences. Ideal for building confidence with beginner readers or those struggling with the original difficulty level.',
+        class: 'easier'
+      },
+      'slightly_easier': {
+        title: 'Slightly Easier',
+        description: 'Moderately simplifies vocabulary and sentence structure. Good for readers who found the original slightly challenging.',
+        class: 'easier'
+      },
+      'same_level': {
+        title: 'Same Level',
+        description: 'Maintains the same vocabulary level and sentence complexity as the original story.',
+        class: 'same'
+      },
+      'slightly_harder': {
+        title: 'Slightly Harder',
+        description: 'Introduces somewhat more advanced vocabulary and more complex sentences. Good for readers ready for a small challenge.',
+        class: 'harder'
+      },
+      'much_harder': {
+        title: 'Much Harder',
+        description: 'Uses significantly more advanced vocabulary and complex sentence structures. Ideal for pushing advanced readers to the next level.',
+        class: 'harder'
+      }
+    };
+
+    const selected = descriptions[this._settings.difficulty] || descriptions['same_level'];
+
+    return `
+      <div class="difficulty-description">
+        <div class="difficulty-description-content ${selected.class}">
+          <h4>${selected.title}</h4>
+          <p>${selected.description}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  _renderVocabulary() {
+    if (!this._vocabularyItems || this._vocabularyItems.length === 0) {
+        return '';
+    }
+
+    const vocabItems = this._vocabularyItems.map(item => `
+        <div class="vocabulary-item">
+            <h4 class="vocabulary-term">${item.term}</h4>
+            <p class="vocabulary-definition">${item.definition}</p>
+        </div>
+    `).join('');
+
+    return `
+        <div class="vocabulary-section">
+            <h3>New Vocabulary</h3>
+            <div class="vocabulary-list">
+                ${vocabItems}
             </div>
-          </div>
-        ` 
-        : ''}
-        
-      ${this._showError 
-        ? html`
-          <div class="continuation-error">
-            ${this._errorMessage}
-          </div>
-        ` 
-        : ''}
+        </div>
     `;
   }
 }
