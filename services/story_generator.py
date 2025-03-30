@@ -8,7 +8,7 @@ from typing import Tuple, Optional, List, Dict
 load_dotenv() # Load environment variables from .env file
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "anthropic/claude-3.5-sonnet") # Default model
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.0-flash-001") # Default model
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async def generate_story_content(request: StoryGenerationRequest) -> StoryGenerationResponse:
