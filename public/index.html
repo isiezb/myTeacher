@@ -143,18 +143,9 @@
   <!-- Add JavaScript to handle the Continue Story button -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Add event listener for the Continue Story button and handle both buttons in the footer 
+      // Add event listener for the Continue Story button
       const continueStoryBtn = document.getElementById('continueStoryBtn');
       const continuationContainer = document.getElementById('continuationContainer');
-      
-      // Also handle the buttons at the bottom of the page
-      const footerContinueBtn = document.querySelector('.story-actions + button, button:contains("Continue Story")');
-      const footerGenerateQuizBtn = document.querySelector('button:contains("Generate Quiz")');
-      
-      // If footer Generate Quiz button exists, just remove it
-      if (footerGenerateQuizBtn) {
-        footerGenerateQuizBtn.remove();
-      }
       
       // Function to handle the continue story action
       function handleContinueStory(storyObj) {
@@ -189,15 +180,11 @@
         continueStoryBtn.addEventListener('click', () => handleContinueStory());
       }
       
-      // Attach to footer button if it exists
-      if (footerContinueBtn) {
-        footerContinueBtn.addEventListener('click', () => handleContinueStory());
-      }
-      
-      // Add global event listener for any button with that text
+      // Additional listener for buttons that appear in the quiz view
       document.addEventListener('click', function(event) {
         if (event.target.tagName === 'BUTTON' && 
             (event.target.textContent.includes('Continue Story') || 
+             event.target.classList.contains('quiz-continue-button') ||
              event.target.id === 'continueStoryBtn')) {
           handleContinueStory();
         }

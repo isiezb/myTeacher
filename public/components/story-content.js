@@ -782,3 +782,6 @@ export class StoryContent extends LitElement {
     `;
   }
 }
+
+// Register the component
+customElements.define('story-content', StoryContent);
