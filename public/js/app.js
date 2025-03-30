@@ -162,19 +162,24 @@
 
   // Generate a story using form data
   async function generateStory(formData) {
-    // Default API base URL
-    const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
+    // Default API base URL from env.js
+    const baseUrl = window.ENV_API_URL;
+    if (!baseUrl) {
+      console.error("API_URL is not defined in env.js!");
+      window.showToast?.("Configuration Error: API URL missing.", "error");
+      return mockGenerateStory(formData); // Fallback to mock if config missing
+    }
     console.log('Using base URL:', baseUrl);
     
-    // First try direct API access
+    // Check if API service *function* exists before trying
     if (window.apiService && typeof window.apiService.generateStory === 'function') {
-      console.log('Using API service to generate story');
+      console.log('Attempting direct API request...');
       try {
         const result = await window.apiService.generateStory(formData);
         console.log('Direct API request successful');
         return result;
       } catch (error) {
-        console.error('API service error:', error);
+        console.error('Direct API service error:', error);
         
         // If this looks like a CORS or network error, try using proxy
         if (window.proxyService && 
@@ -183,42 +188,38 @@
              error.message.includes('Network') ||
              error.message.includes('TypeError'))) {
           
-          console.log('CORS/Network issue detected, trying proxy service...');
-          try {
-            const proxyResult = await window.proxyService.generateStory(baseUrl, formData);
-            console.log('Proxy request successful');
-            return proxyResult;
-          } catch (proxyError) {
-            console.error('Proxy service error:', proxyError);
-            window.showToast?.('API Service Unavailable: Using mock data for demonstration', 'warning');
-            
-            // Fall back to mock data as last resort
-            console.log('All remote methods failed. Using mock story data.');
-            return mockGenerateStory(formData);
-          }
+          console.log('Direct API failed (CORS/Network likely), trying proxy service...');
+          // Fall through to proxy attempt below
         } else {
+          // API failed for other reasons (e.g., 404, 500 from API itself)
           window.showToast?.('API error: ' + error.message, 'error');
-          
-          // Fallback to mock if API fails for non-CORS reasons
-          console.log('API error (non-CORS). Using mock story generation');
+          console.log('Direct API error (non-CORS/Network). Using mock story generation.');
           return mockGenerateStory(formData);
         }
       }
-    } else if (window.proxyService) {
-      // Try proxy service if API service isn't available
-      console.log('API service not available, trying proxy service');
+    } else {
+        console.log('API service generateStory function not found.');
+        // Fall through to proxy attempt if apiService itself exists but function doesn't
+        // Or if apiService doesn't exist at all.
+    }
+
+    // Try proxy service if direct API failed or wasn't available
+    if (window.proxyService && typeof window.proxyService.generateStory === 'function') {
+      console.log('Attempting proxy service request...');
       try {
         const proxyResult = await window.proxyService.generateStory(baseUrl, formData);
-        console.log('Proxy request successful');
+        console.log('Proxy request successful (via app.js)');
         return proxyResult;
       } catch (proxyError) {
         console.error('Proxy service error:', proxyError);
-        window.showToast?.('Remote services unavailable. Using mock data.', 'warning');
+        window.showToast?.('API Service Unavailable: Using mock data.', 'warning');
+        console.log('Proxy failed. Using mock story generation.');
         return mockGenerateStory(formData);
       }
     } else {
       // No API or proxy service available
-      console.log('No API or proxy service available. Using mock data.');
+      console.log('No API or proxy service function available. Using mock data.');
+      window.showToast?.('App Error: Services unavailable. Using mock data.', 'error');
       return mockGenerateStory(formData);
     }
   }

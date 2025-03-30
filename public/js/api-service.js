@@ -1,7 +1,11 @@
 // ... existing code ...
   async function generateStory(formData) {
-    // Initialize with the configured base URL
-    const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com"; // User needs to update this URL after backend deployment
+    // Initialize with the configured base URL from env.js
+    const apiUrl = window.ENV_API_URL;
+    if (!apiUrl) {
+        console.error("API_URL is not defined in env.js!");
+        throw new Error("API endpoint configuration is missing.");
+    }
     console.log(`Generating story... API URL: ${apiUrl}`);
     
     // Use POST /stories/generate as defined in the FastAPI backend

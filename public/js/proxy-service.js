@@ -114,8 +114,12 @@ const proxyService = (function() {
   
   // Generate a story via proxy
   async function generateStory(apiBaseUrl, formData) {
-    // Use the provided API base URL or fall back to the environment variable
-    const baseUrl = apiBaseUrl || window.ENV_API_URL || "https://easystory.onrender.com"; // User needs to update this URL
+    // Use the provided API base URL or fall back to the environment variable from env.js
+    const baseUrl = apiBaseUrl || window.ENV_API_URL; 
+    if (!baseUrl) {
+        console.error("API_URL is not defined in env.js for proxy fallback!");
+        throw new Error("API endpoint configuration is missing for proxy.");
+    }
     // Use POST /stories/generate as defined in the FastAPI backend
     const endpoint = '/stories/generate';
     const url = `${baseUrl}${endpoint}`;
