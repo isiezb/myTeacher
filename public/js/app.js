@@ -122,6 +122,10 @@
       // Call API to generate story
       const story = await generateStory(formData);
 
+      // Save the story to window.currentStory for global access
+      window.currentStory = story;
+      console.log('Story saved to window.currentStory:', window.currentStory);
+
       // Find story content component and update it
       const storyContent = document.querySelector('#storyDisplay');
       if (storyContent) {
@@ -129,7 +133,8 @@
         // Trigger custom event for story update
         storyContent.dispatchEvent(new CustomEvent('story-updated', {
           bubbles: true,
-          composed: true
+          composed: true,
+          detail: { story: story }
         }));
       }
 

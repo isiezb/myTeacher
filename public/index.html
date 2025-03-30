@@ -209,15 +209,27 @@
         
         // Get the current story or use the provided one
         const currentStory = storyObj || window.currentStory;
+
+        // Store the story in window object for access by other components
+        if (currentStory) {
+          window.currentStory = currentStory;
+        } else {
+          // Try to get the story from the story display component
+          const storyDisplay = document.querySelector('#storyDisplay');
+          if (storyDisplay && storyDisplay.story) {
+            window.currentStory = storyDisplay.story;
+            console.log('Retrieved story from storyDisplay component:', window.currentStory);
+          }
+        }
         
         // If we have a story and the continuation component
-        if (currentStory) {
+        if (window.currentStory) {
           // Find the continuation component
           const continuationComponent = document.querySelector('story-continuation');
           
           if (continuationComponent) {
             // Set the original story
-            continuationComponent.originalStory = currentStory;
+            continuationComponent.originalStory = window.currentStory;
             
             // Scroll to the continuation section
             continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -226,6 +238,7 @@
           }
         } else {
           console.error('No story to continue!');
+          window.showToast('No story to continue. Please generate a story first.', 'error');
         }
       }
       
@@ -246,6 +259,14 @@
       document.addEventListener('continue-story', (event) => {
         console.log('Continue story event received:', event);
         handleContinueStory(event.detail?.story);
+      });
+
+      // Listen for story-updated event to store the current story
+      document.addEventListener('story-updated', (event) => {
+        if (event.target && event.target.story) {
+          window.currentStory = event.target.story;
+          console.log('Story updated, stored in window.currentStory:', window.currentStory);
+        }
       });
     });
   </script>
