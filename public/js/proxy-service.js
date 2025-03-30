@@ -138,16 +138,17 @@ const proxyService = (function() {
         if (typeof postResult === 'object' && (postResult.content || postResult.title)) {
           return postResult;
         } else {
-          console.warn('Proxy returned unexpected data format:', postResult);
+          console.warn('Proxy returned unexpected data format (POST):', postResult);
           // Try to make the best of what we got
           if (typeof postResult === 'string') {
-            // If we got a string, try to parse it as JSON
+            // Log the raw string before trying to parse
+            console.log('Raw POST response string from proxy:', postResult.substring(0, 500)); 
             try {
               const parsedResult = JSON.parse(postResult);
               console.log('Successfully parsed string response as JSON');
               return parsedResult;
             } catch (e) {
-              console.error('Could not parse string as JSON:', e);
+              console.error('Could not parse string as JSON (POST):', e);
               // Return a simple object with the content
               return {
                 title: `Generated Story (${formData.subject || 'General'})`,
@@ -188,10 +189,14 @@ const proxyService = (function() {
         } else {
           console.warn('GET proxy returned unexpected data format:', getResult);
           if (typeof getResult === 'string') {
+            // Log the raw string before trying to parse
+            console.log('Raw GET response string from proxy:', getResult.substring(0, 500));
             try {
               const parsedResult = JSON.parse(getResult);
+              console.log('Successfully parsed GET string response as JSON');
               return parsedResult;
             } catch (e) {
+              console.error('Could not parse string as JSON (GET):', e);
               return {
                 title: `Generated Story (${formData.subject || 'General'})`,
                 content: getResult,
