@@ -4,9 +4,8 @@
     const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com";
     console.log(`Generating story... API URL: ${apiUrl}`);
     
-    // Define the endpoint - the logs show '/stories/generate' returns 404
-    // Try '/stories' instead since that endpoint works (200 OK in logs)
-    const endpoint = '/stories';
+    // Revert to using /stories/generate endpoint
+    const endpoint = '/stories/generate';
     const fullUrl = `${apiUrl}${endpoint}`;
     
     try {
@@ -18,6 +17,14 @@
         'Origin': window.location.origin,
         'Accept': 'application/json'
       };
+      
+      // Log the request details before sending
+      console.log('Request Details:', {
+        url: fullUrl,
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(formData).substring(0, 200) + '...' // Log preview of body
+      });
       
       // Make the POST request
       const postResponse = await fetch(fullUrl, {
@@ -37,73 +44,26 @@
           return data;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);
-          
-          // Try to get the raw text
           const responseClone = postResponse.clone();
           const rawText = await responseClone.text();
           console.log('Raw response text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
-          
-          // This might be a CORS issue - try falling back to proxy
           throw new Error(`Failed to parse response: ${parseError.message}`);
         }
       } else {
         // Log the error details
         console.error(`POST request failed with status ${postResponse.status}`);
+        let errorText = 'Could not read error response';
         try {
-          const errorText = await postResponse.text();
+          errorText = await postResponse.text();
           console.error('Error response:', errorText.substring(0, 200));
-        } catch (e) {
-          console.error('Could not read error response');
-        }
+        } catch (e) { /* Ignore */ }
         
-        // If POST failed with 404, the endpoint might be wrong - try a GET request
-        if (postResponse.status === 404) {
-          console.log('Endpoint not found, trying GET request as fallback');
-          
-          // Build query string
-          const params = new URLSearchParams();
-          Object.entries(formData).forEach(([key, value]) => {
-            params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
-          });
-          
-          const getUrl = `${fullUrl}?${params.toString()}`;
-          console.log('Attempting GET request:', getUrl.substring(0, 100) + '...');
-          
-          const getResponse = await fetch(getUrl, {
-            method: 'GET',
-            headers: headers,
-            mode: 'cors',
-            credentials: 'omit'
-          });
-          
-          console.log('GET response status:', getResponse.status);
-          
-          if (getResponse.ok) {
-            try {
-              const data = await getResponse.json();
-              console.log('Story generated successfully via GET');
-              return data;
-            } catch (parseError) {
-              console.error('Error parsing GET response:', parseError);
-              throw new Error(`Failed to parse GET response: ${parseError.message}`);
-            }
-          }
-          
-          throw new Error(`API request failed: ${getResponse.status}`);
-        }
-        
-        throw new Error(`API request failed: ${postResponse.status}`);
+        // Throw specific error based on status
+        throw new Error(`API request failed: ${postResponse.status} - ${errorText.substring(0, 50)}`);
       }
     } catch (error) {
-      console.error('Error generating story:', error);
-      
-      // If this might be a CORS error, suggest using the proxy service
-      if (error.message.includes('Failed to fetch') || 
-          error.message.includes('NetworkError') ||
-          error.message.includes('CORS')) {
-        throw new Error('Network or CORS error detected. This could be fixed using a proxy service.');
-      }
-      
+      console.error('Error generating story (direct API):', error);
+      // Re-throw the error so app.js can handle fallback
       throw error;
     }
   }

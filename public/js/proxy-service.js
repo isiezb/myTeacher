@@ -78,9 +78,7 @@ const proxyService = (function() {
       const errorDetails = {
         message: error.message || 'Unknown error',
         name: error.name || 'Error',
-        url: proxyUrl,
-        method: fetchOptions.method,
-        stack: error.stack?.substring(0, 500) || 'No stack trace'
+        url: proxyUrl
       };
       
       console.error('Proxy fetch error:', errorDetails);
@@ -118,8 +116,8 @@ const proxyService = (function() {
   async function generateStory(apiBaseUrl, formData) {
     // Use the provided API base URL or fall back to the environment variable
     const baseUrl = apiBaseUrl || window.ENV_API_URL || "https://easystory.onrender.com";
-    // Use '/stories' instead of '/stories/generate' based on the logs
-    const url = `${baseUrl}/stories`;
+    // Revert to /stories/generate since the proxy seems to work with it
+    const url = `${baseUrl}/stories/generate`;
     console.log(`Generating story via proxy. Target: ${url}`);
     
     try {
