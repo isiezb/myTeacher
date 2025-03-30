@@ -199,12 +199,14 @@ export class StoryForm extends LitElement {
     }
 
     .form-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex;
+      flex-wrap: wrap;
       gap: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
     .form-group {
+      flex: 1 1 275px;
       margin-bottom: 1.5rem;
     }
 
@@ -350,22 +352,61 @@ export class StoryForm extends LitElement {
     }
 
     @media (max-width: 768px) {
-      .form-section {
-        padding: 2rem;
-      }
-
-      .form-row {
+      .story-elements-grid {
         grid-template-columns: 1fr;
-        gap: 0;
       }
-
+      
+      .form-section {
+        padding: 1.5rem;
+        border-radius: 20px;
+      }
+      
       fieldset {
         padding: 1.5rem;
       }
+    }
 
-      button[type="submit"] {
-        width: 100%;
-      }
+    /* Add new styles for story elements grid */
+    .story-elements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-group {
+      flex: 1 1 275px;
+    }
+
+    /* Add new styles for checkbox options */
+    .checkbox-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .checkbox-group {
+      flex: 1 1 200px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .checkbox-label:hover {
+      color: var(--primary, #5e7ce6);
+    }
+    
+    .checkbox-label input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary, #5e7ce6);
     }
   `;
   }
@@ -377,8 +418,8 @@ export class StoryForm extends LitElement {
           <div class="form-container">
             <fieldset class="form-group">
               <legend>Content Settings</legend>
-              <div class="form-row">
-                <div class="form-group">
+              <div class="story-elements-grid">
+                <div class="input-group">
                   <label for="academicGrade">Academic Level</label>
                   <select id="academicGrade" name="academic_grade" 
                           @change=${this._handleInputChange} 
@@ -393,7 +434,7 @@ export class StoryForm extends LitElement {
                   </select>
                 </div>
 
-                <div class="form-group">
+                <div class="input-group">
                   <label for="subject">Subject Area</label>
                   <select id="subject" name="subject" 
                           @change=${this._handleInputChange} 
@@ -409,7 +450,7 @@ export class StoryForm extends LitElement {
                 </div>
               </div>
 
-              <div class="form-group" ?hidden=${!this._showOtherSubject}>
+              <div class="input-group" ?hidden=${!this._showOtherSubject}>
                 <label for="otherSubject">Specify Subject</label>
                 <input type="text" id="otherSubject" name="other_subject" 
                       placeholder="e.g., Astronomy"
@@ -418,7 +459,7 @@ export class StoryForm extends LitElement {
                       ?disabled=${this.isSubmitting}>
               </div>
 
-              <div class="form-group">
+              <div class="input-group">
                 <label for="subjectSpecification">Topic Focus</label>
                 <input type="text" id="subjectSpecification" name="subject_specification" 
                       placeholder="e.g., Genetics for Biology"
@@ -430,8 +471,8 @@ export class StoryForm extends LitElement {
 
             <fieldset class="form-group">
               <legend>Story Elements</legend>
-              <div class="form-row">
-                <div class="form-group">
+              <div class="story-elements-grid">
+                <div class="input-group">
                   <label for="setting">Story Setting</label>
                   <input type="text" id="setting" name="setting" 
                         placeholder="e.g., a small village in the mountains"
@@ -439,7 +480,7 @@ export class StoryForm extends LitElement {
                         @input=${this._handleInputChange}
                         ?disabled=${this.isSubmitting}>
                 </div>
-                <div class="form-group">
+                <div class="input-group">
                   <label for="mainCharacter">Main Character</label>
                   <input type="text" id="mainCharacter" name="main_character"
                         placeholder="e.g., a curious young scientist"
@@ -452,8 +493,8 @@ export class StoryForm extends LitElement {
 
             <fieldset class="form-group">
               <legend>Format Settings</legend>
-              <div class="form-row">
-                <div class="form-group">
+              <div class="story-elements-grid">
+                <div class="input-group">
                   <label for="wordCount">Story Length</label>
                   <select id="wordCount" name="word_count"
                           @change=${this._handleInputChange}
@@ -466,7 +507,7 @@ export class StoryForm extends LitElement {
                     `)}
                   </select>
                 </div>
-                <div class="form-group">
+                <div class="input-group">
                   <label for="language">Language</label>
                   <select id="language" name="language"
                           @change=${this._handleInputChange}
@@ -480,32 +521,34 @@ export class StoryForm extends LitElement {
                   </select>
                 </div>
               </div>
-              <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="generateVocabulary" name="generate_vocabulary"
-                        ?checked=${this._formData.generate_vocabulary}
-                        @change=${this._handleInputChange}
-                        ?disabled=${this.isSubmitting}>
-                  <span>Generate Vocabulary List</span>
-                </label>
-              </div>
-              <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="generateSummary" name="generate_summary"
-                        ?checked=${this._formData.generate_summary}
-                        @change=${this._handleInputChange}
-                        ?disabled=${this.isSubmitting}>
-                  <span>Generate Story Summary</span>
-                </label>
-              </div>
-              <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="generateQuiz" name="generate_quiz"
-                        ?checked=${this._formData.generate_quiz}
-                        @change=${this._handleInputChange}
-                        ?disabled=${this.isSubmitting}>
-                  <span>Generate Comprehension Quiz</span>
-                </label>
+              <div class="checkbox-options">
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="generateVocabulary" name="generate_vocabulary"
+                          ?checked=${this._formData.generate_vocabulary}
+                          @change=${this._handleInputChange}
+                          ?disabled=${this.isSubmitting}>
+                    <span>Generate Vocabulary List</span>
+                  </label>
+                </div>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="generateSummary" name="generate_summary"
+                          ?checked=${this._formData.generate_summary}
+                          @change=${this._handleInputChange}
+                          ?disabled=${this.isSubmitting}>
+                    <span>Generate Story Summary</span>
+                  </label>
+                </div>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="generateQuiz" name="generate_quiz"
+                          ?checked=${this._formData.generate_quiz}
+                          @change=${this._handleInputChange}
+                          ?disabled=${this.isSubmitting}>
+                    <span>Generate Comprehension Quiz</span>
+                  </label>
+                </div>
               </div>
             </fieldset>
 
