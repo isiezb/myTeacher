@@ -291,6 +291,16 @@ export class StoryContent extends LitElement {
         transition: all 0.2s ease;
       }
 
+      .quiz-error {
+        padding: 1rem;
+        background-color: var(--danger-100, #fee2e2);
+        border-radius: 8px;
+        border: 1px solid var(--danger, #ef4444);
+        color: var(--danger-dark, #b91c1c);
+        margin-bottom: 1rem;
+        font-size: 0.9375rem;
+      }
+
       @media (max-width: 768px) {
         .story-content-container {
           padding: 1.5rem;
@@ -308,16 +318,35 @@ export class StoryContent extends LitElement {
   }
 
   firstUpdated() {
-    if (this.story && this.story.quiz) {
-      this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+    try {
+      if (this.story && this.story.quiz && Array.isArray(this.story.quiz) && this.story.quiz.length > 0) {
+        this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+      } else if (this.story && this.story.quiz) {
+        console.warn('Quiz data is not an array or is empty:', this.story.quiz);
+        this.quizAnswers = [];
+      }
+    } catch (error) {
+      console.error('Error in firstUpdated handling quiz data:', error);
+      this.quizAnswers = [];
     }
   }
 
   updated(changedProperties) {
-    if (changedProperties.has('story') && this.story && this.story.quiz) {
-      this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+    try {
+      if (changedProperties.has('story') && this.story) {
+        if (this.story.quiz && Array.isArray(this.story.quiz) && this.story.quiz.length > 0) {
+          this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+          this.currentQuizIndex = 0;
+          this.quizCompleted = false;
+        } else if (this.story.quiz) {
+          console.warn('Updated with invalid quiz data:', this.story.quiz);
+          this.quizAnswers = [];
+        }
+      }
+    } catch (error) {
+      console.error('Error in updated handling quiz data:', error);
+      this.quizAnswers = [];
       this.currentQuizIndex = 0;
-      this.quizCompleted = false;
     }
   }
 
@@ -350,16 +379,30 @@ export class StoryContent extends LitElement {
   }
 
   _handleQuizOptionClick(optionIndex) {
-    const currentQuestion = this.story.quiz[this.currentQuizIndex];
-    const isCorrect = optionIndex === currentQuestion.correct_answer;
-    
-    // Update quiz answers
-    this.quizAnswers[this.currentQuizIndex] = {
-      selectedIndex: optionIndex,
-      isCorrect: isCorrect
-    };
-    
-    this.requestUpdate();
+    try {
+      if (!this.story || !this.story.quiz || !Array.isArray(this.story.quiz) || this.currentQuizIndex >= this.story.quiz.length) {
+        console.error('Cannot handle quiz option click: invalid quiz data or index');
+        return;
+      }
+      
+      const currentQuestion = this.story.quiz[this.currentQuizIndex];
+      if (!currentQuestion || typeof currentQuestion.correct_answer !== 'number') {
+        console.error('Invalid question format, cannot determine correct answer:', currentQuestion);
+        return;
+      }
+      
+      const isCorrect = optionIndex === currentQuestion.correct_answer;
+      
+      // Update quiz answers
+      this.quizAnswers[this.currentQuizIndex] = {
+        selectedIndex: optionIndex,
+        isCorrect: isCorrect
+      };
+      
+      this.requestUpdate();
+    } catch (error) {
+      console.error('Error handling quiz option click:', error);
+    }
   }
 
   _handleNextQuestion() {
@@ -387,83 +430,138 @@ export class StoryContent extends LitElement {
   }
 
   _getQuizScore() {
-    const correctAnswers = this.quizAnswers.filter(answer => answer && answer.isCorrect).length;
-    return {
-      correct: correctAnswers,
-      total: this.story.quiz.length,
-      percentage: Math.round((correctAnswers / this.story.quiz.length) * 100)
-    };
+    try {
+      if (!this.story || !this.story.quiz || !Array.isArray(this.story.quiz) || this.story.quiz.length === 0) {
+        return { correct: 0, total: 0, percentage: 0 };
+      }
+      
+      if (!this.quizAnswers || !Array.isArray(this.quizAnswers)) {
+        return { correct: 0, total: this.story.quiz.length, percentage: 0 };
+      }
+      
+      const correctAnswers = this.quizAnswers.filter(answer => answer && answer.isCorrect).length;
+      return {
+        correct: correctAnswers,
+        total: this.story.quiz.length,
+        percentage: Math.round((correctAnswers / this.story.quiz.length) * 100)
+      };
+    } catch (error) {
+      console.error('Error calculating quiz score:', error);
+      return { correct: 0, total: 0, percentage: 0 };
+    }
   }
 
   _renderQuizQuestion(question, index) {
+    // Safety check for malformed question
+    if (!question || typeof question !== 'object') {
+      return html`<div class="quiz-error">Error: Invalid question format</div>`;
+    }
+    
+    // Ensure question has required properties
+    if (!question.question || !question.options || !Array.isArray(question.options)) {
+      console.error('Malformed quiz question:', question);
+      return html`<div class="quiz-error">Error: Quiz question is missing required properties</div>`;
+    }
+    
     const userAnswer = this.quizAnswers[index];
     const showResults = userAnswer !== null;
     
-    return html`
-      <div class="quiz-question">${index + 1}. ${question.question}</div>
-      <div class="quiz-options">
-        ${question.options.map((option, optionIndex) => {
-          let classes = 'quiz-option';
-          
-          if (showResults) {
-            if (userAnswer.selectedIndex === optionIndex) {
-              classes += ' selected';
-              classes += userAnswer.isCorrect ? ' correct' : ' incorrect';
-            } else if (optionIndex === question.correct_answer && !userAnswer.isCorrect) {
-              classes += ' correct';
+    try {
+      return html`
+        <div class="quiz-question">${index + 1}. ${question.question}</div>
+        <div class="quiz-options">
+          ${question.options.map((option, optionIndex) => {
+            let classes = 'quiz-option';
+            
+            if (showResults) {
+              if (userAnswer.selectedIndex === optionIndex) {
+                classes += ' selected';
+                classes += userAnswer.isCorrect ? ' correct' : ' incorrect';
+              } else if (optionIndex === question.correct_answer && !userAnswer.isCorrect) {
+                classes += ' correct';
+              }
             }
-          }
-          
-          return html`
-            <div class="${classes}" 
-                 @click=${() => showResults ? null : this._handleQuizOptionClick(optionIndex)}>
-              <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
-              <span class="quiz-option-text">${option}</span>
-            </div>
-          `;
-        })}
-      </div>
-    `;
+            
+            return html`
+              <div class="${classes}" 
+                   @click=${() => showResults ? null : this._handleQuizOptionClick(optionIndex)}>
+                <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
+                <span class="quiz-option-text">${option}</span>
+              </div>
+            `;
+          })}
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error rendering quiz question:', error);
+      return html`<div class="quiz-error">Error rendering quiz question: ${error.message}</div>`;
+    }
   }
 
   _renderQuizNavigation() {
-    const currentAnswer = this.quizAnswers[this.currentQuizIndex];
-    const isLastQuestion = this.currentQuizIndex === this.story.quiz.length - 1;
-    const nextButtonText = isLastQuestion ? 'Finish Quiz' : 'Next Question';
-    
-    return html`
-      <div class="quiz-navigation">
-        <button 
-          class="quiz-button secondary" 
-          ?disabled=${this.currentQuizIndex === 0}
-          @click=${this._handlePreviousQuestion}>
-          Previous
-        </button>
-        <button 
-          class="quiz-button" 
-          ?disabled=${currentAnswer === null}
-          @click=${this._handleNextQuestion}>
-          ${nextButtonText}
-        </button>
-      </div>
-    `;
+    try {
+      if (!this.story || !this.story.quiz || !Array.isArray(this.story.quiz) || this.story.quiz.length === 0) {
+        return html`<div class="quiz-navigation">
+          <button class="quiz-button" disabled>No valid quiz data</button>
+        </div>`;
+      }
+      
+      const currentAnswer = this.quizAnswers[this.currentQuizIndex];
+      const isLastQuestion = this.currentQuizIndex === this.story.quiz.length - 1;
+      const nextButtonText = isLastQuestion ? 'Finish Quiz' : 'Next Question';
+      
+      return html`
+        <div class="quiz-navigation">
+          <button 
+            class="quiz-button secondary" 
+            ?disabled=${this.currentQuizIndex === 0}
+            @click=${this._handlePreviousQuestion}>
+            Previous
+          </button>
+          <button 
+            class="quiz-button" 
+            ?disabled=${currentAnswer === null}
+            @click=${this._handleNextQuestion}>
+            ${nextButtonText}
+          </button>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error rendering quiz navigation:', error);
+      return html`<div class="quiz-navigation">
+        <button class="quiz-button" disabled>Error: ${error.message}</button>
+      </div>`;
+    }
   }
 
   _renderQuizProgress() {
-    return html`
-      <div class="quiz-progress">
-        ${this.quizAnswers.map((answer, index) => {
-          let className = 'quiz-progress-item';
-          if (index === this.currentQuizIndex) {
-            className += ' active';
-          }
-          if (answer !== null) {
-            className += ' answered';
-          }
-          return html`<div class="${className}"></div>`;
-        })}
-      </div>
-    `;
+    try {
+      if (!this.quizAnswers || !Array.isArray(this.quizAnswers) || this.quizAnswers.length === 0) {
+        return html`<div class="quiz-progress">
+          <div class="quiz-progress-item active"></div>
+        </div>`;
+      }
+      
+      return html`
+        <div class="quiz-progress">
+          ${this.quizAnswers.map((answer, index) => {
+            let className = 'quiz-progress-item';
+            if (index === this.currentQuizIndex) {
+              className += ' active';
+            }
+            if (answer !== null) {
+              className += ' answered';
+            }
+            return html`<div class="${className}"></div>`;
+          })}
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error rendering quiz progress:', error);
+      return html`<div class="quiz-progress">
+        <div class="quiz-progress-item active"></div>
+      </div>`;
+    }
   }
 
   _renderQuizResults() {
@@ -496,23 +594,39 @@ export class StoryContent extends LitElement {
   }
 
   _renderQuiz() {
-    if (!this.story.quiz || !this.story.quiz.length) {
-      return html`<p>No quiz available for this story.</p>`;
+    try {
+      if (!this.story.quiz || !this.story.quiz.length) {
+        return html`<p>No quiz available for this story.</p>`;
+      }
+
+      if (this.quizCompleted) {
+        return this._renderQuizResults();
+      }
+
+      // Ensure currentQuizIndex is within bounds
+      if (this.currentQuizIndex < 0 || this.currentQuizIndex >= this.story.quiz.length) {
+        this.currentQuizIndex = 0;
+      }
+
+      const currentQuestion = this.story.quiz[this.currentQuizIndex];
+      
+      // Check if currentQuestion is valid
+      if (!currentQuestion || typeof currentQuestion !== 'object') {
+        console.error('Invalid quiz question at index', this.currentQuizIndex);
+        return html`<p>Error: Invalid quiz data. Please try again.</p>`;
+      }
+
+      return html`
+        ${this._renderQuizProgress()}
+        <div class="quiz-item">
+          ${this._renderQuizQuestion(currentQuestion, this.currentQuizIndex)}
+          ${this._renderQuizNavigation()}
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error rendering quiz:', error);
+      return html`<p>An error occurred while displaying the quiz: ${error.message}</p>`;
     }
-
-    if (this.quizCompleted) {
-      return this._renderQuizResults();
-    }
-
-    const currentQuestion = this.story.quiz[this.currentQuizIndex];
-
-    return html`
-      ${this._renderQuizProgress()}
-      <div class="quiz-item">
-        ${this._renderQuizQuestion(currentQuestion, this.currentQuizIndex)}
-        ${this._renderQuizNavigation()}
-      </div>
-    `;
   }
 
   render() {
