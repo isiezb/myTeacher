@@ -14,6 +14,8 @@ import './toast-container.js';
 import './loading-overlay.js';
 import './story-form.js';
 import './story-display.js';
+import './story-content.js';
+import './story-continuation.js';
 
 // Utility to check if a component is defined
 const isComponentDefined = (name) => {

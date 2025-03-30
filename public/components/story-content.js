@@ -545,25 +545,48 @@ export class StoryContent extends LitElement {
   }
 
   _renderQuizQuestion(question, index) {
-    // Safety check for malformed question
-    if (!question || typeof question !== 'object') {
-      return html`<div class="quiz-error">Error: Invalid question format</div>`;
-    }
-    
-    // Ensure question has required properties
-    if (!question.question || !question.options || !Array.isArray(question.options)) {
-      console.error('Malformed quiz question:', question);
-      return html`<div class="quiz-error">Error: Quiz question is missing required properties</div>`;
-    }
-    
-    const userAnswer = this.quizAnswers[index];
-    const showResults = userAnswer !== null;
-    
     try {
+      // Safety check for malformed question
+      if (!question || typeof question !== 'object') {
+        console.error('Invalid quiz question format:', question);
+        return html`<div class="quiz-error">Error: Invalid question format (null or not an object)</div>`;
+      }
+      
+      // Ensure question has required properties
+      if (!question.question || typeof question.question !== 'string') {
+        console.error('Quiz question missing "question" property or not a string:', question);
+        return html`<div class="quiz-error">Error: Quiz question is missing the question text</div>`;
+      }
+      
+      if (!question.options || !Array.isArray(question.options) || question.options.length === 0) {
+        console.error('Quiz question missing "options" property or not a valid array:', question);
+        return html`<div class="quiz-error">Error: Quiz question is missing answer options</div>`;
+      }
+      
+      if (typeof question.correct_answer !== 'number' || 
+          question.correct_answer < 0 || 
+          question.correct_answer >= question.options.length) {
+        console.error('Quiz question has invalid "correct_answer" property:', question);
+        return html`<div class="quiz-error">Error: Quiz question has an invalid correct answer index</div>`;
+      }
+      
+      // Safely get user answer
+      let userAnswer = null;
+      if (Array.isArray(this.quizAnswers) && index >= 0 && index < this.quizAnswers.length) {
+        userAnswer = this.quizAnswers[index];
+      }
+      
+      const showResults = userAnswer !== null;
+      
       return html`
         <div class="quiz-question">${index + 1}. ${question.question}</div>
         <div class="quiz-options">
           ${question.options.map((option, optionIndex) => {
+            if (typeof option !== 'string') {
+              console.warn(`Quiz option at index ${optionIndex} is not a string:`, option);
+              option = String(option || '');
+            }
+            
             let classes = 'quiz-option';
             
             if (showResults) {
@@ -602,7 +625,13 @@ export class StoryContent extends LitElement {
       `;
     } catch (error) {
       console.error('Error rendering quiz question:', error);
-      return html`<div class="quiz-error">Error rendering quiz question: ${error.message}</div>`;
+      return html`<div class="quiz-error">
+        Error rendering quiz question. Please try again later.
+        <details>
+          <summary>Technical details</summary>
+          <pre>${error.message || 'Unknown error'}</pre>
+        </details>
+      </div>`;
     }
   }
 

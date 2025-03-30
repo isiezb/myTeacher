@@ -290,11 +290,19 @@ export class StoryContinuation extends LitElement {
   async _handleContinue() {
     if (this.isSubmitting) return; 
     
+    // Check if we have an original story
+    if (!this.originalStory || !this.originalStory.id) {
+      this._showError = true;
+      this._errorMessage = 'No story to continue. Please generate a story first.';
+      this.requestUpdate();
+      return;
+    }
+    
     this.isSubmitting = true;
     this._continuationContent = '';
     this._showError = false;
     this._errorMessage = '';
-    this.render();
+    this.requestUpdate();
     
     const originalStory = this.originalStory || {};
     const storyId = originalStory.id || 'unknown';
@@ -302,79 +310,86 @@ export class StoryContinuation extends LitElement {
     
     // Map UI difficulty values to API values
     const difficultyMap = {
-        'much_easier': 'much_easier',
-        'slightly_easier': 'slightly_easier', 
-        'same_level': 'same_level',
-        'slightly_harder': 'slightly_harder',
-        'much_harder': 'much_harder'
+      'much_easier': 'much_easier',
+      'slightly_easier': 'slightly_easier', 
+      'same_level': 'same_level',
+      'slightly_harder': 'slightly_harder',
+      'much_harder': 'much_harder'
     };
     
     const options = {
-        length: parseInt(this._settings.length, 10),
-        difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
-        original_story_content: originalContent
+      length: parseInt(this._settings.length, 10),
+      difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
+      original_story_content: originalContent
     };
     
     // Log what we're about to do
     console.log(`Continuing story ${storyId} with options:`, options);
     
-    // Use the API service to continue the story
-    window.apiService.continueStory(storyId, options)
-        .then(data => {
-            this.isSubmitting = false;
-            
-            // Process the continuation response
-            if (data && data.continuation_text) {
-                this._continuationContent = data.continuation_text;
-                
-                // Process vocabulary items if available
-                if (data.vocabulary && Array.isArray(data.vocabulary)) {
-                    console.log('New vocabulary items:', data.vocabulary);
-                    this._vocabularyItems = data.vocabulary;
-                } else {
-                    this._vocabularyItems = [];
-                }
-                
-                // Dispatch event that continuation is ready
-                const event = new CustomEvent('story-continued', { 
-                    detail: { 
-                        continuation: data.continuation_text,
-                        difficulty: data.difficulty,
-                        wordCount: data.word_count,
-                        vocabulary: data.vocabulary
-                    } 
-                });
-                document.dispatchEvent(event);
-            } else {
-                throw new Error('Received empty or invalid continuation response');
-            }
-            
-            this.render();
-        })
-        .catch(error => {
-            console.error('Error continuing story:', error);
-            this.isSubmitting = false;
-            this._showError = true;
-            this._errorMessage = `Failed to continue the story: ${error.message || 'Unknown error'}`;
-            this.render();
-            
-            // Use mock data in development if API is unavailable
-            if (window.ENV_USE_MOCK_DATA === true) {
-                console.log('Using mock continuation data...');
-                setTimeout(() => {
-                    this._continuationContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
-                    this.isSubmitting = false;
-                    this._showError = false;
-                    this._errorMessage = '';
-                    this.render();
-                }, 1500);
-            }
+    try {
+      // Check if API service exists and has the required method
+      if (!window.apiService || typeof window.apiService.continueStory !== 'function') {
+        throw new Error('API service not available');
+      }
+      
+      // Use the API service to continue the story
+      const data = await window.apiService.continueStory(storyId, options);
+      
+      // Process the continuation response
+      if (data && data.continuation_text) {
+        this._continuationContent = data.continuation_text;
+        
+        // Process vocabulary items if available
+        if (data.vocabulary && Array.isArray(data.vocabulary)) {
+          console.log('New vocabulary items:', data.vocabulary);
+          this._vocabularyItems = data.vocabulary;
+        } else {
+          this._vocabularyItems = [];
+        }
+        
+        // Dispatch event that continuation is ready
+        const event = new CustomEvent('story-continued', { 
+          detail: { 
+            continuation: data.continuation_text,
+            difficulty: data.difficulty,
+            wordCount: data.word_count,
+            vocabulary: data.vocabulary
+          },
+          bubbles: true,
+          composed: true
         });
+        this.dispatchEvent(event);
+      } else {
+        throw new Error('Received empty or invalid continuation response');
+      }
+    } catch (error) {
+      console.error('Error continuing story:', error);
+      this._showError = true;
+      this._errorMessage = `Failed to continue the story: ${error.message || 'Unknown error'}`;
+      
+      // Use mock data in development if API is unavailable
+      if (window.ENV_USE_MOCK_DATA === true) {
+        console.log('Using mock continuation data...');
+        setTimeout(() => {
+          this._continuationContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
+          this._showError = false;
+          this._errorMessage = '';
+          this._vocabularyItems = [
+            { term: "Sample Term 1", definition: "This is a sample definition for demonstration purposes." },
+            { term: "Sample Term 2", definition: "Another sample definition to show how vocabulary works." }
+          ];
+          this.requestUpdate();
+        }, 1500);
+      }
+    } finally {
+      this.isSubmitting = false;
+      this.requestUpdate();
+    }
   }
 
   render() {
     if (this._showError) {
-      return `
+      return html`
         <div class="continuation-error">
           <p>${this._errorMessage}</p>
         </div>
@@ -382,19 +397,23 @@ export class StoryContinuation extends LitElement {
     }
 
     if (this._continuationContent) {
-      const formattedContinuation = this._continuationContent.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>');
-      return `
+      // Process the text with proper paragraph breaks
+      const formattedContinuation = this._continuationContent
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+        
+      return html`
         <div class="continuation-result">
           <h3>Story Continuation</h3>
           <div class="continuation-content">
-            <p>${formattedContinuation}</p>
+            <p .innerHTML=${formattedContinuation}></p>
           </div>
           ${this._renderVocabulary()}
         </div>
       `;
     }
 
-    return `
+    return html`
       <div class="continuation-form">
         <h3>Continue the Story</h3>
         
@@ -433,10 +452,10 @@ export class StoryContinuation extends LitElement {
         <button 
           class="continue-button ${this.isSubmitting ? 'loading' : ''}" 
           @click="${this._handleContinue}"
-          ?disabled="${this.isSubmitting}"
+          ?disabled="${this.isSubmitting || !this.originalStory}"
         >
           ${this.isSubmitting ? 
-            '<div class="spinner"></div> Generating...' : 
+            html`<div class="spinner"></div> Generating...` : 
             'Continue Story'
           }
         </button>
@@ -475,7 +494,7 @@ export class StoryContinuation extends LitElement {
 
     const selected = descriptions[this._settings.difficulty] || descriptions['same_level'];
 
-    return `
+    return html`
       <div class="difficulty-description">
         <div class="difficulty-description-content ${selected.class}">
           <h4>${selected.title}</h4>
@@ -490,14 +509,14 @@ export class StoryContinuation extends LitElement {
         return '';
     }
 
-    const vocabItems = this._vocabularyItems.map(item => `
+    const vocabItems = this._vocabularyItems.map(item => html`
         <div class="vocabulary-item">
             <h4 class="vocabulary-term">${item.term}</h4>
             <p class="vocabulary-definition">${item.definition}</p>
         </div>
     `).join('');
 
-    return `
+    return html`
         <div class="vocabulary-section">
             <h3>New Vocabulary</h3>
             <div class="vocabulary-list">
@@ -508,4 +527,5 @@ export class StoryContinuation extends LitElement {
   }
 }
 
+// Register the component
 customElements.define('story-continuation', StoryContinuation); 
