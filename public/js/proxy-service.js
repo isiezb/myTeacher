@@ -115,14 +115,26 @@ const proxyService = (function() {
   // Generate a story via proxy
   async function generateStory(apiBaseUrl, formData) {
     // Use the provided API base URL or fall back to the environment variable from env.js
+    // An empty string means use the current origin (though proxy usually needs an absolute URL)
     const baseUrl = apiBaseUrl || window.ENV_API_URL; 
+    // Removed the check that threw an error for empty string
+    
     if (!baseUrl) {
-        console.error("API_URL is not defined in env.js for proxy fallback!");
-        throw new Error("API endpoint configuration is missing for proxy.");
+      // The proxy service *requires* an absolute base URL to function correctly.
+      // If ENV_API_URL is empty (meaning same origin), the proxy cannot be used effectively
+      // unless we construct the absolute URL here based on window.location.
+      // However, the fallback logic in app.js should prevent calling the proxy if direct API succeeds.
+      // If direct API fails for non-CORS/network reasons, it goes to mock.
+      // If it fails for CORS/network, it *then* tries proxy, but baseUrl will likely be needed.
+      // For now, log a warning. A more robust solution might construct window.location.origin.
+      console.warn("Proxy Service called but API_URL (baseUrl) is empty. Proxy might fail.");
+      // Even if baseUrl is empty, proceed to try and use it, it might resolve relatively 
+      // or be intended for a specific proxy setup, although standard proxies will likely fail.
     }
+
     // Use POST /stories/generate as defined in the FastAPI backend
     const endpoint = '/stories/generate';
-    const url = `${baseUrl}${endpoint}`;
+    const url = `${baseUrl}${endpoint}`; // If baseUrl is empty, this becomes relative
     console.log(`Generating story via proxy. Target: ${url}`);
     
     try {

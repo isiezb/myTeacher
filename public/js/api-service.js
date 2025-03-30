@@ -4,15 +4,14 @@ const apiService = (function() {
 
   async function generateStory(formData) {
     // Initialize with the configured base URL from env.js
+    // An empty string means use the current origin
     const apiUrl = window.ENV_API_URL;
-    if (!apiUrl) {
-        console.error("API_URL is not defined in env.js!");
-        throw new Error("API endpoint configuration is missing.");
-    }
-    console.log(`Generating story... API URL: ${apiUrl}`);
+    
+    console.log(`Generating story... API Base URL (from env): '${apiUrl}'`);
     
     // Use POST /stories/generate as defined in the FastAPI backend
     const endpoint = '/stories/generate';
+    // If apiUrl is "", fullUrl will correctly start with "/"
     const fullUrl = `${apiUrl}${endpoint}`;
     
     try {

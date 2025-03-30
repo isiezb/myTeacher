@@ -163,13 +163,10 @@
   // Generate a story using form data
   async function generateStory(formData) {
     // Default API base URL from env.js
-    const baseUrl = window.ENV_API_URL;
-    if (!baseUrl) {
-      console.error("API_URL is not defined in env.js!");
-      window.showToast?.("Configuration Error: API URL missing.", "error");
-      return mockGenerateStory(formData); // Fallback to mock if config missing
-    }
-    console.log('Using base URL:', baseUrl);
+    // Empty string is valid and means use the current origin
+    const baseUrl = window.ENV_API_URL; 
+
+    console.log(`Using base URL (from env.js): '${baseUrl}'`);
     
     // Check if API service *function* exists before trying
     if (window.apiService && typeof window.apiService.generateStory === 'function') {
