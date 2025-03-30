@@ -4,8 +4,8 @@
     const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com";
     console.log(`Generating story... API URL: ${apiUrl}`);
     
-    // Revert to using /stories/generate endpoint
-    const endpoint = '/stories/generate';
+    // Change endpoint back to /stories for POST
+    const endpoint = '/stories';
     const fullUrl = `${apiUrl}${endpoint}`;
     
     try {
