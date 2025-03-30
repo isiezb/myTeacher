@@ -135,7 +135,7 @@ export class StoryContent extends LitElement {
 
       /* Quiz styling */
       .story-quiz {
-        margin-top: 2rem;
+        margin-top: 3rem;
       }
 
       .quiz-title {
@@ -256,14 +256,16 @@ export class StoryContent extends LitElement {
         display: flex;
         justify-content: center;
         margin-bottom: 1rem;
+        margin-top: 2rem;
       }
 
       .quiz-progress-item {
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         background: var(--border, rgba(0, 0, 0, 0.1));
-        margin: 0 0.25rem;
+        margin: 0 0.35rem;
+        transition: background-color 0.3s ease;
       }
 
       .quiz-progress-item.active {
