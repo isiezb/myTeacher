@@ -36,8 +36,7 @@
       <div id="story-result" class="story-result hidden">
         <story-content id="storyDisplay" showHeader="true" showSummary="true" showVocabulary="true" showQuiz="true"></story-content>
         <div class="story-actions">
-          <button id="generateQuizBtn" class="btn btn-secondary">Generate Quiz</button>
-          <button id="continueStoryBtn" class="btn btn-secondary">Continue Story</button>
+          <button id="continueStoryBtn" class="btn btn-primary">Continue Story</button>
         </div>
         <div id="quizContainer" class="hidden">
           <quiz-component id="quizComponent"></quiz-component>
@@ -138,6 +137,34 @@
       
       // Add to body
       document.body.appendChild(debugButton);
+    });
+  </script>
+
+  <!-- Add JavaScript to handle the Continue Story button -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add event listener for the Continue Story button
+      const continueStoryBtn = document.getElementById('continueStoryBtn');
+      const continuationContainer = document.getElementById('continuationContainer');
+      
+      if (continueStoryBtn && continuationContainer) {
+        continueStoryBtn.addEventListener('click', function() {
+          // Show the continuation UI
+          continuationContainer.classList.remove('hidden');
+          
+          // Find the current story to pass to the continuation component
+          const storyDisplay = document.querySelector('#storyDisplay');
+          const storyContinuation = document.querySelector('#storyContinuation');
+          
+          if (storyDisplay && storyDisplay.story && storyContinuation) {
+            // Pass the current story to the continuation component
+            storyContinuation.originalStory = storyDisplay.story;
+          }
+          
+          // Scroll to the continuation UI
+          continuationContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
     });
   </script>
 </body>
