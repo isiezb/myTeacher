@@ -68,8 +68,8 @@ export class StoryForm extends LitElement {
       main_character: '',
       word_count: '300',
       language: 'English',
-      generate_vocabulary: false,
-      generate_summary: false
+      generate_vocabulary: true,
+      generate_summary: true
     };
 
     this._showOtherSubject = false;
