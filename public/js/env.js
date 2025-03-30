@@ -1,6 +1,6 @@
 // Environment variables for frontend
 const ENV = {
-  API_URL: "https://easystory.onrender.com",
+  API_URL: "", // API is now served from the same origin
   SUPABASE_URL: "https://YOUR_SUPABASE_URL.supabase.co",
   SUPABASE_ANON_KEY: "YOUR_SUPABASE_KEY",
   DEBUG: true
