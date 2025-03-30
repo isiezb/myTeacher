@@ -224,7 +224,8 @@
         
         // Add API test button
         html += '<h4>API Test:</h4>';
-        html += '<button id="test-api-btn" style="padding: 8px 16px; background: #0275d8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Test API Connection</button>';
+        html += '<button id="test-api-btn" style="padding: 8px 16px; background: #0275d8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px; margin-right: 10px;">Test API Connection</button>';
+        html += '<button id="test-proxy-btn" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Test via CORS Proxy</button>';
         html += '<div id="api-test-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>';
         
         // Show element tree of #generator-tab
@@ -300,6 +301,61 @@
             resultDiv.innerHTML = html;
           } catch (error) {
             resultDiv.innerHTML = `<p>Error testing API: ${error.message}</p>`;
+          }
+        });
+      }
+      
+      // Add proxy test button handler
+      const testProxyBtn = document.getElementById('test-proxy-btn');
+      if (testProxyBtn) {
+        testProxyBtn.addEventListener('click', async () => {
+          const resultDiv = document.getElementById('api-test-results');
+          
+          if (!window.proxyService) {
+            resultDiv.innerHTML = '<p style="color: red">❌ Error: Proxy service not available</p>';
+            return;
+          }
+          
+          resultDiv.innerHTML = '<p>Testing API via proxy...</p>';
+          
+          try {
+            const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
+            
+            // Test basic URL fetch
+            try {
+              const proxyTest = await window.proxyService.fetchViaProxy(baseUrl);
+              let html = `<p><strong>Proxy basic connection:</strong> ✅ Success</p>`;
+              if (typeof proxyTest === 'string') {
+                html += `<p>Received HTML response (${proxyTest.length} chars)</p>`;
+              } else {
+                html += `<pre>${JSON.stringify(proxyTest).substring(0, 300)}...</pre>`;
+              }
+              
+              // Try generating a story via proxy
+              html += `<p><strong>Testing Story Generation via Proxy:</strong> Sending request...</p>`;
+              resultDiv.innerHTML = html + '<p>Waiting for proxy response...</p>';
+              
+              const testData = {
+                academic_grade: '5',
+                subject: 'science',
+                word_count: 300,
+                language: 'English'
+              };
+              
+              const story = await window.proxyService.generateStory(baseUrl, testData);
+              html += `<p><strong>Proxy Story Generation:</strong> ${story ? '✅ Success' : '❌ Failed'}</p>`;
+              if (story) {
+                html += `<p>Title: ${story.title || 'No title'}</p>`;
+                html += `<p>Content: ${story.content ? (story.content.substring(0, 100) + '...') : 'No content'}</p>`;
+              }
+              
+              resultDiv.innerHTML = html;
+            } catch (error) {
+              resultDiv.innerHTML = `<p><strong>Proxy Test:</strong> ❌ Error</p>
+                                    <pre style="color: red">${error.toString()}</pre>`;
+            }
+          } catch (error) {
+            resultDiv.innerHTML = `<p>Error testing proxy: ${error.message}</p>`;
           }
         });
       }

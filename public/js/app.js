@@ -169,10 +169,42 @@
         return await window.apiService.generateStory(formData);
       } catch (error) {
         console.error('API service error:', error);
-        window.showToast?.('API error: ' + error.message, 'error');
         
-        // Fallback to mock if API fails
-        console.log('Falling back to mock story generation');
+        // Try proxy service if available and it's a CORS or network error
+        if (window.proxyService && 
+            (error.message.includes('CORS') || 
+             error.message.includes('Failed to fetch') ||
+             error.message.includes('Network'))) {
+          
+          console.log('CORS/Network issue detected, trying proxy service...');
+          try {
+            const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
+            return await window.proxyService.generateStory(baseUrl, formData);
+          } catch (proxyError) {
+            console.error('Proxy service error:', proxyError);
+            window.showToast?.('Proxy API error: ' + proxyError.message, 'error');
+            
+            // Fall back to mock if both methods fail
+            console.log('Falling back to mock story generation');
+            return mockGenerateStory(formData);
+          }
+        } else {
+          window.showToast?.('API error: ' + error.message, 'error');
+          
+          // Fallback to mock if API fails
+          console.log('Falling back to mock story generation');
+          return mockGenerateStory(formData);
+        }
+      }
+    } else if (window.proxyService) {
+      // Try proxy service if API service isn't available
+      console.log('No API service, trying proxy service');
+      try {
+        const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
+        return await window.proxyService.generateStory(baseUrl, formData);
+      } catch (proxyError) {
+        console.error('Proxy service error:', proxyError);
+        window.showToast?.('Proxy error: ' + proxyError.message, 'error');
         return mockGenerateStory(formData);
       }
     }
