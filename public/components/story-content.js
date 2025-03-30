@@ -99,7 +99,9 @@ export class StoryContent extends LitElement {
       /* Vocabulary styling */
       .story-vocabulary {
         margin-top: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 3.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border, rgba(0, 0, 0, 0.1));
       }
 
       .vocabulary-title {
@@ -133,9 +135,32 @@ export class StoryContent extends LitElement {
         line-height: 1.5;
       }
 
+      /* Common section styling */
+      .section-title {
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary, #5e7ce6);
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 0.75rem;
+        position: relative;
+      }
+      
+      .section-title::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary, #5e7ce6);
+        border-radius: 3px;
+      }
+
       /* Quiz styling */
       .story-quiz {
-        margin-top: 3rem;
+        margin-top: 3.5rem;
+        padding-top: 1rem;
       }
 
       .quiz-title {
@@ -466,20 +491,33 @@ export class StoryContent extends LitElement {
   }
 
   _renderVocabulary() {
-    if (!this.story.vocabulary || !this.story.vocabulary.length) {
-      return html`<p>No vocabulary available for this story.</p>`;
+    if (!this.story || !this.showVocabulary || !this.story.vocabulary || !this.story.vocabulary.length) {
+      return html``;
     }
-
-    return html`
-      <div class="vocabulary-list">
-        ${this.story.vocabulary.map(item => html`
-          <div class="vocabulary-item">
-            <div class="vocabulary-term">${item.term}</div>
-            <div class="vocabulary-definition">${item.definition}</div>
+    
+    try {
+      return html`
+        <div class="story-vocabulary">
+          <h3 class="section-title">Vocabulary List</h3>
+          <div class="vocabulary-list">
+            ${this.story.vocabulary.map(item => html`
+              <div class="vocabulary-item">
+                <div class="vocabulary-term">${item.term}</div>
+                <div class="vocabulary-definition">${item.definition}</div>
+              </div>
+            `)}
           </div>
-        `)}
-      </div>
-    `;
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error rendering vocabulary:', error);
+      return html`
+        <div class="story-vocabulary">
+          <h3 class="section-title">Vocabulary List</h3>
+          <p>An error occurred while displaying the vocabulary.</p>
+        </div>
+      `;
+    }
   }
 
   _handleQuizOptionClick(optionIndex) {
@@ -705,36 +743,55 @@ export class StoryContent extends LitElement {
 
   _renderQuiz() {
     try {
-      if (!this.story.quiz || !this.story.quiz.length) {
-        return html`<p>No quiz available for this story.</p>`;
+      if (!this.story || !this.story.quiz || !this.story.quiz.length || !this.showQuiz) {
+        return html``;
       }
-
+      
       if (this.quizCompleted) {
-        return this._renderQuizResults();
+        return html`
+          <div class="story-quiz">
+            <h3 class="section-title">Comprehension Quiz</h3>
+            ${this._renderQuizResults()}
+          </div>
+        `;
       }
 
       // Ensure currentQuizIndex is within bounds
       if (this.currentQuizIndex < 0 || this.currentQuizIndex >= this.story.quiz.length) {
         this.currentQuizIndex = 0;
       }
-
+      
       const currentQuestion = this.story.quiz[this.currentQuizIndex];
       
       // Check if currentQuestion is valid
       if (!currentQuestion || typeof currentQuestion !== 'object') {
         console.error('Invalid quiz question at index', this.currentQuizIndex);
-        return html`<p>Error: Invalid quiz data. Please try again.</p>`;
+        return html`
+          <div class="story-quiz">
+            <h3 class="section-title">Comprehension Quiz</h3>
+            <p>Error: Invalid quiz data. Please try again.</p>
+          </div>
+        `;
       }
-
+      
       return html`
-        <div class="quiz-item">
+        <div class="story-quiz">
+          <h3 class="section-title">Comprehension Quiz</h3>
+          <div class="quiz-progress">
+            Question ${this.currentQuizIndex + 1} of ${this.story.quiz.length}
+          </div>
           ${this._renderQuizQuestion(currentQuestion, this.currentQuizIndex)}
           ${this._renderQuizNavigation()}
         </div>
       `;
     } catch (error) {
       console.error('Error rendering quiz:', error);
-      return html`<p>An error occurred while displaying the quiz: ${error.message}</p>`;
+      return html`
+        <div class="story-quiz">
+          <h3 class="section-title">Comprehension Quiz</h3>
+          <p>An error occurred while displaying the quiz: ${error.message}</p>
+        </div>
+      `;
     }
   }
 
