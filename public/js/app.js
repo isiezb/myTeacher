@@ -149,6 +149,27 @@
         storyResult.scrollIntoView({ behavior: 'smooth' });
       }
 
+      // Save the story to Supabase if storage is enabled
+      if (window.ENV_ENABLE_STORAGE && typeof window.SupabaseService !== 'undefined') {
+        try {
+          window.showToast?.('Saving story to library...', 'info');
+          const savedStory = await window.SupabaseService.saveStory(story);
+          console.log('Story saved to database:', savedStory);
+          
+          // Update the story ID with the database ID if needed
+          if (savedStory && savedStory.id && (!story.id || story.id.startsWith('mock'))) {
+            story.id = savedStory.id;
+            window.currentStory.id = savedStory.id;
+            console.log('Updated story ID from database:', story.id);
+          }
+          
+          window.showToast?.('Story saved to your library!', 'success');
+        } catch (saveError) {
+          console.error('Error saving story to database:', saveError);
+          window.showToast?.('Failed to save story to library', 'warning');
+        }
+      }
+
       // Show success message
       window.showToast?.('Story generated successfully!', 'success');
     } catch (error) {
