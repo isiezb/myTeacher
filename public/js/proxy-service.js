@@ -74,7 +74,16 @@ const proxyService = (function() {
         return await response.text();
       }
     } catch (error) {
-      console.error('Proxy fetch error:', error);
+      // Improve error logging with more details
+      const errorDetails = {
+        message: error.message || 'Unknown error',
+        name: error.name || 'Error',
+        url: proxyUrl,
+        method: fetchOptions.method,
+        stack: error.stack?.substring(0, 500) || 'No stack trace'
+      };
+      
+      console.error('Proxy fetch error:', errorDetails);
       
       // Try alternate proxy if retries are available
       if (config.retries > 0) {
