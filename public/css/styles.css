@@ -359,42 +359,89 @@ input:focus, select:focus, textarea:focus {
 Form Styling Improvements
 ============================
 */
+/* Remove problematic fieldset styling */
 fieldset {
-  position: relative;
-  isolation: isolate;
-  margin-bottom: 2.5rem !important;
+  border: none;
+  padding: 0;
+  margin: 0;
 }
 
-fieldset::after {
-  content: '';
-  position: absolute;
-  height: 15px;
-  bottom: -15px;
-  left: 0;
-  right: 0;
-  background: var(--bg);
-  z-index: -1;
+/* Form card styling */
+.form-card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 32px;
+  border: 1px solid #e9ecef;
+  overflow: visible;
 }
 
-legend {
-  background-color: var(--bg);
-  padding: 0 1rem;
-  border-radius: 4px;
+.card-title {
+  background-color: var(--primary-50);
+  color: var(--primary);
+  padding: 16px 24px;
+  margin: 0;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 700;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.card-content {
+  padding: 24px;
 }
 
 /* Make input fields more distinct */
 input[type="text"], 
 select, 
 textarea {
-  border: 2px solid rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid rgba(0, 0, 0, 0.15) !important;
   background-color: white !important;
+  padding: 12px !important;
+  border-radius: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  font-size: 16px !important;
 }
 
+/* Set consistent focus styles */
 input[type="text"]:focus, 
 select:focus, 
 textarea:focus {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.15) !important;
+  outline: none !important;
+}
+
+/* Topic focus field styling */
+#subjectSpecification {
+  border: 2px solid var(--primary-100) !important;
+  background-color: #fcfcff !important;
+}
+
+/* Add more spacing in mobile view */
+@media (max-width: 768px) {
+  .form-card {
+    margin-bottom: 24px;
+    border-radius: 12px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+    padding: 12px 16px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+  
+  .card-content {
+    padding: 16px;
+  }
+  
+  input[type="text"], 
+  select, 
+  textarea {
+    padding: 10px !important;
+  }
 }
 
 /* 

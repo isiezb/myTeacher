@@ -177,29 +177,31 @@ export class StoryForm extends LitElement {
       gap: 2.5rem;
     }
 
-    fieldset {
-      border: 2px solid var(--border, rgba(0, 0, 0, 0.1));
-      border-radius: 24px;
-      padding: 2rem;
-      background: var(--bg, #f8f9fa);
-      transition: var(--transition-normal, all 0.3s ease);
-      margin-bottom: 1.5rem;
-      box-sizing: border-box;
-      width: 100%;
-      overflow: hidden;
+    .form-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 32px;
+      overflow: visible;
+      position: relative;
+      border: 1px solid #e9ecef;
     }
 
-    fieldset:hover {
-      box-shadow: var(--shadow-sm, 0 2px 4px rgba(0, 0, 0, 0.05));
-    }
-
-    legend {
+    .card-title {
+      background: var(--primary-50, #eef2ff);
+      color: var(--primary, #5e7ce6);
       font-family: var(--font-heading, 'Inter', sans-serif);
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--primary, #5e7ce6);
-      padding: 0 1rem;
-      margin-bottom: 1rem;
+      padding: 16px 24px;
+      margin: 0;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .card-content {
+      padding: 24px;
     }
 
     .form-row {
@@ -470,6 +472,60 @@ export class StoryForm extends LitElement {
       border: 2px solid rgba(94, 124, 230, 0.35);
       background-color: rgba(244, 246, 255, 0.5);
     }
+
+    /* Specific styles for topic focus */
+    .topic-focus {
+      margin-top: 20px;
+      border-top: 1px dashed #e9ecef;
+      padding-top: 20px;
+    }
+    
+    .topic-focus input {
+      border: 2px solid var(--primary-100, #e0e7ff) !important;
+      background-color: #fcfcff !important;
+    }
+
+    /* Add spacing between form elements */
+    .story-elements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* Ensure input containers have proper spacing */
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    /* Mobile styles */
+    @media (max-width: 768px) {
+      .form-card {
+        margin-bottom: 24px;
+        border-radius: 12px;
+      }
+      
+      .card-title {
+        font-size: 1.1rem;
+        padding: 12px 16px;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+      }
+      
+      .card-content {
+        padding: 16px;
+      }
+      
+      .story-elements-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      
+      .topic-focus {
+        margin-top: 16px;
+        padding-top: 16px;
+      }
+    }
   `;
   }
 
@@ -478,141 +534,150 @@ export class StoryForm extends LitElement {
       <div class="form-section">
         <form @submit=${this._handleSubmit}>
           <div class="form-container">
-            <fieldset class="form-group">
-              <legend>Content Settings</legend>
-              <div class="story-elements-grid">
-                <div class="input-group">
-                  <label for="academicGrade">Academic Level</label>
-                  <select id="academicGrade" name="academic_grade" 
-                          @change=${this._handleInputChange} 
-                          ?disabled=${this.isSubmitting}
-                          required>
-                    <option value="">Select your grade level...</option>
-                    ${this.gradeLevels.map(grade => html`
-                      <option value=${grade.value} ?selected=${this._formData.academic_grade === grade.value}>
-                        ${grade.label}
-                      </option>
-                    `)}
-                  </select>
+            <!-- Content Settings Card -->
+            <div class="form-card">
+              <h3 class="card-title">Content Settings</h3>
+              <div class="card-content">
+                <div class="story-elements-grid">
+                  <div class="input-group">
+                    <label for="academicGrade">Academic Level</label>
+                    <select id="academicGrade" name="academic_grade" 
+                            @change=${this._handleInputChange} 
+                            ?disabled=${this.isSubmitting}
+                            required>
+                      <option value="">Select your grade level...</option>
+                      ${this.gradeLevels.map(grade => html`
+                        <option value=${grade.value} ?selected=${this._formData.academic_grade === grade.value}>
+                          ${grade.label}
+                        </option>
+                      `)}
+                    </select>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="subject">Subject Area</label>
+                    <select id="subject" name="subject" 
+                            @change=${this._handleInputChange} 
+                            ?disabled=${this.isSubmitting}
+                            required>
+                      <option value="">Select a subject...</option>
+                      ${this.subjects.map(subject => html`
+                        <option value=${subject.value} ?selected=${this._formData.subject === subject.value}>
+                          ${subject.label}
+                        </option>
+                      `)}
+                    </select>
+                  </div>
                 </div>
 
-                <div class="input-group">
-                  <label for="subject">Subject Area</label>
-                  <select id="subject" name="subject" 
-                          @change=${this._handleInputChange} 
-                          ?disabled=${this.isSubmitting}
-                          required>
-                    <option value="">Select a subject...</option>
-                    ${this.subjects.map(subject => html`
-                      <option value=${subject.value} ?selected=${this._formData.subject === subject.value}>
-                        ${subject.label}
-                      </option>
-                    `)}
-                  </select>
-                </div>
-              </div>
-
-              <div class="input-group" ?hidden=${!this._showOtherSubject} style="margin-top: 0.75rem;">
-                <label for="otherSubject">Specify Subject</label>
-                <input type="text" id="otherSubject" name="other_subject" 
-                      placeholder="e.g., Astronomy"
-                      .value=${this._formData.other_subject}
-                      @input=${this._handleInputChange}
-                      ?disabled=${this.isSubmitting}>
-              </div>
-
-              <div class="input-group" style="margin-top: 2rem; margin-bottom: 1.5rem;">
-                <label for="subjectSpecification">Topic Focus (optional)</label>
-                <input type="text" id="subjectSpecification" name="subject_specification" 
-                      placeholder="e.g., Genetics for Biology"
-                      .value=${this._formData.subject_specification}
-                      @input=${this._handleInputChange}
-                      ?disabled=${this.isSubmitting}>
-              </div>
-            </fieldset>
-
-            <fieldset class="form-group" style="margin-top: 3rem; margin-bottom: 2rem;">
-              <legend>Story Elements</legend>
-              <div class="story-elements-grid">
-                <div class="input-group">
-                  <label for="setting">Story Setting (optional)</label>
-                  <input type="text" id="setting" name="setting" 
-                        placeholder="e.g., a small village in the mountains"
-                        .value=${this._formData.setting}
+                <div class="input-group" ?hidden=${!this._showOtherSubject}>
+                  <label for="otherSubject">Specify Subject</label>
+                  <input type="text" id="otherSubject" name="other_subject" 
+                        placeholder="e.g., Astronomy"
+                        .value=${this._formData.other_subject}
                         @input=${this._handleInputChange}
                         ?disabled=${this.isSubmitting}>
                 </div>
-                <div class="input-group">
-                  <label for="mainCharacter">Main Character (optional)</label>
-                  <input type="text" id="mainCharacter" name="main_character"
-                        placeholder="e.g., a curious young scientist"
-                        .value=${this._formData.main_character}
+
+                <div class="input-group topic-focus">
+                  <label for="subjectSpecification">Topic Focus (optional)</label>
+                  <input type="text" id="subjectSpecification" name="subject_specification" 
+                        placeholder="e.g., Genetics for Biology"
+                        .value=${this._formData.subject_specification}
                         @input=${this._handleInputChange}
                         ?disabled=${this.isSubmitting}>
                 </div>
               </div>
-            </fieldset>
+            </div>
 
-            <fieldset class="form-group" style="margin-top: 3rem; margin-bottom: 2rem;">
-              <legend>Format Settings</legend>
-              <div class="story-elements-grid">
-                <div class="input-group">
-                  <label for="wordCount">Story Length</label>
-                  <select id="wordCount" name="word_count"
-                          @change=${this._handleInputChange}
-                          ?disabled=${this.isSubmitting}
-                          required>
-                    ${this.wordCounts.map(option => html`
-                      <option value=${option.value} ?selected=${this._formData.word_count === option.value}>
-                        ${option.label}
-                      </option>
-                    `)}
-                  </select>
-                </div>
-                <div class="input-group">
-                  <label for="language">Language</label>
-                  <select id="language" name="language"
-                          @change=${this._handleInputChange}
-                          ?disabled=${this.isSubmitting}
-                          required>
-                    ${this.languages.map(language => html`
-                      <option value=${language.value} ?selected=${this._formData.language === language.value}>
-                        ${language.label}
-                      </option>
-                    `)}
-                  </select>
+            <!-- Story Elements Card -->
+            <div class="form-card">
+              <h3 class="card-title">Story Elements</h3>
+              <div class="card-content">
+                <div class="story-elements-grid">
+                  <div class="input-group">
+                    <label for="setting">Story Setting (optional)</label>
+                    <input type="text" id="setting" name="setting" 
+                          placeholder="e.g., a small village in the mountains"
+                          .value=${this._formData.setting}
+                          @input=${this._handleInputChange}
+                          ?disabled=${this.isSubmitting}>
+                  </div>
+                  <div class="input-group">
+                    <label for="mainCharacter">Main Character (optional)</label>
+                    <input type="text" id="mainCharacter" name="main_character"
+                          placeholder="e.g., a curious young scientist"
+                          .value=${this._formData.main_character}
+                          @input=${this._handleInputChange}
+                          ?disabled=${this.isSubmitting}>
+                  </div>
                 </div>
               </div>
-              <div class="checkbox-options">
-                <div class="checkbox-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="generateVocabulary" name="generate_vocabulary"
-                          ?checked=${this._formData.generate_vocabulary}
-                          @change=${this._handleInputChange}
-                          ?disabled=${this.isSubmitting}>
-                    <span>Generate Vocabulary List</span>
-                  </label>
+            </div>
+
+            <!-- Format Settings Card -->
+            <div class="form-card">
+              <h3 class="card-title">Format Settings</h3>
+              <div class="card-content">
+                <div class="story-elements-grid">
+                  <div class="input-group">
+                    <label for="wordCount">Story Length</label>
+                    <select id="wordCount" name="word_count"
+                            @change=${this._handleInputChange}
+                            ?disabled=${this.isSubmitting}
+                            required>
+                      ${this.wordCounts.map(option => html`
+                        <option value=${option.value} ?selected=${this._formData.word_count === option.value}>
+                          ${option.label}
+                        </option>
+                      `)}
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label for="language">Language</label>
+                    <select id="language" name="language"
+                            @change=${this._handleInputChange}
+                            ?disabled=${this.isSubmitting}
+                            required>
+                      ${this.languages.map(language => html`
+                        <option value=${language.value} ?selected=${this._formData.language === language.value}>
+                          ${language.label}
+                        </option>
+                      `)}
+                    </select>
+                  </div>
                 </div>
-                <div class="checkbox-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="generateSummary" name="generate_summary"
-                          ?checked=${this._formData.generate_summary}
-                          @change=${this._handleInputChange}
-                          ?disabled=${this.isSubmitting}>
-                    <span>Generate Story Summary</span>
-                  </label>
-                </div>
-                <div class="checkbox-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" id="generateQuiz" name="generate_quiz"
-                          ?checked=${this._formData.generate_quiz}
-                          @change=${this._handleInputChange}
-                          ?disabled=${this.isSubmitting}>
-                    <span>Generate Comprehension Quiz</span>
-                  </label>
+                <div class="checkbox-options">
+                  <div class="checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="generateVocabulary" name="generate_vocabulary"
+                            ?checked=${this._formData.generate_vocabulary}
+                            @change=${this._handleInputChange}
+                            ?disabled=${this.isSubmitting}>
+                      <span>Generate Vocabulary List</span>
+                    </label>
+                  </div>
+                  <div class="checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="generateSummary" name="generate_summary"
+                            ?checked=${this._formData.generate_summary}
+                            @change=${this._handleInputChange}
+                            ?disabled=${this.isSubmitting}>
+                      <span>Generate Story Summary</span>
+                    </label>
+                  </div>
+                  <div class="checkbox-group">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="generateQuiz" name="generate_quiz"
+                            ?checked=${this._formData.generate_quiz}
+                            @change=${this._handleInputChange}
+                            ?disabled=${this.isSubmitting}>
+                      <span>Generate Comprehension Quiz</span>
+                    </label>
+                  </div>
                 </div>
               </div>
-            </fieldset>
+            </div>
 
             <div class="form-actions">
               <button type="submit" ?disabled=${this.isSubmitting}>
