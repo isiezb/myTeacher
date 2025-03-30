@@ -36,7 +36,7 @@
       <div id="story-result" class="story-result hidden">
         <story-content id="storyDisplay" showHeader="true" showSummary="true" showVocabulary="true" showQuiz="true"></story-content>
         <div class="story-actions">
-          <button id="continueStoryBtn" class="btn btn-primary">Continue Story</button>
+          <!-- Continue Story button removed -->
         </div>
         <div id="quizContainer" class="hidden">
           <quiz-component id="quizComponent"></quiz-component>
@@ -152,10 +152,11 @@
       padding: 0 1rem;
     }
     
-    /* We'll hide the default footer continue button when the component is shown */
+    /* The Continue Story button has been removed, so this rule is no longer needed
     .continuation-container + .story-actions button {
       display: none;
     }
+    */
     
     /* Make the Continue Story button in the quiz results stand out */
     .quiz-continue-button {
@@ -187,8 +188,8 @@
         continuationContainer.style.display = 'none';
       }
       
-      // Get the "Continue Story" button in the page footer
-      const continueStoryBtn = document.querySelector('.story-actions button');
+      // We've removed the main Continue Story button, so this is no longer needed
+      // const continueStoryBtn = document.querySelector('.story-actions button');
       
       // Function to handle story continuation
       function handleContinueStory(storyObj) {
@@ -260,10 +261,10 @@
         }
       }
       
-      // Add click handler to the button in the page footer
-      if (continueStoryBtn) {
-        continueStoryBtn.addEventListener('click', () => handleContinueStory());
-      }
+      // The main button has been removed, so this listener is no longer needed
+      // if (continueStoryBtn) {
+      //   continueStoryBtn.addEventListener('click', () => handleContinueStory());
+      // }
       
       // Add event delegation for any "Continue Story" button
       document.addEventListener('click', (event) => {
