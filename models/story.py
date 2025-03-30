@@ -1,0 +1,30 @@
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict
+
+class StoryGenerationRequest(BaseModel):
+    academic_grade: str = Field(..., description="Target academic grade level (e.g., 'K', '5', '12')")
+    subject: str = Field(..., description="Main subject area (e.g., 'biology', 'history')")
+    other_subject: Optional[str] = Field(None, description="Specific subject if 'other' is chosen")
+    subject_specification: Optional[str] = Field(None, description="Specific topic focus within the subject")
+    setting: Optional[str] = Field(None, description="Setting or environment for the story")
+    main_character: Optional[str] = Field(None, description="Description of the main character")
+    word_count: int = Field(default=300, description="Target word count for the story")
+    language: str = Field(default="English", description="Language for the story")
+    generate_vocabulary: bool = Field(default=False, description="Flag to generate a vocabulary list")
+    generate_summary: bool = Field(default=False, description="Flag to generate a story summary")
+
+class VocabularyItem(BaseModel):
+    term: str
+    definition: str
+
+class StoryGenerationResponse(BaseModel):
+    id: Optional[str] = Field(None, description="Unique ID if saved") # Assuming ID generation/saving happens elsewhere
+    title: str = Field(..., description="Generated title for the story")
+    content: str = Field(..., description="The main generated story text")
+    academic_grade: str = Field(..., description="The academic grade level used")
+    subject: str = Field(..., description="The subject used")
+    word_count: int = Field(..., description="Actual word count (approximate)")
+    language: str = Field(..., description="Language of the story")
+    summary: Optional[str] = Field(None, description="Generated story summary, if requested")
+    vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Generated vocabulary list, if requested")
+    learning_objectives: Optional[List[str]] = Field(None, description="Potential learning objectives derived from the story") # Added this as it was in frontend display 

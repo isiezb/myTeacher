@@ -1,3 +1,5 @@
+# Node.js Frontend Specific
+# =========================
 # Dependencies
 node_modules/
 npm-debug.log
@@ -5,7 +7,7 @@ yarn-debug.log
 yarn-error.log
 
 # Environment variables
-.env
+# .env # Keep frontend .env if separate, otherwise ignore root .env
 .env.local
 .env.development.local
 .env.test.local
@@ -24,4 +26,56 @@ yarn-error.log
 
 # Logs
 logs
-*.log 
+*.log
+
+
+# Python Backend Specific
+# ======================
+# Environment files
+.env # Ignore the backend .env file
+.env.*
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+.Python
+build/
+*.egg-info/
+dist/
+*.egg
+MANIFES
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints 

@@ -1,0 +1,7 @@
+# requirements.txt for the FastAPI backend
+
+fastapi
+uvicorn[standard] # Includes 'uvicorn' and standard dependencies like 'watchfiles' for reloading
+httpx          # For making async HTTP requests to the LLM API
+pydantic       # For data validation
+python-dotenv  # For loading environment variables (like API keys) 
