@@ -234,6 +234,7 @@
           addEndpointStructureCheck();
           addStoryGenerationTest();
           addServerConfigCheck();
+          addResponseAnalyzer();
         }, 200);
         
         // Show element tree of #generator-tab
@@ -1229,4 +1230,238 @@ Access-Control-Allow-Headers: Content-Type</pre>
       });
     }
   }, 100);
-} 
+}
+
+// Function to analyze API response formats
+function addResponseAnalyzer() {
+  const apiTestResults = document.getElementById('api-test-results');
+  if (!apiTestResults) return;
+  
+  const html = apiTestResults.innerHTML || '';
+  
+  apiTestResults.innerHTML = html + `
+    <h4 style="margin-top: 15px;">API Response Format Analyzer:</h4>
+    <button id="analyze-response-btn" style="padding: 8px 16px; background: #e83e8c; color: white; border: none; border-radius: 4px; cursor: pointer;">Analyze Latest Response</button>
+    <div id="response-analyzer-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+      <p>Click the button to analyze the latest API response format.</p>
+    </div>
+  `;
+  
+  // Initialize storage for response captures if it doesn't exist
+  if (!window.debugCaptures) {
+    window.debugCaptures = {
+      apiResponses: []
+    };
+    
+    // Setup capture points for API responses
+    const originalFetch = window.fetch;
+    window.fetch = async function(url, options) {
+      const startTime = Date.now();
+      
+      try {
+        const response = await originalFetch.apply(this, arguments);
+        
+        // Only capture API calls to our backend
+        if (typeof url === 'string' && url.includes('easystory.onrender.com')) {
+          // Clone the response so we don't consume it
+          const clonedResponse = response.clone();
+          
+          try {
+            // Try to read response data
+            let responseData;
+            const contentType = clonedResponse.headers.get('content-type') || '';
+            
+            if (contentType.includes('application/json')) {
+              responseData = await clonedResponse.json().catch(() => '[Invalid JSON]');
+            } else {
+              responseData = await clonedResponse.text().catch(() => '[Failed to read response]');
+              
+              // Only capture part of large text responses
+              if (typeof responseData === 'string' && responseData.length > 500) {
+                responseData = responseData.substring(0, 500) + '...';
+              }
+            }
+            
+            window.debugCaptures.apiResponses.unshift({
+              url: url.toString(),
+              method: options?.method || 'GET',
+              timestamp: new Date().toISOString(),
+              duration: Date.now() - startTime,
+              status: response.status,
+              contentType,
+              data: responseData
+            });
+            
+            // Keep only last 10 responses
+            if (window.debugCaptures.apiResponses.length > 10) {
+              window.debugCaptures.apiResponses.pop();
+            }
+          } catch (e) {
+            console.log('Error capturing API response:', e);
+          }
+        }
+        
+        return response;
+      } catch (error) {
+        // Also capture failed requests
+        if (typeof url === 'string' && url.includes('easystory.onrender.com')) {
+          window.debugCaptures.apiResponses.unshift({
+            url: url.toString(),
+            method: options?.method || 'GET',
+            timestamp: new Date().toISOString(),
+            duration: Date.now() - startTime,
+            status: 'Error',
+            error: error.message
+          });
+        }
+        throw error;
+      }
+    };
+  }
+  
+  setTimeout(() => {
+    const analyzeBtn = document.getElementById('analyze-response-btn');
+    const analyzerResults = document.getElementById('response-analyzer-results');
+    
+    if (analyzeBtn && analyzerResults) {
+      analyzeBtn.addEventListener('click', () => {
+        if (!window.debugCaptures || !window.debugCaptures.apiResponses.length) {
+          analyzerResults.innerHTML = '<p>No API responses have been captured yet. Try generating a story first.</p>';
+          return;
+        }
+        
+        const latestResponse = window.debugCaptures.apiResponses[0];
+        
+        // Create detailed analysis of the response
+        let analysisHtml = `<h4>Analysis of Response to ${latestResponse.method} ${latestResponse.url.split('/').pop()}</h4>`;
+        
+        // Basic info
+        analysisHtml += `<p><strong>Time:</strong> ${latestResponse.timestamp} (${latestResponse.duration}ms)</p>`;
+        analysisHtml += `<p><strong>Status:</strong> ${latestResponse.status}</p>`;
+        
+        if (latestResponse.error) {
+          analysisHtml += `<p style="color: red;"><strong>Error:</strong> ${latestResponse.error}</p>`;
+        } else {
+          // Content type analysis
+          const contentType = latestResponse.contentType || 'unknown';
+          analysisHtml += `<p><strong>Content-Type:</strong> ${contentType}</p>`;
+          
+          // Data format analysis
+          if (latestResponse.data) {
+            if (contentType.includes('application/json')) {
+              if (latestResponse.data === '[Invalid JSON]') {
+                analysisHtml += `<p style="color: red;"><strong>JSON Parse Error:</strong> The response claimed to be JSON but could not be parsed.</p>`;
+              } else {
+                analysisHtml += `<p style="color: green;"><strong>Valid JSON Response:</strong> Response was successfully parsed as JSON.</p>`;
+              }
+            } else if (typeof latestResponse.data === 'string') {
+              // Check for common non-JSON formats
+              if (latestResponse.data.includes('<!DOCTYPE html>') || latestResponse.data.includes('<html')) {
+                analysisHtml += `<p style="color: orange;"><strong>HTML Response:</strong> The server returned HTML instead of the expected data format.</p>`;
+              } else if (latestResponse.data.includes('<?xml')) {
+                analysisHtml += `<p style="color: orange;"><strong>XML Response:</strong> The server returned XML instead of the expected data format.</p>`;
+              } else if (latestResponse.data.trim().startsWith('{') || latestResponse.data.trim().startsWith('[')) {
+                analysisHtml += `<p style="color: orange;"><strong>JSON-like Response:</strong> The response appears to be JSON but was not properly identified as such by the server.</p>`;
+              }
+            }
+            
+            // Response preview
+            analysisHtml += `<h4>Response Preview:</h4>`;
+            if (typeof latestResponse.data === 'string') {
+              analysisHtml += `<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${latestResponse.data}</pre>`;
+            } else {
+              analysisHtml += `<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${JSON.stringify(latestResponse.data, null, 2)}</pre>`;
+            }
+          }
+          
+          // Formatting issues detection
+          if (typeof latestResponse.data === 'string' && latestResponse.data !== '[Invalid JSON]') {
+            analysisHtml += `<h4>Potential Formatting Issues:</h4>`;
+            let issuesFound = false;
+            
+            const data = latestResponse.data;
+            
+            // Check for unquoted property names (a common JSON error)
+            if (data.match(/\{[^{}]*?[a-zA-Z0-9_]+\s*:/)) {
+              analysisHtml += `<p style="color: red;"><strong>Unquoted Property Names:</strong> The response appears to contain unquoted property names, which is invalid in JSON.</p>`;
+              issuesFound = true;
+            }
+            
+            // Check for single quotes instead of double quotes
+            if (data.match(/\'[^\']*?\'/)) {
+              analysisHtml += `<p style="color: red;"><strong>Single Quotes:</strong> The response appears to use single quotes instead of double quotes, which is invalid in JSON.</p>`;
+              issuesFound = true;
+            }
+            
+            // Check for trailing commas
+            if (data.match(/,\s*[\]}]/)) {
+              analysisHtml += `<p style="color: red;"><strong>Trailing Commas:</strong> The response contains trailing commas, which is invalid in JSON.</p>`;
+              issuesFound = true;
+            }
+            
+            // Check for JavaScript-specific values
+            if (data.includes('undefined') || data.includes('NaN') || data.includes('Infinity')) {
+              analysisHtml += `<p style="color: red;"><strong>Non-JSON Values:</strong> The response contains JavaScript-specific values like undefined, NaN, or Infinity that are not valid in JSON.</p>`;
+              issuesFound = true;
+            }
+            
+            if (!issuesFound) {
+              analysisHtml += `<p style="color: green;">No common formatting issues detected.</p>`;
+            }
+          }
+        }
+        
+        // API Endpoint Suggestions
+        analysisHtml += `<h4>API Endpoint Suggestions:</h4>`;
+        
+        const url = new URL(latestResponse.url);
+        const path = url.pathname;
+        
+        if (path.includes('/stories/generate') && latestResponse.status === 404) {
+          analysisHtml += `<p>The API returned a 404 for the story generation endpoint. Possible alternatives:</p>`;
+          analysisHtml += `<ul>`;
+          analysisHtml += `<li>Try <code>/api/stories/generate</code></li>`;
+          analysisHtml += `<li>Try <code>/generate-story</code></li>`;
+          analysisHtml += `<li>Try <code>/api/v1/stories/generate</code></li>`;
+          analysisHtml += `</ul>`;
+        }
+        
+        // Fix recommendations
+        analysisHtml += `<h4>Recommendations:</h4>`;
+        if (latestResponse.error || latestResponse.status >= 400) {
+          analysisHtml += `<p>Based on this analysis, consider:</p>`;
+          analysisHtml += `<ul>`;
+          analysisHtml += `<li>Checking the API documentation for the correct endpoint URL</li>`;
+          analysisHtml += `<li>Verifying if the server requires authentication</li>`;
+          analysisHtml += `<li>Using the proxy service as a workaround for CORS issues</li>`;
+          analysisHtml += `<li>Checking the format of your request payload</li>`;
+          analysisHtml += `</ul>`;
+        } else if (latestResponse.data === '[Invalid JSON]') {
+          analysisHtml += `<p>To fix the JSON parsing issues:</p>`;
+          analysisHtml += `<ul>`;
+          analysisHtml += `<li>Contact the API provider to fix the response format</li>`;
+          analysisHtml += `<li>Implement a middleware to sanitize the response</li>`;
+          analysisHtml += `<li>Consider using the fallback mock content for development</li>`;
+          analysisHtml += `</ul>`;
+        } else {
+          analysisHtml += `<p style="color: green;">The response looks good! If you're still having issues, check:</p>`;
+          analysisHtml += `<ul>`;
+          analysisHtml += `<li>That the returned data structure matches what your application expects</li>`;
+          analysisHtml += `<li>Any transformations needed on the returned data</li>`;
+          analysisHtml += `</ul>`;
+        }
+        
+        analyzerResults.innerHTML = analysisHtml;
+      });
+    }
+  }, 100);
+}
+
+// Use existing add* functions from the Components tab
+setTimeout(() => {
+  addDirectUrlCheck();
+  addEndpointStructureCheck();
+  addStoryGenerationTest();
+  addServerConfigCheck();
+  addResponseAnalyzer();
+}, 200); 
