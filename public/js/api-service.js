@@ -87,17 +87,30 @@ const apiService = (function() {
         'Accept': 'application/json'
       };
       
+      // Make sure to include the original story content in the request
       const requestBody = {
         length: options.length || 300,
-        difficulty: options.difficulty || 'same'
+        difficulty: options.difficulty || 'same',
+        original_story_content: options.original_story_content || ''
       };
+      
+      // Log request details but limit content length in logs for readability
+      const logBody = {...requestBody};
+      if (logBody.original_story_content) {
+        logBody.original_story_content = logBody.original_story_content.substring(0, 100) + '...';
+      }
       
       console.log('Request Details:', {
         url: fullUrl,
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(logBody)
       });
+      
+      // Validate the original story content is included
+      if (!requestBody.original_story_content) {
+        console.warn('Original story content is missing or empty in continuation request!');
+      }
       
       const postResponse = await fetch(fullUrl, {
         method: 'POST',

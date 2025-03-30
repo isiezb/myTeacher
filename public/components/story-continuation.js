@@ -360,9 +360,18 @@ export class StoryContinuation extends LitElement {
     if (this.isSubmitting) return; 
     
     // Check if we have an original story
-    if (!this.originalStory || !this.originalStory.id) {
+    if (!this.originalStory) {
       this._showError = true;
       this._errorMessage = 'No story to continue. Please generate a story first.';
+      this.requestUpdate();
+      return;
+    }
+    
+    // Double-check that we have an actual story object with content
+    if (!this.originalStory.content) {
+      this._showError = true;
+      this._errorMessage = 'Original story is missing content. Please regenerate the story.';
+      console.error('Original story is missing content:', this.originalStory);
       this.requestUpdate();
       return;
     }
@@ -373,9 +382,18 @@ export class StoryContinuation extends LitElement {
     this._errorMessage = '';
     this.requestUpdate();
     
+    // Ensure we have a valid story object
     const originalStory = this.originalStory || {};
-    const storyId = originalStory.id || 'unknown';
+    
+    // Generate a mock ID if one doesn't exist
+    const storyId = originalStory.id || `mock-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    
+    // Make sure we have the content
     const originalContent = originalStory.content || '';
+    
+    if (!originalContent) {
+      console.error('Original story content is empty even after checks');
+    }
     
     // Map UI difficulty values to API values
     const difficultyMap = {
@@ -386,14 +404,20 @@ export class StoryContinuation extends LitElement {
       'much_harder': 'much_harder'
     };
     
+    // Prepare options with complete original story content
     const options = {
       length: parseInt(this._settings.length, 10),
       difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
       original_story_content: originalContent
     };
     
-    // Log what we're about to do
-    console.log(`Continuing story ${storyId} with options:`, options);
+    // Log what we're about to do (limiting content length for logging)
+    const logOptions = {...options};
+    if (logOptions.original_story_content) {
+      logOptions.original_story_content = logOptions.original_story_content.substring(0, 100) + '...';
+    }
+    console.log(`Continuing story ${storyId} with options:`, logOptions);
+    console.log(`Original story content length: ${originalContent.length} characters`);
     
     try {
       // Check if API service exists and has the required method

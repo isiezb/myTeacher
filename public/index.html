@@ -178,7 +178,7 @@
     }
   </style>
 
-  <!-- Update the handleContinueStory function to properly center the component -->
+  <!-- Update the handleContinueStory function to properly pass complete story data to the continuation component -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize the continuation container with display: none
@@ -221,6 +221,24 @@
             console.log('Retrieved story from storyDisplay component:', window.currentStory);
           }
         }
+        
+        // Validate the story for continuation
+        if (!window.currentStory) {
+          console.error('No story to continue!');
+          window.showToast('No story to continue. Please generate a story first.', 'error');
+          return;
+        }
+        
+        // Verify the story has content
+        if (!window.currentStory.content) {
+          console.error('Story is missing content!', window.currentStory);
+          window.showToast('Story is missing content. Please regenerate the story.', 'error');
+          return;
+        }
+        
+        // Log story details for debugging
+        console.log('Continuing story with ID:', window.currentStory.id);
+        console.log('Story content length:', window.currentStory.content?.length || 0, 'characters');
         
         // If we have a story and the continuation component
         if (window.currentStory) {
