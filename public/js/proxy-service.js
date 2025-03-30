@@ -116,110 +116,64 @@ const proxyService = (function() {
   async function generateStory(apiBaseUrl, formData) {
     // Use the provided API base URL or fall back to the environment variable
     const baseUrl = apiBaseUrl || window.ENV_API_URL || "https://easystory.onrender.com";
-    // Change endpoint back to /stories for POST
-    const url = `${baseUrl}/stories`;
+    // Target /stories/generate
+    const endpoint = '/stories/generate';
+    const url = `${baseUrl}${endpoint}`;
     console.log(`Generating story via proxy. Target: ${url}`);
     
     try {
-      // Try POST first
-      try {
-        console.log('Attempting POST via proxy');
-        const postResult = await fetchViaProxy(url, {
-          method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-        console.log('Proxy POST successful');
-        
-        // Verify that the result contains the expected story properties
-        if (typeof postResult === 'object' && (postResult.content || postResult.title)) {
-          return postResult;
-        } else {
-          console.warn('Proxy returned unexpected data format (POST):', postResult);
-          // Try to make the best of what we got
-          if (typeof postResult === 'string') {
-            // Log the raw string before trying to parse
-            console.log('Raw POST response string from proxy:', postResult.substring(0, 500)); 
-            try {
-              const parsedResult = JSON.parse(postResult);
-              console.log('Successfully parsed string response as JSON');
-              return parsedResult;
-            } catch (e) {
-              console.error('Could not parse string as JSON (POST):', e);
-              // Return a simple object with the content
-              return {
-                title: `Generated Story (${formData.subject || 'General'})`,
-                content: postResult,
-                generated_at: new Date().toISOString()
-              };
-            }
-          } else {
-            // Return whatever we got
-            return postResult;
-          }
+      // Build query string
+      const params = new URLSearchParams();
+      Object.entries(formData).forEach(([key, value]) => {
+        params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
+      });
+      const getUrl = `${url}?${params.toString()}`;
+      
+      console.log(`Attempting GET via proxy: ${getUrl.substring(0, 150)}...`);
+      
+      // Try GET first since that seems more likely to work based on logs
+      const getResult = await fetchViaProxy(getUrl, {
+        headers: {
+          'Accept': 'application/json'
         }
-      } catch (postError) {
-        console.error('Proxy POST failed:', postError);
-        
-        // Try GET as fallback
-        console.log('Attempting GET via proxy as fallback');
-        
-        // Build query string
-        const params = new URLSearchParams();
-        Object.entries(formData).forEach(([key, value]) => {
-          params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
-        });
-        
-        const getUrl = `${url}?${params.toString()}`;
-        console.log('GET URL:', getUrl.substring(0, 100) + '...');
-        
-        const getResult = await fetchViaProxy(getUrl, {
-          headers: {
-            'Accept': 'application/json'
+      });
+      console.log('Proxy GET successful');
+      
+      // Validation for GET result
+      if (typeof getResult === 'object' && (getResult.content || getResult.title)) {
+        return getResult;
+      } else {
+        console.warn('GET proxy returned unexpected data format:', getResult);
+        if (typeof getResult === 'string') {
+          console.log('Raw GET response string from proxy:', getResult.substring(0, 500));
+          try {
+            const parsedResult = JSON.parse(getResult);
+            console.log('Successfully parsed GET string response as JSON');
+            return parsedResult;
+          } catch (e) {
+            console.error('Could not parse string as JSON (GET):', e);
+            // Return fallback object
+            return {
+              title: `Generated Story (${formData.subject || 'General'})`,
+              content: getResult,
+              generated_at: new Date().toISOString()
+            };
           }
-        });
-        console.log('Proxy GET successful');
-        
-        // Same validation as for POST
-        if (typeof getResult === 'object' && (getResult.content || getResult.title)) {
-          return getResult;
         } else {
-          console.warn('GET proxy returned unexpected data format:', getResult);
-          if (typeof getResult === 'string') {
-            // Log the raw string before trying to parse
-            console.log('Raw GET response string from proxy:', getResult.substring(0, 500));
-            try {
-              const parsedResult = JSON.parse(getResult);
-              console.log('Successfully parsed GET string response as JSON');
-              return parsedResult;
-            } catch (e) {
-              console.error('Could not parse string as JSON (GET):', e);
-              return {
-                title: `Generated Story (${formData.subject || 'General'})`,
-                content: getResult,
-                generated_at: new Date().toISOString()
-              };
-            }
-          } else {
-            return getResult;
-          }
+          // If not object or string, return what we got
+          return getResult;
         }
       }
     } catch (error) {
-      // Provide more detailed error message
-      console.error('All proxy methods failed with error:', error);
-      
-      // Try to determine if this is a CORS issue or a server issue
+      // If GET via proxy fails, log and throw specific error
+      console.error('GET via proxy failed:', error);
       const errorMsg = error.message.toLowerCase();
       if (errorMsg.includes('cors') || errorMsg.includes('network') || errorMsg.includes('failed to fetch')) {
-        throw new Error(`Proxy service couldn't access the API due to CORS/network issues. The server may be down or blocking requests.`);
+        throw new Error(`Proxy service couldn't access the API via GET due to CORS/network issues.`);
       } else if (errorMsg.includes('parse')) {
-        throw new Error(`Proxy received response but couldn't parse it. The API may be returning invalid data.`);
+        throw new Error(`Proxy GET received response but couldn't parse it.`);
       } else {
-        throw new Error(`Story generation via proxy failed: ${error.message}`);
+        throw new Error(`Story generation via proxy GET failed: ${error.message}`);
       }
     }
   }
