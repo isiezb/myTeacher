@@ -686,11 +686,6 @@ export class StoryContent extends LitElement {
         <div class="quiz-feedback">
           ${feedback}
         </div>
-        <div class="quiz-actions">
-          <button class="quiz-continue-button" @click=${this._handleContinueStory}>
-            Continue Story
-          </button>
-        </div>
       </div>
     `;
   }
@@ -796,13 +791,13 @@ export class StoryContent extends LitElement {
         
         ${this.showVocabulary ? this._renderVocabulary() : ''}
         
+        ${this.showQuiz ? this._renderQuiz() : ''}
+        
         <div class="continue-story-section">
           <button class="quiz-continue-button" @click=${this._handleContinueStory}>
             Continue Story
           </button>
         </div>
-        
-        ${this.showQuiz ? this._renderQuiz() : ''}
       </div>
     `;
   }
