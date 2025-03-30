@@ -28,178 +28,193 @@ export class StoryContent extends LitElement {
 
   static get styles() {
     return css`
-      :host {
-        display: block;
-        font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
-      }
-
+      /* Component container */
       .story-content-container {
-        background: var(--card-bg, white);
-        border-radius: 24px;
-        padding: 3rem;
-        box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
-        border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
         margin-bottom: 2rem;
       }
 
+      /* Header styling */
       .story-header {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
       }
 
       .story-title {
         font-family: var(--font-heading, 'Inter', sans-serif);
-        font-weight: 800;
-        font-size: 2.5rem;
+        font-size: 2rem;
         color: var(--text, #212529);
-        line-height: 1.2;
-        margin: 0 0 1rem;
+        margin: 0 0 1rem 0;
       }
 
       .story-meta {
         display: flex;
         flex-wrap: wrap;
         gap: 1rem;
-        margin-top: 1rem;
+        color: var(--text-secondary, #6c757d);
+        font-size: 0.875rem;
       }
 
       .story-meta-item {
-        font-size: 0.875rem;
-        color: var(--text-secondary, #6c757d);
         display: flex;
         align-items: center;
         gap: 0.25rem;
       }
 
+      /* Summary styling */
       .story-summary {
-        padding: 1.5rem;
-        background: var(--bg, #f8f9fa);
-        border-radius: 12px;
-        margin-bottom: 2rem;
+        background: var(--secondary-50, #f8f9fa);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--secondary, #6c757d);
       }
 
       .summary-title {
-        font-family: var(--font-heading, 'Inter', sans-serif);
-        font-weight: 700;
-        font-size: 1.25rem;
-        color: var(--primary, #5e7ce6);
-        margin: 0 0 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem 0;
+        color: var(--text, #212529);
       }
 
       .summary-text {
-        color: var(--text, #212529);
-        line-height: 1.6;
-        margin: 0;
-      }
-
-      .story-text {
-        font-size: 1.125rem;
-        line-height: 1.8;
-        color: var(--text, #212529);
-      }
-
-      .story-text p {
-        margin-bottom: 1.5rem;
-      }
-
-      .story-vocabulary, .story-quiz {
-        margin-top: 3rem;
-        padding-top: 2rem;
-        border-top: 1px solid var(--border, rgba(0, 0, 0, 0.1));
-      }
-
-      .vocabulary-title, .quiz-title {
-        font-family: var(--font-heading, 'Inter', sans-serif);
-        font-weight: 700;
-        font-size: 1.5rem;
-        color: var(--text, #212529);
-        margin: 0 0 1.5rem;
-      }
-
-      .vocabulary-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-      }
-
-      .vocabulary-item {
-        background: var(--bg, #f8f9fa);
-        border-radius: 8px;
-        padding: 1rem;
-        border-left: 3px solid var(--primary, #5e7ce6);
-      }
-
-      .vocabulary-term {
-        font-weight: 700;
-        font-size: 1.125rem;
-        color: var(--primary, #5e7ce6);
-        margin: 0 0 0.5rem;
-      }
-
-      .vocabulary-definition {
-        font-size: 0.9375rem;
         color: var(--text, #212529);
         line-height: 1.5;
         margin: 0;
       }
 
+      /* Main story content */
+      .story-text {
+        line-height: 1.8;
+        color: var(--text, #212529);
+        margin-bottom: 1.5rem;
+      }
+
+      .story-text p {
+        margin-bottom: 1.25rem;
+      }
+
+      /* Vocabulary styling */
+      .story-vocabulary {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .vocabulary-title {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--text, #212529);
+      }
+
+      .vocabulary-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+      }
+
+      .vocabulary-item {
+        background: var(--secondary-50, #f8f9fa);
+        border-radius: 8px;
+        padding: 1rem;
+        border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+      }
+
+      .vocabulary-term {
+        font-weight: 600;
+        color: var(--primary, #5e7ce6);
+        margin-bottom: 0.5rem;
+      }
+
+      .vocabulary-definition {
+        color: var(--text, #212529);
+        font-size: 0.9375rem;
+        line-height: 1.5;
+      }
+
+      /* Quiz styling */
+      .story-quiz {
+        margin-top: 2rem;
+      }
+
+      .quiz-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        color: var(--text, #212529);
+      }
+
       .quiz-item {
-        background: var(--bg, #f8f9fa);
+        background: var(--secondary-50, #f8f9fa);
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
       }
 
       .quiz-question {
-        font-weight: 700;
         font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
         color: var(--text, #212529);
-        margin: 0 0 1rem;
       }
 
       .quiz-options {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
-        margin-bottom: 1.5rem;
       }
 
       .quiz-option {
-        display: flex;
-        align-items: flex-start;
-        padding: 0.75rem;
         background: white;
-        border-radius: 8px;
         border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+        border-radius: 8px;
+        padding: 1rem;
         cursor: pointer;
         transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
       }
 
       .quiz-option:hover {
-        background: var(--primary-50, #eef2ff);
+        border-color: var(--primary, #5e7ce6);
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       }
 
       .quiz-option.selected {
-        background: var(--primary-100, #dbeafe);
-        border-color: var(--primary, #5e7ce6);
+        border-width: 2px;
       }
 
       .quiz-option.correct {
-        background: var(--success-100, #dcfce7);
         border-color: var(--success, #22c55e);
+        background-color: var(--success-50, #f0fdf4);
       }
 
       .quiz-option.incorrect {
-        background: var(--danger-100, #fee2e2);
         border-color: var(--danger, #ef4444);
+        background-color: var(--danger-50, #fef2f2);
+      }
+
+      .quiz-option-index {
+        font-weight: 600;
+        margin-right: 0.75rem;
+        color: var(--text-secondary, #6c757d);
       }
 
       .quiz-option-text {
-        margin-left: 0.5rem;
+        flex: 1;
       }
 
       .quiz-navigation {
         display: flex;
         justify-content: space-between;
+        margin-top: 1.5rem;
+      }
+      
+      .quiz-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
         margin-top: 1.5rem;
       }
 
@@ -290,15 +305,23 @@ export class StoryContent extends LitElement {
         cursor: pointer;
         transition: all 0.2s ease;
       }
-
-      .quiz-error {
-        padding: 1rem;
-        background-color: var(--danger-100, #fee2e2);
+      
+      .quiz-continue-button {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--success, #22c55e);
+        color: white;
+        border: none;
         border-radius: 8px;
-        border: 1px solid var(--danger, #ef4444);
-        color: var(--danger-dark, #b91c1c);
-        margin-bottom: 1rem;
-        font-size: 0.9375rem;
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .quiz-continue-button:hover {
+        background-color: var(--success-dark, #16a34a);
+        transform: translateY(-1px);
       }
 
       .quiz-option-indicator {
@@ -347,6 +370,16 @@ export class StoryContent extends LitElement {
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-8px); }
         to { opacity: 1; transform: translateY(0); }
+      }
+
+      .quiz-error {
+        padding: 1rem;
+        background-color: var(--danger-100, #fee2e2);
+        border-radius: 8px;
+        border: 1px solid var(--danger, #ef4444);
+        color: var(--danger-dark, #b91c1c);
+        margin-bottom: 1rem;
+        font-size: 0.9375rem;
       }
 
       @media (max-width: 768px) {
@@ -630,11 +663,29 @@ export class StoryContent extends LitElement {
         <div class="quiz-feedback">
           ${feedback}
         </div>
-        <button class="quiz-restart-button" @click=${this._handleRestartQuiz}>
-          Restart Quiz
-        </button>
+        <div class="quiz-actions">
+          <button class="quiz-restart-button" @click=${this._handleRestartQuiz}>
+            Restart Quiz
+          </button>
+          <button class="quiz-continue-button" @click=${this._handleContinueStory}>
+            Continue Story
+          </button>
+        </div>
       </div>
     `;
+  }
+
+  _handleContinueStory() {
+    // Dispatch a custom event that will be handled by the parent
+    const event = new CustomEvent('continue-story', {
+      bubbles: true,
+      composed: true,
+      detail: { story: this.story }
+    });
+    this.dispatchEvent(event);
+    
+    // Also log for debugging
+    console.log('Continue story event dispatched from quiz');
   }
 
   _renderQuiz() {
@@ -719,25 +770,15 @@ export class StoryContent extends LitElement {
         ` : ''}
         
         <div class="story-text">
-          ${this.story.content.split('\n\n').map(p => html`<p>${p}</p>`)}
+          ${this.story.content.split('\n\n').map(p => html`
+            <p>${p}</p>
+          `)}
         </div>
         
-        ${this.showVocabulary && this.story.vocabulary ? html`
-          <div class="story-vocabulary">
-            <h2 class="vocabulary-title">Vocabulary</h2>
-            ${this._renderVocabulary()}
-          </div>
-        ` : ''}
+        ${this.showVocabulary ? this._renderVocabulary() : ''}
         
-        ${this.showQuiz && this.story.quiz ? html`
-          <div class="story-quiz">
-            <h2 class="quiz-title">Comprehension Quiz</h2>
-            ${this._renderQuiz()}
-          </div>
-        ` : ''}
+        ${this.showQuiz ? this._renderQuiz() : ''}
       </div>
     `;
   }
 }
-
-customElements.define('story-content', StoryContent); 
