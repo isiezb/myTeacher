@@ -1,70 +1,63 @@
 // ... existing code ...
   async function generateStory(formData) {
     // Initialize with the configured base URL
-    const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com";
+    const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com"; // User needs to update this URL after backend deployment
     console.log(`Generating story... API URL: ${apiUrl}`);
     
-    // Target /stories/generate, but prioritize GET based on previous logs
+    // Use POST /stories/generate as defined in the FastAPI backend
     const endpoint = '/stories/generate';
-    const fullUrlBase = `${apiUrl}${endpoint}`;
+    const fullUrl = `${apiUrl}${endpoint}`;
     
     try {
-      // Convert form data to query string for GET request
-      const params = new URLSearchParams();
-      Object.entries(formData).forEach(([key, value]) => {
-        params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
-      });
-      const getUrl = `${fullUrlBase}?${params.toString()}`;
+      console.log(`Attempting POST request to ${fullUrl}`);
       
-      console.log(`Attempting GET request first to ${getUrl.substring(0, 150)}...`);
-      
-      // Set up proper headers
       const headers = {
-        'Origin': window.location.origin, // Still needed for CORS
+        'Content-Type': 'application/json',
+        'Origin': window.location.origin,
         'Accept': 'application/json'
       };
       
-      // Log the request details
-      console.log('Request Details (GET):', { url: getUrl, method: 'GET', headers });
-      
-      // Make the GET request
-      const getResponse = await fetch(getUrl, {
-        method: 'GET',
+      console.log('Request Details:', {
+        url: fullUrl,
+        method: 'POST',
         headers: headers,
-        mode: 'cors',
-        credentials: 'omit'
+        body: JSON.stringify(formData).substring(0, 200) + '...'
       });
       
-      console.log('GET response status:', getResponse.status);
+      const postResponse = await fetch(fullUrl, {
+        method: 'POST',
+        headers: headers,
+        mode: 'cors',
+        credentials: 'omit',
+        body: JSON.stringify(formData)
+      });
       
-      if (getResponse.ok) {
+      console.log('POST response status:', postResponse.status);
+      
+      if (postResponse.ok) {
         try {
-          const data = await getResponse.json();
-          console.log('Story generated successfully via GET');
+          const data = await postResponse.json();
+          console.log('Story generated successfully via POST');
           return data;
         } catch (parseError) {
-          console.error('Error parsing JSON response from GET:', parseError);
-          const responseClone = getResponse.clone();
+          console.error('Error parsing JSON response:', parseError);
+          const responseClone = postResponse.clone();
           const rawText = await responseClone.text();
-          console.log('Raw GET response text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
-          throw new Error(`Failed to parse GET response: ${parseError.message}`);
+          console.log('Raw response text:', rawText.substring(0, 200) + (rawText.length > 200 ? '...' : ''));
+          throw new Error(`Failed to parse response: ${parseError.message}`);
         }
       } else {
-        // Log the error details from GET
-        console.error(`GET request failed with status ${getResponse.status}`);
+        console.error(`POST request failed with status ${postResponse.status}`);
         let errorText = 'Could not read error response';
         try {
-          errorText = await getResponse.text();
-          console.error('GET Error response:', errorText.substring(0, 200));
+          errorText = await postResponse.text();
+          console.error('Error response:', errorText.substring(0, 200));
         } catch (e) { /* Ignore */ }
-        
-        // If GET failed, throw an error (app.js will handle fallback)
-        throw new Error(`API GET request failed: ${getResponse.status} - ${errorText.substring(0, 50)}`);
+        throw new Error(`API request failed: ${postResponse.status} - ${errorText.substring(0, 50)}`);
       }
     } catch (error) {
-      console.error('Error generating story (direct API - GET attempt):', error);
-      // Re-throw the error so app.js can handle fallback to proxy
-      throw error;
+      console.error('Error generating story (direct API):', error);
+      throw error; // Re-throw for app.js to handle fallback
     }
   }
 
