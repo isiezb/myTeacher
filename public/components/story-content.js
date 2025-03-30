@@ -316,14 +316,15 @@ export class StoryContent extends LitElement {
         border-radius: 8px;
         font-family: var(--font-heading, 'Inter', sans-serif);
         font-weight: 600;
-        font-size: 0.875rem;
+        font-size: 0.975rem;
         cursor: pointer;
         transition: all 0.2s ease;
       }
       
       .quiz-continue-button:hover {
         background-color: var(--success-dark, #16a34a);
-        transform: translateY(-1px);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
       }
 
       .quiz-option-indicator {
@@ -382,6 +383,22 @@ export class StoryContent extends LitElement {
         color: var(--danger-dark, #b91c1c);
         margin-bottom: 1rem;
         font-size: 0.9375rem;
+      }
+
+      /* Add styling for the continue story section */
+      .continue-story-section {
+        margin: 2rem 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .continue-story-section .quiz-continue-button {
+        font-size: 1.125rem;
+        padding: 0.875rem 2rem;
+        min-width: 200px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        animation: pulse 2s infinite;
       }
 
       @media (max-width: 768px) {
@@ -643,33 +660,8 @@ export class StoryContent extends LitElement {
   }
 
   _renderQuizProgress() {
-    try {
-      if (!this.quizAnswers || !Array.isArray(this.quizAnswers) || this.quizAnswers.length === 0) {
-        return html`<div class="quiz-progress">
-          <div class="quiz-progress-item active"></div>
-        </div>`;
-      }
-      
-      return html`
-        <div class="quiz-progress">
-          ${this.quizAnswers.map((answer, index) => {
-            let className = 'quiz-progress-item';
-            if (index === this.currentQuizIndex) {
-              className += ' active';
-            }
-            if (answer !== null) {
-              className += ' answered';
-            }
-            return html`<div class="${className}"></div>`;
-          })}
-        </div>
-      `;
-    } catch (error) {
-      console.error('Error rendering quiz progress:', error);
-      return html`<div class="quiz-progress">
-        <div class="quiz-progress-item active"></div>
-      </div>`;
-    }
+    // Return empty template - we don't want to show the dots anymore
+    return html``;
   }
 
   _renderQuizResults() {
@@ -695,9 +687,6 @@ export class StoryContent extends LitElement {
           ${feedback}
         </div>
         <div class="quiz-actions">
-          <button class="quiz-restart-button" @click=${this._handleRestartQuiz}>
-            Restart Quiz
-          </button>
           <button class="quiz-continue-button" @click=${this._handleContinueStory}>
             Continue Story
           </button>
@@ -743,7 +732,6 @@ export class StoryContent extends LitElement {
       }
 
       return html`
-        ${this._renderQuizProgress()}
         <div class="quiz-item">
           ${this._renderQuizQuestion(currentQuestion, this.currentQuizIndex)}
           ${this._renderQuizNavigation()}
@@ -807,6 +795,12 @@ export class StoryContent extends LitElement {
         </div>
         
         ${this.showVocabulary ? this._renderVocabulary() : ''}
+        
+        <div class="continue-story-section">
+          <button class="quiz-continue-button" @click=${this._handleContinueStory}>
+            Continue Story
+          </button>
+        </div>
         
         ${this.showQuiz ? this._renderQuiz() : ''}
       </div>
