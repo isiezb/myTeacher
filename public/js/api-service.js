@@ -248,7 +248,10 @@ const apiService = (function() {
 })();
 
 // Initialize API service with config
-window.apiService = apiService.init(window.appConfig?.api || {});
+apiService.init(window.appConfig?.api || {});
+
+// Expose API methods globally
+window.apiService = apiService;
 
 // Test connection on load
 document.addEventListener('DOMContentLoaded', () => {

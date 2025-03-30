@@ -222,6 +222,11 @@
         });
         html += '</ul>';
         
+        // Add API test button
+        html += '<h4>API Test:</h4>';
+        html += '<button id="test-api-btn" style="padding: 8px 16px; background: #0275d8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Test API Connection</button>';
+        html += '<div id="api-test-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>';
+        
         // Show element tree of #generator-tab
         const generatorTab = document.getElementById('generator-tab');
         if (generatorTab) {
@@ -245,6 +250,60 @@
     }
     
     document.body.appendChild(panel);
+    
+    // Add event listeners to buttons
+    setTimeout(() => {
+      const testApiBtn = document.getElementById('test-api-btn');
+      if (testApiBtn) {
+        testApiBtn.addEventListener('click', async () => {
+          const resultDiv = document.getElementById('api-test-results');
+          resultDiv.innerHTML = '<p>Testing API connection...</p>';
+          
+          try {
+            // Test base connection
+            const basicTest = await window.apiService.testConnection();
+            let html = `<p><strong>Basic connection:</strong> ${basicTest.ok ? '✅ Success' : '❌ Failed'}</p>`;
+            
+            // Try to fetch API status
+            try {
+              const status = await window.apiService.getStatus();
+              html += `<p><strong>API Status:</strong> ${status ? '✅ Success' : '❌ Failed'}</p>`;
+              html += `<pre>${JSON.stringify(status, null, 2)}</pre>`;
+            } catch (error) {
+              html += `<p><strong>API Status:</strong> ❌ Error</p>`;
+              html += `<pre style="color: red">${error.message}</pre>`;
+            }
+            
+            // Test story generation with minimal data
+            try {
+              html += `<p><strong>Testing Story Generation:</strong> Sending request...</p>`;
+              const testData = {
+                academic_grade: '5',
+                subject: 'science',
+                word_count: 300,
+                language: 'English'
+              };
+              
+              resultDiv.innerHTML = html + '<p>Waiting for API response...</p>';
+              
+              const story = await window.apiService.generateStory(testData);
+              html += `<p><strong>Story Generation:</strong> ${story ? '✅ Success' : '❌ Failed'}</p>`;
+              if (story) {
+                html += `<p>Title: ${story.title || 'No title'}</p>`;
+                html += `<p>Content: ${story.content ? (story.content.substring(0, 100) + '...') : 'No content'}</p>`;
+              }
+            } catch (error) {
+              html += `<p><strong>Story Generation:</strong> ❌ Error</p>`;
+              html += `<pre style="color: red">${error.message}</pre>`;
+            }
+            
+            resultDiv.innerHTML = html;
+          } catch (error) {
+            resultDiv.innerHTML = `<p>Error testing API: ${error.message}</p>`;
+          }
+        });
+      }
+    }, 100);
   }
   
   // Add global access to debug panel
