@@ -356,6 +356,49 @@ input:focus, select:focus, textarea:focus {
 
 /* 
 ============================
+Form Styling Improvements
+============================
+*/
+fieldset {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 2.5rem !important;
+}
+
+fieldset::after {
+  content: '';
+  position: absolute;
+  height: 15px;
+  bottom: -15px;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  z-index: -1;
+}
+
+legend {
+  background-color: var(--bg);
+  padding: 0 1rem;
+  border-radius: 4px;
+}
+
+/* Make input fields more distinct */
+input[type="text"], 
+select, 
+textarea {
+  border: 2px solid rgba(0, 0, 0, 0.2) !important;
+  background-color: white !important;
+}
+
+input[type="text"]:focus, 
+select:focus, 
+textarea:focus {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.2) !important;
+}
+
+/* 
+============================
 Utils
 ============================
 */
@@ -421,8 +464,8 @@ Responsive
   
   /* Improve form layout on mobile */
   fieldset {
+    margin-bottom: 2rem !important;
     padding: 1.25rem !important;
-    margin-bottom: 1.25rem !important;
   }
   
   legend {

@@ -436,6 +436,40 @@ export class StoryForm extends LitElement {
       font-weight: 600;
       color: var(--text, #212529);
     }
+
+    .input-group input, 
+    .input-group select {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      border: 2px solid var(--border, rgba(0, 0, 0, 0.1));
+      border-radius: 12px;
+      background-color: var(--card-bg, white);
+      color: var(--text, #212529);
+      font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
+      transition: var(--transition-fast, all 0.2s ease);
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+      outline: none;
+      border-color: var(--primary, #5e7ce6);
+      box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.25);
+    }
+
+    /* Make input fields more visible */
+    .input-group input {
+      background-color: #fff;
+      border: 2px solid rgba(0, 0, 0, 0.15);
+    }
+
+    /* Special styling for topic focus field */
+    #subjectSpecification {
+      border: 2px solid rgba(94, 124, 230, 0.35);
+      background-color: rgba(244, 246, 255, 0.5);
+    }
   `;
   }
 
@@ -487,7 +521,7 @@ export class StoryForm extends LitElement {
                       ?disabled=${this.isSubmitting}>
               </div>
 
-              <div class="input-group" style="margin-top: 1rem;">
+              <div class="input-group" style="margin-top: 2rem; margin-bottom: 1.5rem;">
                 <label for="subjectSpecification">Topic Focus (optional)</label>
                 <input type="text" id="subjectSpecification" name="subject_specification" 
                       placeholder="e.g., Genetics for Biology"
@@ -497,7 +531,7 @@ export class StoryForm extends LitElement {
               </div>
             </fieldset>
 
-            <fieldset class="form-group" style="margin-top: 1.5rem;">
+            <fieldset class="form-group" style="margin-top: 3rem; margin-bottom: 2rem;">
               <legend>Story Elements</legend>
               <div class="story-elements-grid">
                 <div class="input-group">
@@ -519,7 +553,7 @@ export class StoryForm extends LitElement {
               </div>
             </fieldset>
 
-            <fieldset class="form-group" style="margin-top: 1.5rem;">
+            <fieldset class="form-group" style="margin-top: 3rem; margin-bottom: 2rem;">
               <legend>Format Settings</legend>
               <div class="story-elements-grid">
                 <div class="input-group">
