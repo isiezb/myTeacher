@@ -4,8 +4,9 @@
     const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com";
     console.log(`Generating story... API URL: ${apiUrl}`);
     
-    // Define the endpoint - based on the URL seen in the browser screenshot
-    const endpoint = '/stories/generate';
+    // Define the endpoint - the logs show '/stories/generate' returns 404
+    // Try '/stories' instead since that endpoint works (200 OK in logs)
+    const endpoint = '/stories';
     const fullUrl = `${apiUrl}${endpoint}`;
     
     try {
