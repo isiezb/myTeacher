@@ -301,6 +301,54 @@ export class StoryContent extends LitElement {
         font-size: 0.9375rem;
       }
 
+      .quiz-option-indicator {
+        margin-left: 8px;
+        font-weight: bold;
+      }
+      
+      .quiz-feedback-message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: center;
+        animation: fadeIn 0.3s ease;
+      }
+      
+      .quiz-feedback-correct {
+        background-color: var(--success-50, #dcfce7);
+        color: var(--success-700, #15803d);
+        border: 1px solid var(--success-200, #bbf7d0);
+      }
+      
+      .quiz-feedback-incorrect {
+        background-color: var(--danger-50, #fee2e2);
+        color: var(--danger-700, #b91c1c);
+        border: 1px solid var(--danger-200, #fecaca);
+      }
+      
+      .highlight-correct {
+        animation: pulse 1.5s infinite;
+        border: 2px solid var(--success, #22c55e);
+      }
+      
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        }
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
       @media (max-width: 768px) {
         .story-content-container {
           padding: 1.5rem;
@@ -335,6 +383,10 @@ export class StoryContent extends LitElement {
     try {
       if (changedProperties.has('story') && this.story) {
         if (this.story.quiz && Array.isArray(this.story.quiz) && this.story.quiz.length > 0) {
+          // Limit quiz to max 3 questions
+          const limitedQuiz = this.story.quiz.slice(0, 3);
+          this.story.quiz = limitedQuiz;
+          
           this.quizAnswers = new Array(this.story.quiz.length).fill(null);
           this.currentQuizIndex = 0;
           this.quizCompleted = false;
@@ -399,6 +451,17 @@ export class StoryContent extends LitElement {
         isCorrect: isCorrect
       };
       
+      // Automatically move to next question after a short delay
+      // to allow user to see the feedback
+      setTimeout(() => {
+        if (this.currentQuizIndex < this.story.quiz.length - 1) {
+          this._handleNextQuestion();
+        } else {
+          this.quizCompleted = true;
+          this.requestUpdate();
+        }
+      }, 1000);
+      
       this.requestUpdate();
     } catch (error) {
       console.error('Error handling quiz option click:', error);
@@ -408,9 +471,6 @@ export class StoryContent extends LitElement {
   _handleNextQuestion() {
     if (this.currentQuizIndex < this.story.quiz.length - 1) {
       this.currentQuizIndex++;
-      this.requestUpdate();
-    } else {
-      this.quizCompleted = true;
       this.requestUpdate();
     }
   }
@@ -478,7 +538,7 @@ export class StoryContent extends LitElement {
                 classes += ' selected';
                 classes += userAnswer.isCorrect ? ' correct' : ' incorrect';
               } else if (optionIndex === question.correct_answer && !userAnswer.isCorrect) {
-                classes += ' correct';
+                classes += ' correct highlight-correct';
               }
             }
             
@@ -487,10 +547,25 @@ export class StoryContent extends LitElement {
                    @click=${() => showResults ? null : this._handleQuizOptionClick(optionIndex)}>
                 <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
                 <span class="quiz-option-text">${option}</span>
+                ${showResults && optionIndex === question.correct_answer ? 
+                  html`<span class="quiz-option-indicator">✓</span>` : 
+                  (showResults && userAnswer.selectedIndex === optionIndex && !userAnswer.isCorrect ? 
+                    html`<span class="quiz-option-indicator">✗</span>` : 
+                    ''
+                  )
+                }
               </div>
             `;
           })}
         </div>
+        ${showResults ? html`
+          <div class="quiz-feedback-message">
+            ${userAnswer.isCorrect ? 
+              html`<div class="quiz-feedback-correct">Correct! Moving to next question...</div>` : 
+              html`<div class="quiz-feedback-incorrect">Not quite right. The correct answer is highlighted.</div>`
+            }
+          </div>
+        ` : ''}
       `;
     } catch (error) {
       console.error('Error rendering quiz question:', error);
@@ -499,39 +574,8 @@ export class StoryContent extends LitElement {
   }
 
   _renderQuizNavigation() {
-    try {
-      if (!this.story || !this.story.quiz || !Array.isArray(this.story.quiz) || this.story.quiz.length === 0) {
-        return html`<div class="quiz-navigation">
-          <button class="quiz-button" disabled>No valid quiz data</button>
-        </div>`;
-      }
-      
-      const currentAnswer = this.quizAnswers[this.currentQuizIndex];
-      const isLastQuestion = this.currentQuizIndex === this.story.quiz.length - 1;
-      const nextButtonText = isLastQuestion ? 'Finish Quiz' : 'Next Question';
-      
-      return html`
-        <div class="quiz-navigation">
-          <button 
-            class="quiz-button secondary" 
-            ?disabled=${this.currentQuizIndex === 0}
-            @click=${this._handlePreviousQuestion}>
-            Previous
-          </button>
-          <button 
-            class="quiz-button" 
-            ?disabled=${currentAnswer === null}
-            @click=${this._handleNextQuestion}>
-            ${nextButtonText}
-          </button>
-        </div>
-      `;
-    } catch (error) {
-      console.error('Error rendering quiz navigation:', error);
-      return html`<div class="quiz-navigation">
-        <button class="quiz-button" disabled>Error: ${error.message}</button>
-      </div>`;
-    }
+    // Don't render navigation buttons as we're auto-advancing
+    return html``;
   }
 
   _renderQuizProgress() {
