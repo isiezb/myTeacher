@@ -77,18 +77,24 @@
       document.body.appendChild(loadingOverlay);
     }
 
-    // Check if story form exists and add if not
-    const storyFormContainer = document.getElementById('story-form-container');
-    if (storyFormContainer && !storyFormContainer.querySelector('story-form')) {
+    // Since story-form is directly in the HTML, make sure it exists or create it if not
+    const generatorTab = document.getElementById('generator-tab');
+    if (generatorTab && !generatorTab.querySelector('story-form')) {
+      console.log('Story form not found in generator tab, creating one');
       const storyForm = document.createElement('story-form');
-      storyFormContainer.appendChild(storyForm);
+      // Insert the form at the beginning of the generator tab
+      generatorTab.insertBefore(storyForm, generatorTab.firstChild);
     }
 
-    // Check if we need to add story display
-    const storyDisplayContainer = document.getElementById('story-display-container');
-    if (storyDisplayContainer && !storyDisplayContainer.querySelector('story-display')) {
-      const storyDisplay = document.createElement('story-display');
-      storyDisplayContainer.appendChild(storyDisplay);
+    // Show the story result area when a story is generated
+    const storyResult = document.getElementById('story-result');
+    if (storyResult) {
+      const storyDisplay = storyResult.querySelector('story-display');
+      if (storyDisplay) {
+        storyDisplay.addEventListener('story-updated', () => {
+          storyResult.classList.remove('hidden');
+        });
+      }
     }
   }
 
@@ -120,12 +126,22 @@
       const storyDisplay = document.querySelector('story-display');
       if (storyDisplay) {
         storyDisplay.story = story;
+        // Trigger custom event for story update
+        storyDisplay.dispatchEvent(new CustomEvent('story-updated', {
+          bubbles: true,
+          composed: true
+        }));
+      }
+
+      // Show the story result container if hidden
+      const storyResult = document.getElementById('story-result');
+      if (storyResult) {
+        storyResult.classList.remove('hidden');
       }
 
       // Scroll to story display
-      const storyDisplayContainer = document.getElementById('story-display-container');
-      if (storyDisplayContainer) {
-        storyDisplayContainer.scrollIntoView({ behavior: 'smooth' });
+      if (storyResult) {
+        storyResult.scrollIntoView({ behavior: 'smooth' });
       }
 
       // Show success message
