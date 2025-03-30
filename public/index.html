@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="description" content="Generate educational stories based on grade level, subject, and custom elements">
+  <meta name="keywords" content="education, stories, learning, children, teaching">
+  <title>EASY STORY EASY LIFE</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lit library import -->
+  <script type="module" src="https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js"></script>
+</head>
+<body>
+  <toast-container position="top-right"></toast-container>
+  <loading-overlay id="loadingOverlay"></loading-overlay>
+
+  <header>
+    <div class="container">
+      <h1>EASY STORY EASY LIFE</h1>
+      <p>Create engaging educational stories with just a few clicks</p>
+    </div>
+  </header>
+
+  <main id="app" class="container">
+    <div class="app-tabs">
+      <button class="tab-button active" data-tab="generator">Generate Story</button>
+      <button class="tab-button" data-tab="my-stories">My Stories</button>
+    </div>
+
+    <div class="tab-content active" id="generator-tab">
+      <story-form></story-form>
+      <div id="story-result" class="story-result hidden">
+        <story-display id="storyDisplay" showControls="true"></story-display>
+        <div class="story-actions">
+          <button id="generateQuizBtn" class="btn btn-secondary">Generate Quiz</button>
+          <button id="continueStoryBtn" class="btn btn-secondary">Continue Story</button>
+        </div>
+        <div id="quizContainer" class="hidden">
+          <quiz-component id="quizComponent"></quiz-component>
+        </div>
+        <div id="continuationContainer" class="hidden">
+          <story-continuation id="storyContinuation"></story-continuation>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="my-stories-tab">
+      <div class="my-stories-header">
+        <h2>My Stories</h2>
+        <p>Stories you've created and saved</p>
+      </div>
+      <stories-grid id="storiesGrid"></stories-grid>
+      <div id="selected-story-view" class="hidden">
+        <button id="backToListBtn" class="btn btn-secondary">Back to List</button>
+        <story-content id="storyContent"></story-content>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2023 EASY STORY EASY LIFE</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Files -->
+  <script src="js/env.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/api-service.js"></script>
+  <!-- Import components -->
+  <script type="module" src="components/index.js"></script>
+  <!-- App initialization -->
+  <script src="js/app.js"></script>
+
+  <script>
+    // Simple tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Deactivate all tabs
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          tabContents.forEach(content => content.classList.remove('active'));
+          
+          // Activate selected tab
+          button.classList.add('active');
+          const tabId = button.getAttribute('data-tab');
+          document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+      });
+
+      // Back to list button functionality
+      document.getElementById('backToListBtn').addEventListener('click', () => {
+        document.getElementById('selected-story-view').classList.add('hidden');
+        document.getElementById('storiesGrid').classList.remove('hidden');
+      });
+    });
+  </script>
+</body>
+</html> 
