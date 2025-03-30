@@ -183,6 +183,7 @@ export class StoryForm extends LitElement {
       padding: 2rem;
       background: var(--bg, #f8f9fa);
       transition: var(--transition-normal, all 0.3s ease);
+      margin-bottom: 1.5rem;
     }
 
     fieldset:hover {
@@ -202,7 +203,7 @@ export class StoryForm extends LitElement {
       display: flex;
       flex-wrap: wrap;
       gap: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
     }
 
     .form-group {
@@ -230,6 +231,8 @@ export class StoryForm extends LitElement {
       color: var(--text, #212529);
       font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
       transition: var(--transition-fast, all 0.2s ease);
+      margin-top: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .form-group input:focus,
@@ -371,11 +374,12 @@ export class StoryForm extends LitElement {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
       gap: 1.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .input-group {
       flex: 1 1 275px;
+      margin-bottom: 1.5rem;
     }
 
     /* Add new styles for checkbox options */
@@ -407,6 +411,14 @@ export class StoryForm extends LitElement {
       width: 18px;
       height: 18px;
       accent-color: var(--primary, #5e7ce6);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.75rem; 
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-weight: 600;
+      color: var(--text, #212529);
     }
   `;
   }
@@ -450,7 +462,7 @@ export class StoryForm extends LitElement {
                 </div>
               </div>
 
-              <div class="input-group" ?hidden=${!this._showOtherSubject}>
+              <div class="input-group" ?hidden=${!this._showOtherSubject} style="margin-top: 0.75rem;">
                 <label for="otherSubject">Specify Subject</label>
                 <input type="text" id="otherSubject" name="other_subject" 
                       placeholder="e.g., Astronomy"
@@ -459,7 +471,7 @@ export class StoryForm extends LitElement {
                       ?disabled=${this.isSubmitting}>
               </div>
 
-              <div class="input-group">
+              <div class="input-group" style="margin-top: 1rem;">
                 <label for="subjectSpecification">Topic Focus</label>
                 <input type="text" id="subjectSpecification" name="subject_specification" 
                       placeholder="e.g., Genetics for Biology"
@@ -469,7 +481,7 @@ export class StoryForm extends LitElement {
               </div>
             </fieldset>
 
-            <fieldset class="form-group">
+            <fieldset class="form-group" style="margin-top: 1.5rem;">
               <legend>Story Elements</legend>
               <div class="story-elements-grid">
                 <div class="input-group">
@@ -491,7 +503,7 @@ export class StoryForm extends LitElement {
               </div>
             </fieldset>
 
-            <fieldset class="form-group">
+            <fieldset class="form-group" style="margin-top: 1.5rem;">
               <legend>Format Settings</legend>
               <div class="story-elements-grid">
                 <div class="input-group">
