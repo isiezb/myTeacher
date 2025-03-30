@@ -578,8 +578,14 @@ export class StoryForm extends LitElement {
                         @input=${this._handleInputChange}
                         ?disabled=${this.isSubmitting}>
                 </div>
+              </div>
+            </div>
 
-                <div class="input-group topic-focus">
+            <!-- Topic Focus Card (separate from Content Settings) -->
+            <div class="form-card topic-focus-card">
+              <h3 class="card-title">Topic Focus</h3>
+              <div class="card-content">
+                <div class="input-group">
                   <label for="subjectSpecification">Topic Focus (optional)</label>
                   <input type="text" id="subjectSpecification" name="subject_specification" 
                         placeholder="e.g., Genetics for Biology"
