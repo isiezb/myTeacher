@@ -41,7 +41,7 @@
         <div id="quizContainer" class="hidden">
           <quiz-component id="quizComponent"></quiz-component>
         </div>
-        <div id="continuationContainer" class="hidden">
+        <div id="continuation-container" class="continuation-container">
           <story-continuation id="storyContinuation"></story-continuation>
         </div>
       </div>
@@ -181,10 +181,14 @@
   <!-- Update the handleContinueStory function to properly center the component -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the continuation container with display: none
+      const continuationContainer = document.getElementById('continuation-container');
+      if (continuationContainer) {
+        continuationContainer.style.display = 'none';
+      }
+      
       // Get the "Continue Story" button in the page footer
       const continueStoryBtn = document.querySelector('.story-actions button');
-      // Get the continuation container
-      const continuationContainer = document.getElementById('continuation-container');
       
       // Function to handle story continuation
       function handleContinueStory(storyObj) {
@@ -194,7 +198,7 @@
           return;
         }
         
-        // Show the continuation container by scrolling to it
+        // Show the continuation container 
         continuationContainer.style.display = 'flex';
         
         // Hide the quiz container if it exists
