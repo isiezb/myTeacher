@@ -184,6 +184,9 @@ export class StoryForm extends LitElement {
       background: var(--bg, #f8f9fa);
       transition: var(--transition-normal, all 0.3s ease);
       margin-bottom: 1.5rem;
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
     }
 
     fieldset:hover {
@@ -355,17 +358,30 @@ export class StoryForm extends LitElement {
     }
 
     @media (max-width: 768px) {
-      .story-elements-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .form-section {
-        padding: 1.5rem;
-        border-radius: 20px;
-      }
-      
       fieldset {
-        padding: 1.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+      
+      .form-row {
+        margin-bottom: 1rem;
+      }
+      
+      .form-group {
+        margin-bottom: 1rem;
+      }
+      
+      legend {
+        font-size: 1.15rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .story-elements-grid {
+        gap: 0.75rem;
+      }
+      
+      .input-group {
+        margin-bottom: 0.75rem;
       }
     }
 
@@ -472,7 +488,7 @@ export class StoryForm extends LitElement {
               </div>
 
               <div class="input-group" style="margin-top: 1rem;">
-                <label for="subjectSpecification">Topic Focus</label>
+                <label for="subjectSpecification">Topic Focus (optional)</label>
                 <input type="text" id="subjectSpecification" name="subject_specification" 
                       placeholder="e.g., Genetics for Biology"
                       .value=${this._formData.subject_specification}
@@ -485,7 +501,7 @@ export class StoryForm extends LitElement {
               <legend>Story Elements</legend>
               <div class="story-elements-grid">
                 <div class="input-group">
-                  <label for="setting">Story Setting</label>
+                  <label for="setting">Story Setting (optional)</label>
                   <input type="text" id="setting" name="setting" 
                         placeholder="e.g., a small village in the mountains"
                         .value=${this._formData.setting}
@@ -493,7 +509,7 @@ export class StoryForm extends LitElement {
                         ?disabled=${this.isSubmitting}>
                 </div>
                 <div class="input-group">
-                  <label for="mainCharacter">Main Character</label>
+                  <label for="mainCharacter">Main Character (optional)</label>
                   <input type="text" id="mainCharacter" name="main_character"
                         placeholder="e.g., a curious young scientist"
                         .value=${this._formData.main_character}
