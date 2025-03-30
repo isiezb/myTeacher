@@ -7,7 +7,10 @@ export class StoryContent extends LitElement {
       showHeader: { type: Boolean },
       showSummary: { type: Boolean },
       showVocabulary: { type: Boolean },
-      showQuiz: { type: Boolean }
+      showQuiz: { type: Boolean },
+      currentQuizIndex: { type: Number },
+      quizAnswers: { type: Array },
+      quizCompleted: { type: Boolean }
     };
   }
 
@@ -18,6 +21,9 @@ export class StoryContent extends LitElement {
     this.showSummary = true;
     this.showVocabulary = true;
     this.showQuiz = true;
+    this.currentQuizIndex = 0;
+    this.quizAnswers = [];
+    this.quizCompleted = false;
   }
 
   static get styles() {
@@ -136,16 +142,11 @@ export class StoryContent extends LitElement {
         margin: 0;
       }
 
-      .quiz-list {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-      }
-
       .quiz-item {
         background: var(--bg, #f8f9fa);
         border-radius: 12px;
         padding: 1.5rem;
+        margin-bottom: 1.5rem;
       }
 
       .quiz-question {
@@ -159,6 +160,7 @@ export class StoryContent extends LitElement {
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
+        margin-bottom: 1.5rem;
       }
 
       .quiz-option {
@@ -195,6 +197,100 @@ export class StoryContent extends LitElement {
         margin-left: 0.5rem;
       }
 
+      .quiz-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+      }
+
+      .quiz-button {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary, #5e7ce6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .quiz-button:hover {
+        background: var(--primary-dark, #4b63b8);
+        transform: translateY(-1px);
+      }
+
+      .quiz-button:disabled {
+        background: var(--text-secondary, #6c757d);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .quiz-button.secondary {
+        background: var(--bg, #f8f9fa);
+        color: var(--text, #212529);
+        border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+      }
+
+      .quiz-button.secondary:hover {
+        background: var(--primary-50, #eef2ff);
+      }
+
+      .quiz-progress {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1rem;
+      }
+
+      .quiz-progress-item {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border, rgba(0, 0, 0, 0.1));
+        margin: 0 0.25rem;
+      }
+
+      .quiz-progress-item.active {
+        background: var(--primary, #5e7ce6);
+      }
+
+      .quiz-progress-item.answered {
+        background: var(--success, #22c55e);
+      }
+
+      .quiz-results {
+        text-align: center;
+        padding: 2rem;
+        background: var(--primary-50, #eef2ff);
+        border-radius: 12px;
+      }
+
+      .quiz-score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary, #5e7ce6);
+        margin-bottom: 1rem;
+      }
+
+      .quiz-feedback {
+        font-size: 1.125rem;
+        margin-bottom: 2rem;
+      }
+
+      .quiz-restart-button {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary, #5e7ce6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
       @media (max-width: 768px) {
         .story-content-container {
           padding: 1.5rem;
@@ -209,6 +305,20 @@ export class StoryContent extends LitElement {
         }
       }
     `;
+  }
+
+  firstUpdated() {
+    if (this.story && this.story.quiz) {
+      this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+    }
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('story') && this.story && this.story.quiz) {
+      this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+      this.currentQuizIndex = 0;
+      this.quizCompleted = false;
+    }
   }
 
   _formatDate(dateString) {
@@ -239,55 +349,170 @@ export class StoryContent extends LitElement {
     `;
   }
 
+  _handleQuizOptionClick(optionIndex) {
+    const currentQuestion = this.story.quiz[this.currentQuizIndex];
+    const isCorrect = optionIndex === currentQuestion.correct_answer;
+    
+    // Update quiz answers
+    this.quizAnswers[this.currentQuizIndex] = {
+      selectedIndex: optionIndex,
+      isCorrect: isCorrect
+    };
+    
+    this.requestUpdate();
+  }
+
+  _handleNextQuestion() {
+    if (this.currentQuizIndex < this.story.quiz.length - 1) {
+      this.currentQuizIndex++;
+      this.requestUpdate();
+    } else {
+      this.quizCompleted = true;
+      this.requestUpdate();
+    }
+  }
+
+  _handlePreviousQuestion() {
+    if (this.currentQuizIndex > 0) {
+      this.currentQuizIndex--;
+      this.requestUpdate();
+    }
+  }
+
+  _handleRestartQuiz() {
+    this.quizAnswers = new Array(this.story.quiz.length).fill(null);
+    this.currentQuizIndex = 0;
+    this.quizCompleted = false;
+    this.requestUpdate();
+  }
+
+  _getQuizScore() {
+    const correctAnswers = this.quizAnswers.filter(answer => answer && answer.isCorrect).length;
+    return {
+      correct: correctAnswers,
+      total: this.story.quiz.length,
+      percentage: Math.round((correctAnswers / this.story.quiz.length) * 100)
+    };
+  }
+
+  _renderQuizQuestion(question, index) {
+    const userAnswer = this.quizAnswers[index];
+    const showResults = userAnswer !== null;
+    
+    return html`
+      <div class="quiz-question">${index + 1}. ${question.question}</div>
+      <div class="quiz-options">
+        ${question.options.map((option, optionIndex) => {
+          let classes = 'quiz-option';
+          
+          if (showResults) {
+            if (userAnswer.selectedIndex === optionIndex) {
+              classes += ' selected';
+              classes += userAnswer.isCorrect ? ' correct' : ' incorrect';
+            } else if (optionIndex === question.correct_answer && !userAnswer.isCorrect) {
+              classes += ' correct';
+            }
+          }
+          
+          return html`
+            <div class="${classes}" 
+                 @click=${() => showResults ? null : this._handleQuizOptionClick(optionIndex)}>
+              <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
+              <span class="quiz-option-text">${option}</span>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }
+
+  _renderQuizNavigation() {
+    const currentAnswer = this.quizAnswers[this.currentQuizIndex];
+    const isLastQuestion = this.currentQuizIndex === this.story.quiz.length - 1;
+    const nextButtonText = isLastQuestion ? 'Finish Quiz' : 'Next Question';
+    
+    return html`
+      <div class="quiz-navigation">
+        <button 
+          class="quiz-button secondary" 
+          ?disabled=${this.currentQuizIndex === 0}
+          @click=${this._handlePreviousQuestion}>
+          Previous
+        </button>
+        <button 
+          class="quiz-button" 
+          ?disabled=${currentAnswer === null}
+          @click=${this._handleNextQuestion}>
+          ${nextButtonText}
+        </button>
+      </div>
+    `;
+  }
+
+  _renderQuizProgress() {
+    return html`
+      <div class="quiz-progress">
+        ${this.quizAnswers.map((answer, index) => {
+          let className = 'quiz-progress-item';
+          if (index === this.currentQuizIndex) {
+            className += ' active';
+          }
+          if (answer !== null) {
+            className += ' answered';
+          }
+          return html`<div class="${className}"></div>`;
+        })}
+      </div>
+    `;
+  }
+
+  _renderQuizResults() {
+    const score = this._getQuizScore();
+    let feedback;
+    
+    if (score.percentage >= 90) {
+      feedback = "Excellent! You've mastered this content!";
+    } else if (score.percentage >= 70) {
+      feedback = "Good job! You understand most of the material.";
+    } else if (score.percentage >= 50) {
+      feedback = "You're making progress! Review the story again for better understanding.";
+    } else {
+      feedback = "Let's try again! Re-read the story to improve your understanding.";
+    }
+    
+    return html`
+      <div class="quiz-results">
+        <div class="quiz-score">
+          ${score.correct} / ${score.total} (${score.percentage}%)
+        </div>
+        <div class="quiz-feedback">
+          ${feedback}
+        </div>
+        <button class="quiz-restart-button" @click=${this._handleRestartQuiz}>
+          Restart Quiz
+        </button>
+      </div>
+    `;
+  }
+
   _renderQuiz() {
     if (!this.story.quiz || !this.story.quiz.length) {
       return html`<p>No quiz available for this story.</p>`;
     }
 
+    if (this.quizCompleted) {
+      return this._renderQuizResults();
+    }
+
+    const currentQuestion = this.story.quiz[this.currentQuizIndex];
+
     return html`
-      <div class="quiz-list">
-        ${this.story.quiz.map((item, questionIndex) => html`
-          <div class="quiz-item">
-            <div class="quiz-question">${questionIndex + 1}. ${item.question}</div>
-            <div class="quiz-options">
-              ${item.options.map((option, optionIndex) => html`
-                <div class="quiz-option" 
-                     @click=${() => this._handleQuizOptionClick(questionIndex, optionIndex)}
-                     data-correct=${optionIndex === item.correct_answer}>
-                  <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
-                  <span class="quiz-option-text">${option}</span>
-                </div>
-              `)}
-            </div>
-          </div>
-        `)}
+      ${this._renderQuizProgress()}
+      <div class="quiz-item">
+        ${this._renderQuizQuestion(currentQuestion, this.currentQuizIndex)}
+        ${this._renderQuizNavigation()}
       </div>
     `;
-  }
-
-  _handleQuizOptionClick(questionIndex, optionIndex) {
-    const quizItem = this.story.quiz[questionIndex];
-    const isCorrect = optionIndex === quizItem.correct_answer;
-    
-    // Get all options for this question
-    const options = this.shadowRoot.querySelectorAll(`.quiz-item:nth-child(${questionIndex + 1}) .quiz-option`);
-    
-    // Reset all options
-    options.forEach(option => {
-      option.classList.remove('selected', 'correct', 'incorrect');
-    });
-    
-    // Mark the clicked option
-    const clickedOption = options[optionIndex];
-    clickedOption.classList.add('selected');
-    
-    if (isCorrect) {
-      clickedOption.classList.add('correct');
-    } else {
-      clickedOption.classList.add('incorrect');
-      // Also highlight the correct answer
-      options[quizItem.correct_answer].classList.add('correct');
-    }
   }
 
   render() {
