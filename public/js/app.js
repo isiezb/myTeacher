@@ -122,12 +122,12 @@
       // Call API to generate story
       const story = await generateStory(formData);
 
-      // Find story display component and update it
-      const storyDisplay = document.querySelector('story-display');
-      if (storyDisplay) {
-        storyDisplay.story = story;
+      // Find story content component and update it
+      const storyContent = document.querySelector('#storyDisplay');
+      if (storyContent) {
+        storyContent.story = story;
         // Trigger custom event for story update
-        storyDisplay.dispatchEvent(new CustomEvent('story-updated', {
+        storyContent.dispatchEvent(new CustomEvent('story-updated', {
           bubbles: true,
           composed: true
         }));
@@ -239,7 +239,30 @@
         language: formData.language,
         academic_grade: formData.academic_grade,
         subject: formData.subject,
-        word_count: formData.word_count
+        word_count: formData.word_count,
+        summary: formData.generate_summary ? `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.` : null,
+        vocabulary: formData.generate_vocabulary ? [
+          { term: `${formData.subject} Term 1`, definition: 'Definition for the first term related to the subject.' },
+          { term: `${formData.subject} Term 2`, definition: 'Definition for the second term related to the subject.' },
+          { term: `${formData.subject} Term 3`, definition: 'Definition for the third term related to the subject.' }
+        ] : null,
+        quiz: formData.generate_quiz ? [
+          {
+            question: `What is the main subject of this story?`,
+            options: [formData.subject, 'History', 'Mathematics', 'Art'],
+            correct_answer: 0
+          },
+          {
+            question: `Who is the main character of the story?`,
+            options: ['A teacher', formData.main_character || 'A curious student', 'A scientist', 'A historian'],
+            correct_answer: 1
+          },
+          {
+            question: `What grade level is this story intended for?`,
+            options: ['Kindergarten', 'Elementary', 'Middle School', formData.academic_grade],
+            correct_answer: 3
+          }
+        ] : null
       });
     }, 2000));
   }
