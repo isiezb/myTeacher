@@ -6,7 +6,8 @@ export class StoryContent extends LitElement {
       story: { type: Object },
       showHeader: { type: Boolean },
       showSummary: { type: Boolean },
-      showVocabulary: { type: Boolean }
+      showVocabulary: { type: Boolean },
+      showQuiz: { type: Boolean }
     };
   }
 
@@ -16,6 +17,7 @@ export class StoryContent extends LitElement {
     this.showHeader = true;
     this.showSummary = true;
     this.showVocabulary = true;
+    this.showQuiz = true;
   }
 
   static get styles() {
@@ -93,13 +95,13 @@ export class StoryContent extends LitElement {
         margin-bottom: 1.5rem;
       }
 
-      .story-vocabulary {
+      .story-vocabulary, .story-quiz {
         margin-top: 3rem;
         padding-top: 2rem;
         border-top: 1px solid var(--border, rgba(0, 0, 0, 0.1));
       }
 
-      .vocabulary-title {
+      .vocabulary-title, .quiz-title {
         font-family: var(--font-heading, 'Inter', sans-serif);
         font-weight: 700;
         font-size: 1.5rem;
@@ -132,6 +134,65 @@ export class StoryContent extends LitElement {
         color: var(--text, #212529);
         line-height: 1.5;
         margin: 0;
+      }
+
+      .quiz-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .quiz-item {
+        background: var(--bg, #f8f9fa);
+        border-radius: 12px;
+        padding: 1.5rem;
+      }
+
+      .quiz-question {
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: var(--text, #212529);
+        margin: 0 0 1rem;
+      }
+
+      .quiz-options {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .quiz-option {
+        display: flex;
+        align-items: flex-start;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .quiz-option:hover {
+        background: var(--primary-50, #eef2ff);
+      }
+
+      .quiz-option.selected {
+        background: var(--primary-100, #dbeafe);
+        border-color: var(--primary, #5e7ce6);
+      }
+
+      .quiz-option.correct {
+        background: var(--success-100, #dcfce7);
+        border-color: var(--success, #22c55e);
+      }
+
+      .quiz-option.incorrect {
+        background: var(--danger-100, #fee2e2);
+        border-color: var(--danger, #ef4444);
+      }
+
+      .quiz-option-text {
+        margin-left: 0.5rem;
       }
 
       @media (max-width: 768px) {
@@ -176,6 +237,57 @@ export class StoryContent extends LitElement {
         `)}
       </div>
     `;
+  }
+
+  _renderQuiz() {
+    if (!this.story.quiz || !this.story.quiz.length) {
+      return html`<p>No quiz available for this story.</p>`;
+    }
+
+    return html`
+      <div class="quiz-list">
+        ${this.story.quiz.map((item, questionIndex) => html`
+          <div class="quiz-item">
+            <div class="quiz-question">${questionIndex + 1}. ${item.question}</div>
+            <div class="quiz-options">
+              ${item.options.map((option, optionIndex) => html`
+                <div class="quiz-option" 
+                     @click=${() => this._handleQuizOptionClick(questionIndex, optionIndex)}
+                     data-correct=${optionIndex === item.correct_answer}>
+                  <span class="quiz-option-index">${String.fromCharCode(65 + optionIndex)}.</span>
+                  <span class="quiz-option-text">${option}</span>
+                </div>
+              `)}
+            </div>
+          </div>
+        `)}
+      </div>
+    `;
+  }
+
+  _handleQuizOptionClick(questionIndex, optionIndex) {
+    const quizItem = this.story.quiz[questionIndex];
+    const isCorrect = optionIndex === quizItem.correct_answer;
+    
+    // Get all options for this question
+    const options = this.shadowRoot.querySelectorAll(`.quiz-item:nth-child(${questionIndex + 1}) .quiz-option`);
+    
+    // Reset all options
+    options.forEach(option => {
+      option.classList.remove('selected', 'correct', 'incorrect');
+    });
+    
+    // Mark the clicked option
+    const clickedOption = options[optionIndex];
+    clickedOption.classList.add('selected');
+    
+    if (isCorrect) {
+      clickedOption.classList.add('correct');
+    } else {
+      clickedOption.classList.add('incorrect');
+      // Also highlight the correct answer
+      options[quizItem.correct_answer].classList.add('correct');
+    }
   }
 
   render() {
@@ -231,6 +343,13 @@ export class StoryContent extends LitElement {
           <div class="story-vocabulary">
             <h2 class="vocabulary-title">Vocabulary</h2>
             ${this._renderVocabulary()}
+          </div>
+        ` : ''}
+        
+        ${this.showQuiz && this.story.quiz ? html`
+          <div class="story-quiz">
+            <h2 class="quiz-title">Comprehension Quiz</h2>
+            ${this._renderQuiz()}
           </div>
         ` : ''}
       </div>

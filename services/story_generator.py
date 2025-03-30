@@ -2,7 +2,7 @@ import httpx
 import os
 import json
 from dotenv import load_dotenv
-from models.story import StoryGenerationRequest, StoryGenerationResponse, VocabularyItem
+from models.story import StoryGenerationRequest, StoryGenerationResponse, VocabularyItem, QuizItem
 from typing import Tuple, Optional, List, Dict
 
 load_dotenv() # Load environment variables from .env file
@@ -68,6 +68,28 @@ async def generate_story_content(request: StoryGenerationRequest) -> StoryGenera
                 except Exception as e:
                     print(f"Warning: Could not parse vocabulary list: {e}")
                     vocabulary_list = None # Fallback if parsing fails
+                    
+            # Process quiz if present
+            quiz_list = None
+            if request.generate_quiz and "quiz" in generated_data:
+                try:
+                    # Ensure quiz is a list of dicts with 'question', 'options', and 'correct_answer'
+                    raw_quiz = generated_data["quiz"]
+                    if isinstance(raw_quiz, list):
+                        quiz_list = []
+                        for item in raw_quiz:
+                            if isinstance(item, dict) and "question" in item and "options" in item and "correct_answer" in item:
+                                # Make sure correct_answer is an integer (index)
+                                if isinstance(item["correct_answer"], int):
+                                    quiz_list.append(QuizItem(**item))
+                                elif isinstance(item["correct_answer"], str) and item["correct_answer"].isdigit():
+                                    item["correct_answer"] = int(item["correct_answer"])
+                                    quiz_list.append(QuizItem(**item))
+                    if not quiz_list:
+                        print("Warning: Quiz requested but format from LLM was invalid or empty.")
+                except Exception as e:
+                    print(f"Warning: Could not parse quiz list: {e}")
+                    quiz_list = None # Fallback if parsing fails
 
 
             return StoryGenerationResponse(
@@ -79,6 +101,7 @@ async def generate_story_content(request: StoryGenerationRequest) -> StoryGenera
                 language=request.language,
                 summary=generated_data.get("summary") if request.generate_summary else None,
                 vocabulary=vocabulary_list,
+                quiz=quiz_list,
                 learning_objectives=generated_data.get("learning_objectives") # Optional field
             )
 
@@ -133,6 +156,10 @@ def _build_llm_prompt(request: StoryGenerationRequest) -> Tuple[str, str]:
     if request.generate_vocabulary:
         prompt_lines.append("- Generate a list of 5-7 key vocabulary words relevant to the grade level and subject, each with a simple definition.")
         output_schema["vocabulary"] = '[{"term": "string", "definition": "string"}] (List of 5-7 vocabulary words and definitions)'
+
+    if request.generate_quiz:
+        prompt_lines.append("- Generate a quiz with 3-5 multiple-choice questions about the story content. Each question should have 4 options with one correct answer.")
+        output_schema["quiz"] = '[{"question": "string", "options": ["string"], "correct_answer": int}] (List of quiz questions, each with an array of 4 options and the index of the correct answer (0-3))'
 
     prompt_lines.append("\nOutput the entire result as a single JSON object conforming exactly to the specified structure.")
 

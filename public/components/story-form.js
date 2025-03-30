@@ -69,7 +69,8 @@ export class StoryForm extends LitElement {
       word_count: '300',
       language: 'English',
       generate_vocabulary: true,
-      generate_summary: true
+      generate_summary: true,
+      generate_quiz: true
     };
 
     this._showOtherSubject = false;
@@ -495,6 +496,15 @@ export class StoryForm extends LitElement {
                         @change=${this._handleInputChange}
                         ?disabled=${this.isSubmitting}>
                   <span>Generate Story Summary</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="generateQuiz" name="generate_quiz"
+                        ?checked=${this._formData.generate_quiz}
+                        @change=${this._handleInputChange}
+                        ?disabled=${this.isSubmitting}>
+                  <span>Generate Comprehension Quiz</span>
                 </label>
               </div>
             </fieldset>

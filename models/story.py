@@ -12,10 +12,16 @@ class StoryGenerationRequest(BaseModel):
     language: str = Field(default="English", description="Language for the story")
     generate_vocabulary: bool = Field(default=False, description="Flag to generate a vocabulary list")
     generate_summary: bool = Field(default=False, description="Flag to generate a story summary")
+    generate_quiz: bool = Field(default=False, description="Flag to generate a comprehension quiz")
 
 class VocabularyItem(BaseModel):
     term: str
     definition: str
+
+class QuizItem(BaseModel):
+    question: str
+    options: List[str]
+    correct_answer: int  # Index of the correct answer in options list
 
 class StoryGenerationResponse(BaseModel):
     id: Optional[str] = Field(None, description="Unique ID if saved") # Assuming ID generation/saving happens elsewhere
@@ -27,4 +33,5 @@ class StoryGenerationResponse(BaseModel):
     language: str = Field(..., description="Language of the story")
     summary: Optional[str] = Field(None, description="Generated story summary, if requested")
     vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Generated vocabulary list, if requested")
+    quiz: Optional[List[QuizItem]] = Field(None, description="Generated comprehension quiz, if requested")
     learning_objectives: Optional[List[str]] = Field(None, description="Potential learning objectives derived from the story") # Added this as it was in frontend display 
