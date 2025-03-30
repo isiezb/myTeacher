@@ -27,10 +27,11 @@ export class StoryContinuation extends LitElement {
     return css`
       :host {
         display: block;
-        margin-top: 2rem;
+        margin: 2rem auto;
         padding-top: 2rem;
         border-top: 2px solid var(--border, rgba(0, 0, 0, 0.1));
         font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
+        max-width: 800px;
       }
 
       h3 {
@@ -39,34 +40,31 @@ export class StoryContinuation extends LitElement {
         font-size: 1.5rem;
         margin-bottom: 1.5rem;
         font-weight: 700;
+        text-align: center;
       }
 
       .continuation-form {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 1.5rem;
         margin-bottom: 1.5rem;
+        align-items: center;
       }
 
-      .continuation-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        width: 100%;
-      }
-
-      .continuation-option {
+      .input-group {
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        width: 100%;
+        max-width: 400px;
       }
 
-      .continuation-option label {
+      .input-group label {
         font-weight: 600;
         font-family: var(--font-heading, 'Inter', sans-serif);
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: var(--text-secondary, #6c757d);
+        text-align: center;
       }
 
       select {
@@ -77,7 +75,8 @@ export class StoryContinuation extends LitElement {
         color: var(--text, #212529);
         font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
         font-size: 0.95rem;
-        min-width: 180px;
+        width: 100%;
+        text-align: center;
         transition: all 0.2s ease;
       }
 
@@ -86,8 +85,65 @@ export class StoryContinuation extends LitElement {
         border-color: var(--primary, #5e7ce6);
         box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.1);
       }
+      
+      .difficulty-options {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+      }
+      
+      .difficulty-options label {
+        font-weight: 600;
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-size: 1rem;
+        color: var(--text-secondary, #6c757d);
+      }
+      
+      .difficulty-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+      }
+      
+      .difficulty-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.75rem;
+        border: 2px solid var(--border, rgba(0, 0, 0, 0.1));
+        border-radius: 12px;
+        background-color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 110px;
+      }
+      
+      .difficulty-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .difficulty-button.active {
+        border-color: var(--primary, #5e7ce6);
+        background-color: var(--primary-50, #eef2ff);
+      }
+      
+      .difficulty-emoji {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .difficulty-label {
+        font-size: 0.8rem;
+        text-align: center;
+        font-weight: 500;
+      }
 
-      button {
+      .continue-button {
         padding: 0.75rem 1.5rem;
         font-size: 1rem;
         font-weight: 600;
@@ -101,17 +157,17 @@ export class StoryContinuation extends LitElement {
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        margin-top: 0.5rem;
-        align-self: flex-start;
+        margin-top: 1rem;
+        min-width: 200px;
       }
 
-      button:hover {
+      .continue-button:hover {
         background: var(--primary-600, #4a63b9);
         transform: translateY(-2px);
         box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
       }
 
-      button:disabled {
+      .continue-button:disabled {
         background: var(--gray-500, #adb5bd);
         cursor: not-allowed;
         transform: none;
@@ -152,11 +208,15 @@ export class StoryContinuation extends LitElement {
         background-color: rgba(245, 101, 101, 0.1);
         border: 1px solid var(--error, #f56565);
         margin-top: 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
       }
 
       .difficulty-description {
         width: 100%;
-        margin: 1rem 0;
+        max-width: 600px;
+        margin: 0 auto;
         transition: all 0.3s ease;
       }
 
@@ -174,6 +234,7 @@ export class StoryContinuation extends LitElement {
         font-weight: 700;
         margin: 0 0 0.5rem 0;
         color: var(--text, #212529);
+        text-align: center;
       }
 
       .difficulty-description-content p {
@@ -181,6 +242,7 @@ export class StoryContinuation extends LitElement {
         font-size: 0.9rem;
         line-height: 1.5;
         color: var(--text-secondary, #6c757d);
+        text-align: center;
       }
 
       .difficulty-description-content.easier {
@@ -198,17 +260,6 @@ export class StoryContinuation extends LitElement {
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
-      }
-
-      @media (max-width: 768px) {
-        .continuation-options {
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        button {
-          width: 100%;
-        }
       }
 
       /* Vocabulary styling */
@@ -274,6 +325,24 @@ export class StoryContinuation extends LitElement {
       
       .continuation-content p {
         margin-bottom: 1rem;
+      }
+      
+      @media (max-width: 768px) {
+        .difficulty-buttons {
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .difficulty-button {
+          width: 80%;
+          flex-direction: row;
+          justify-content: flex-start;
+          gap: 1rem;
+        }
+        
+        .difficulty-emoji {
+          margin-bottom: 0;
+        }
       }
     `;
   }
@@ -431,20 +500,50 @@ export class StoryContinuation extends LitElement {
           </select>
         </div>
         
-        <div class="input-group">
-          <label for="difficulty">Difficulty</label>
-          <select 
-            id="difficulty" 
-            name="difficulty" 
-            @change="${this._handleInputChange}"
-            ?disabled="${this.isSubmitting}"
-          >
-            <option value="much_easier" ${this._settings.difficulty === 'much_easier' ? 'selected' : ''}>Much Easier</option>
-            <option value="slightly_easier" ${this._settings.difficulty === 'slightly_easier' ? 'selected' : ''}>Slightly Easier</option>
-            <option value="same_level" ${this._settings.difficulty === 'same_level' ? 'selected' : ''}>Same Level</option>
-            <option value="slightly_harder" ${this._settings.difficulty === 'slightly_harder' ? 'selected' : ''}>Slightly Harder</option>
-            <option value="much_harder" ${this._settings.difficulty === 'much_harder' ? 'selected' : ''}>Much Harder</option>
-          </select>
+        <div class="difficulty-options">
+          <label>Difficulty Level</label>
+          <div class="difficulty-buttons">
+            <button 
+              class="difficulty-button ${this._settings.difficulty === 'much_easier' ? 'active' : ''}" 
+              @click="${() => this._handleDifficultyChange('much_easier')}"
+              ?disabled="${this.isSubmitting}"
+            >
+              <span class="difficulty-emoji">😌</span>
+              <span class="difficulty-label">Much Easier</span>
+            </button>
+            <button 
+              class="difficulty-button ${this._settings.difficulty === 'slightly_easier' ? 'active' : ''}" 
+              @click="${() => this._handleDifficultyChange('slightly_easier')}"
+              ?disabled="${this.isSubmitting}"
+            >
+              <span class="difficulty-emoji">😊</span>
+              <span class="difficulty-label">Slightly Easier</span>
+            </button>
+            <button 
+              class="difficulty-button ${this._settings.difficulty === 'same_level' ? 'active' : ''}" 
+              @click="${() => this._handleDifficultyChange('same_level')}"
+              ?disabled="${this.isSubmitting}"
+            >
+              <span class="difficulty-emoji">😐</span>
+              <span class="difficulty-label">Same Level</span>
+            </button>
+            <button 
+              class="difficulty-button ${this._settings.difficulty === 'slightly_harder' ? 'active' : ''}" 
+              @click="${() => this._handleDifficultyChange('slightly_harder')}"
+              ?disabled="${this.isSubmitting}"
+            >
+              <span class="difficulty-emoji">🤔</span>
+              <span class="difficulty-label">Slightly Harder</span>
+            </button>
+            <button 
+              class="difficulty-button ${this._settings.difficulty === 'much_harder' ? 'active' : ''}" 
+              @click="${() => this._handleDifficultyChange('much_harder')}"
+              ?disabled="${this.isSubmitting}"
+            >
+              <span class="difficulty-emoji">🧠</span>
+              <span class="difficulty-label">Much Harder</span>
+            </button>
+          </div>
         </div>
         
         ${this._renderDifficultyDescription()}
@@ -524,6 +623,11 @@ export class StoryContinuation extends LitElement {
             </div>
         </div>
     `;
+  }
+
+  _handleDifficultyChange(difficulty) {
+    this._settings.difficulty = difficulty;
+    this.requestUpdate();
   }
 }
 
