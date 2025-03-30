@@ -20,7 +20,7 @@ const ENV = {
   //    - quiz_data: jsonb
   // ===================================================
   SUPABASE_URL: "https://YOUR_SUPABASE_URL.supabase.co",
-  SUPABASE_ANON_KEY: "YOUR_SUPABASE_KEY",
+  SUPABASE_KEY: "YOUR_SUPABASE_KEY",
   
   DEBUG: true,
   ENABLE_STORAGE: true // Set to false to disable story saving

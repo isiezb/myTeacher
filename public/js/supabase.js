@@ -26,7 +26,7 @@ async function initSupabaseClient() {
   try {
     // Get Supabase credentials from environment variables
     const supabaseUrl = window.ENV_SUPABASE_URL;
-    const supabaseKey = window.ENV_SUPABASE_ANON_KEY;
+    const supabaseKey = window.ENV_SUPABASE_KEY;
 
     // Check for valid credentials
     if (!supabaseUrl || supabaseUrl.includes('YOUR_SUPABASE_URL') ||
@@ -72,17 +72,17 @@ function createMockSupabaseClient() {
     from: (table) => ({
       select: () => ({
         order: (column, { ascending = true } = {}) => ({
-          execute: async () => {
+          then: (callback) => {
             console.log(`Mock select from ${table}, order by ${column}`);
             if (table === 'stories') {
-              return { data: mockData.stories, error: null };
+              return Promise.resolve(callback({ data: mockData.stories, error: null }));
             }
-            return { data: [], error: null };
+            return Promise.resolve(callback({ data: [], error: null }));
           }
         })
       }),
       insert: (data) => ({
-        execute: async () => {
+        then: (callback) => {
           console.log(`Mock insert into ${table}:`, data);
           if (table === 'stories') {
             const newData = Array.isArray(data) ? data : [data];
@@ -91,24 +91,24 @@ function createMockSupabaseClient() {
               item.created_at = new Date().toISOString();
               mockData.stories.push(item);
             });
-            return { data: newData, error: null };
+            return Promise.resolve(callback({ data: newData, error: null }));
           }
-          return { data: null, error: null };
+          return Promise.resolve(callback({ data: null, error: null }));
         }
       }),
       update: (data) => ({
         match: (criteria) => ({
-          execute: async () => {
+          then: (callback) => {
             console.log(`Mock update ${table} where:`, criteria);
-            return { data: null, error: null };
+            return Promise.resolve(callback({ data: null, error: null }));
           }
         })
       }),
       delete: () => ({
         match: (criteria) => ({
-          execute: async () => {
+          then: (callback) => {
             console.log(`Mock delete from ${table} where:`, criteria);
-            return { data: null, error: null };
+            return Promise.resolve(callback({ data: null, error: null }));
           }
         })
       })
@@ -128,57 +128,84 @@ const SupabaseService = {
       await initSupabaseClient();
     }
     
-    // Prepare story data for saving
-    const storyData = {
-      title: story.title,
-      content: story.content,
-      summary: story.summary || '',
-      academic_grade: story.academic_grade,
-      subject: story.subject,
-      word_count: story.word_count || 0,
-      vocab_list: story.vocabulary || [],
-      quiz_data: story.quiz || [],
-      created_at: new Date().toISOString()
-    };
-    
-    console.log('Saving story to Supabase:', storyData);
-    
-    // Insert into the stories table
-    const { data, error } = await window.supabase
-      .from('stories')
-      .insert(storyData)
-      .execute();
-      
-    if (error) {
-      console.error('Error saving story to Supabase:', error);
-      throw new Error(`Failed to save story: ${error.message}`);
+    // Check if we have a valid Supabase client
+    if (!window.supabase || !window.supabase.from) {
+      console.error('Supabase client not properly initialized');
+      throw new Error('Supabase client not properly initialized');
     }
     
-    console.log('Story saved successfully:', data);
-    return data[0];
+    try {
+      // Prepare story data for saving
+      const storyData = {
+        title: story.title || 'Untitled Story',
+        content: story.content || '',
+        summary: story.summary || '',
+        academic_grade: story.academic_grade || '',
+        subject: story.subject || '',
+        word_count: parseInt(story.word_count) || 0,
+        vocab_list: Array.isArray(story.vocabulary) ? story.vocabulary : [],
+        quiz_data: Array.isArray(story.quiz) ? story.quiz : []
+      };
+      
+      // Include ID if it exists and is not a mock ID
+      if (story.id && !story.id.startsWith('mock-')) {
+        storyData.id = story.id;
+      }
+      
+      console.log('Saving story to Supabase:', storyData);
+      
+      // Insert into the stories table - removed .execute()
+      const { data, error } = await window.supabase
+        .from('stories')
+        .insert(storyData);
+        
+      if (error) {
+        console.error('Error saving story to Supabase:', error);
+        throw new Error(`Failed to save story: ${error.message}`);
+      }
+      
+      console.log('Story saved successfully:', data);
+      return data[0];
+    } catch (err) {
+      console.error('Error in saveStory:', err);
+      window.showToast(`Failed to save story: ${err.message}`, 'error');
+      throw err;
+    }
   },
   
   // Get all stories from Supabase
   async getStories() {
-    if (!window.supabase) {
-      await initSupabaseClient();
-    }
-    
-    console.log('Fetching stories from Supabase');
-    
-    const { data, error } = await window.supabase
-      .from('stories')
-      .select()
-      .order('created_at', { ascending: false })
-      .execute();
+    try {
+      if (!window.supabase) {
+        await initSupabaseClient();
+      }
       
-    if (error) {
-      console.error('Error fetching stories from Supabase:', error);
-      throw new Error(`Failed to fetch stories: ${error.message}`);
+      // Check if we have a valid Supabase client
+      if (!window.supabase || !window.supabase.from) {
+        console.error('Supabase client not properly initialized');
+        throw new Error('Supabase client not properly initialized');
+      }
+      
+      console.log('Fetching stories from Supabase');
+      
+      // Removed .execute()
+      const { data, error } = await window.supabase
+        .from('stories')
+        .select()
+        .order('created_at', { ascending: false });
+        
+      if (error) {
+        console.error('Error fetching stories from Supabase:', error);
+        throw new Error(`Failed to fetch stories: ${error.message}`);
+      }
+      
+      console.log('Fetched stories:', data);
+      return data;
+    } catch (err) {
+      console.error('Error in getStories:', err);
+      window.showToast(`Failed to fetch stories: ${err.message}`, 'error');
+      throw err;
     }
-    
-    console.log('Fetched stories:', data);
-    return data;
   }
 };
 
