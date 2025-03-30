@@ -1,7 +1,7 @@
 // ... existing code ...
   async function generateStory(formData) {
     // Initialize with the configured base URL
-    const apiUrl = window.ENV_API_URL || "https://quiz-story-1.onrender.com";
+    const apiUrl = window.ENV_API_URL || "https://easystory.onrender.com";
     console.log(`Generating story... API URL: ${apiUrl}`);
     
     // Define the endpoint - based on the URL seen in the browser screenshot

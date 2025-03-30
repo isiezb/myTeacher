@@ -117,7 +117,7 @@ const proxyService = (function() {
   // Generate a story via proxy
   async function generateStory(apiBaseUrl, formData) {
     // Use the provided API base URL or fall back to the environment variable
-    const baseUrl = apiBaseUrl || window.ENV_API_URL || "https://quiz-story-1.onrender.com";
+    const baseUrl = apiBaseUrl || window.ENV_API_URL || "https://easystory.onrender.com";
     const url = `${baseUrl}/stories/generate`;
     console.log(`Generating story via proxy. Target: ${url}`);
     

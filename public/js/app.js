@@ -163,7 +163,7 @@
   // Generate a story using form data
   async function generateStory(formData) {
     // Default API base URL
-    const baseUrl = window.ENV_API_URL || "https://quiz-story-1.onrender.com";
+    const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
     console.log('Using base URL:', baseUrl);
     
     // First try direct API access
