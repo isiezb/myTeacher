@@ -249,8 +249,12 @@ class StoryQuiz extends LitElement {
   _handleContinueStory() {
     console.log('Continue Story button clicked in quiz component');
     
-    // Dispatch a continue-story event
+    // Get the current story from the window object
+    const story = window.currentStory;
+    
+    // Dispatch a continue-story event with the story detail
     this.dispatchEvent(new CustomEvent('continue-story', {
+      detail: { story },
       bubbles: true,
       composed: true
     }));

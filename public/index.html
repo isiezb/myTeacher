@@ -175,9 +175,12 @@
       
       // Function to handle story continuation
       function handleContinueStory(storyObj) {
+        console.log('handleContinueStory called with storyObj:', storyObj ? `ID: ${storyObj.id}` : 'none');
+        
         // Make sure we have the continuation container
         if (!continuationContainer) {
           console.error('Continuation container not found!');
+          window.showToast('Error: Continuation container not found', 'error');
           return;
         }
         
@@ -192,6 +195,7 @@
         
         // Get the current story or use the provided one
         const currentStory = storyObj || window.currentStory;
+        console.log('Using story for continuation:', currentStory ? `ID: ${currentStory.id}` : 'none');
 
         // Store the story in window object for access by other components
         if (currentStory) {
@@ -199,9 +203,9 @@
         } else {
           // Try to get the story from the story display component
           const storyDisplay = document.querySelector('#storyDisplayContainer');
-          if (storyDisplay && storyDisplay.story) {
-            window.currentStory = storyDisplay.story;
-            console.log('Retrieved story from storyDisplay component:', window.currentStory);
+          if (storyDisplay && storyDisplay.querySelector('story-content') && storyDisplay.querySelector('story-content').story) {
+            window.currentStory = storyDisplay.querySelector('story-content').story;
+            console.log('Retrieved story from storyDisplay component:', window.currentStory.id);
           }
         }
         
@@ -249,7 +253,15 @@
         const button = event.target.closest('.quiz-continue-button, .continue-button');
         if (button) {
           console.log('Continue story button clicked');
-          handleContinueStory();
+          
+          // Pass the current story to the handler
+          if (window.currentStory) {
+            console.log('Using window.currentStory for continuation, ID:', window.currentStory.id);
+            handleContinueStory(window.currentStory);
+          } else {
+            console.warn('No window.currentStory available for click handler');
+            handleContinueStory();
+          }
         }
       });
       
