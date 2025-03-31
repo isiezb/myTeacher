@@ -1,4 +1,5 @@
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
+import '../story/story-quiz.js';
 
 export class ContinuationResult extends LitElement {
   static properties = {
