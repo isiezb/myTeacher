@@ -59,8 +59,18 @@ export class StoryContinuation extends LitElement {
       
       // Extract vocabulary items from the original story
       if (this.originalStory.vocabulary && Array.isArray(this.originalStory.vocabulary)) {
-        this._vocabularyItems = this.originalStory.vocabulary;
+        this._vocabularyItems = this.originalStory.vocabulary.map(item => {
+          // Ensure importance is set (default to 5 if not available)
+          if (typeof item.importance === 'undefined') {
+            return { ...item, importance: 5 };
+          }
+          return item;
+        });
         console.log('Vocabulary items extracted from original story:', this._vocabularyItems);
+      } else {
+        // Initialize with empty array if no vocabulary found
+        console.log('No vocabulary items found in original story');
+        this._vocabularyItems = [];
       }
       
       // Reset any previous continuation content when a new story is set

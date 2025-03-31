@@ -148,25 +148,31 @@ export class FocusSelector extends LitElement {
 
   render() {
     console.log('FocusSelector render called with focus:', this.focus);
+    console.log('Vocabulary items:', this.vocabularyItems);
     
-    // Create buttons for top vocabulary items
-    const vocabButtons = this.topVocabularyItems.map(item => {
-      return html`
-        <button 
-          class="focus-button ${this.focus === item.term ? 'active' : ''}" 
-          @click="${() => this._handleFocusChange(item.term)}"
-          ?disabled="${this.disabled}"
-          title="${item.definition}"
-        >
-          <span class="focus-icon">📚</span>
-          <span class="focus-label">${item.term}</span>
-        </button>
-      `;
-    });
+    // Check if we have vocabulary items
+    const hasVocabItems = this.vocabularyItems && this.vocabularyItems.length > 0;
     
-    // Add general button in the middle
-    const middleIndex = Math.ceil(vocabButtons.length / 2);
-    vocabButtons.splice(middleIndex, 0, html`
+    // Create buttons for top vocabulary items if available
+    let vocabButtons = [];
+    if (hasVocabItems) {
+      vocabButtons = this.topVocabularyItems.map(item => {
+        return html`
+          <button 
+            class="focus-button ${this.focus === item.term ? 'active' : ''}" 
+            @click="${() => this._handleFocusChange(item.term)}"
+            ?disabled="${this.disabled}"
+            title="${item.definition}"
+          >
+            <span class="focus-icon">📚</span>
+            <span class="focus-label">${item.term}</span>
+          </button>
+        `;
+      });
+    }
+    
+    // Always add the general button, prominently
+    const generalButton = html`
       <button 
         class="focus-button ${this.focus === 'general' ? 'active' : ''}" 
         @click="${() => this._handleFocusChange('general')}"
@@ -175,14 +181,30 @@ export class FocusSelector extends LitElement {
         <span class="focus-icon">🌟</span>
         <span class="focus-label general-focus">Keep it general</span>
       </button>
-    `);
+    `;
+    
+    // Create the final array of buttons with general button first
+    let allButtons = [generalButton];
+    
+    // Add vocabulary buttons if we have any
+    if (vocabButtons.length > 0) {
+      allButtons = allButtons.concat(vocabButtons);
+    } else {
+      // If no vocab buttons, add a placeholder message
+      console.log('No vocabulary items available for focus selector');
+    }
 
     return html`
       <div class="focus-options">
         <label>Story Focus</label>
         <div class="focus-buttons">
-          ${vocabButtons}
+          ${allButtons}
         </div>
+        ${!hasVocabItems ? html`
+          <div style="font-size: 0.85rem; color: var(--text-secondary, #6c757d); margin-top: 0.5rem;">
+            Vocabulary terms will appear here after generating the first story
+          </div>
+        ` : ''}
       </div>
     `;
   }
