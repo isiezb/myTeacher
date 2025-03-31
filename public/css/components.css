@@ -270,6 +270,69 @@ Story Continuation Styles
 Quiz Component Styles
 ============================
 */
+.quiz-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.quiz-container h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.quiz-actions {
+  margin-top: 2.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.quiz-actions button {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px;
+}
+
+.quiz-actions button:hover {
+  background: var(--primary-600);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.quiz-actions .continue-button {
+  background: var(--success);
+}
+
+.quiz-actions .continue-button:hover {
+  background: #2c9a94;
+}
+
+.quiz-results {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--bg);
+  border-radius: 12px;
+  margin-top: 1.5rem;
+  animation: fadeIn 0.5s ease-in-out;
+  font-size: 0.9rem;
+  opacity: 0.9;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Other quiz styles */
 .story-quiz {
   margin-top: 2rem;
   padding-top: 1rem;
@@ -322,24 +385,10 @@ Quiz Component Styles
   background-color: rgba(94, 124, 230, 0.1);
 }
 
-.quiz-results {
-  background: var(--neutral-50);
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-align: center;
-}
-
 .quiz-results-score {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
-}
-
-.btn-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-  gap: 10px;
 }
 
 /* 

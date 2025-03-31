@@ -19,29 +19,34 @@ export class QuizResults extends LitElement {
 
       .quiz-results {
         text-align: center;
-        padding: 2rem;
+        padding: 1.5rem;
         background: var(--bg, #f8f9fa);
         border-radius: 12px;
         margin-top: 1.5rem;
         animation: fadeIn 0.5s ease-in-out;
+        font-size: 0.9rem;
+        opacity: 0.9;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
       }
 
       .quiz-score {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 700;
         color: var(--primary, #5e7ce6);
         margin-bottom: 0.5rem;
       }
 
       .quiz-score-text {
-        font-size: 1.125rem;
+        font-size: 1rem;
         color: var(--text, #212529);
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
       }
 
       .quiz-feedback {
-        font-size: 1rem;
-        line-height: 1.6;
+        font-size: 0.9rem;
+        line-height: 1.5;
         color: var(--text-secondary, #6c757d);
       }
 

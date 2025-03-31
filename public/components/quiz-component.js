@@ -46,15 +46,16 @@ export class QuizComponent extends LitElement {
       }
 
       .quiz-actions {
-        margin-top: 2rem;
+        margin-top: 2.5rem;
         display: flex;
         justify-content: center;
+        gap: 1rem;
       }
 
       button {
-        padding: 0.875rem 1.75rem;
-        font-size: 1rem;
-        font-weight: 600;
+        padding: 1rem 2rem;
+        font-size: 1.25rem;
+        font-weight: 700;
         color: white;
         background: var(--primary, #5e7ce6);
         border: none;
@@ -62,12 +63,16 @@ export class QuizComponent extends LitElement {
         cursor: pointer;
         transition: all 0.2s ease;
         font-family: var(--font-heading, 'Inter', sans-serif);
+        min-width: 200px;
       }
 
-      button:hover {
-        background: var(--primary-600, #4a63b9);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+      .continue-button {
+        background: var(--success, #38b2ac);
+        margin-left: 1rem;
+      }
+      
+      .continue-button:hover {
+        background: var(--success, #2c9a94);
       }
 
       button:disabled {
@@ -75,6 +80,12 @@ export class QuizComponent extends LitElement {
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
+      }
+
+      button:hover {
+        background: var(--primary-600, #4a63b9);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
       }
 
       @media (max-width: 768px) {
@@ -174,7 +185,10 @@ export class QuizComponent extends LitElement {
         
         <div class="quiz-actions">
           ${this.showResults 
-            ? html`<button @click=${this._retakeQuiz}>Retake Quiz</button>` 
+            ? html`
+              <button @click=${this._retakeQuiz}>Retake Quiz</button>
+              <button class="continue-button" @click=${this._handleContinueStory}>Continue Story</button>
+            ` 
             : html`<button @click=${this._checkAnswers} ?disabled=${Object.keys(this._selectedAnswers).length < this.quiz.questions.length}>Check Answers</button>`
           }
         </div>
@@ -188,6 +202,19 @@ export class QuizComponent extends LitElement {
         ` : ''}
       </div>
     `;
+  }
+
+  _handleContinueStory() {
+    // Dispatch a continue-story event
+    this.dispatchEvent(new CustomEvent('continue-story', {
+      detail: {
+        story: window.currentStory
+      },
+      bubbles: true,
+      composed: true
+    }));
+    
+    console.log('Continue story event dispatched from quiz component');
   }
 }
 
