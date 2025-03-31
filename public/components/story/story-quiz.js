@@ -410,8 +410,6 @@ class StoryQuiz extends LitElement {
 
     return html`
       <div class="story-quiz">
-        <h3 class="quiz-title">Comprehension Quiz</h3>
-        
         ${this.quizCompleted ? 
           this._renderQuizResults() : 
           this.limitedQuiz.map((question, index) => this._renderQuizQuestion(question, index))

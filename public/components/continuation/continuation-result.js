@@ -305,7 +305,6 @@ export class ContinuationResult extends LitElement {
         
         ${this.quiz && this.quiz.length > 0 ? html`
           <div class="quiz-section">
-            <h4>Quiz</h4>
             <story-quiz .quiz=${this.quiz}></story-quiz>
           </div>
         ` : ''}
