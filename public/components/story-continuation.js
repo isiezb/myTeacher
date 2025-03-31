@@ -195,6 +195,18 @@ export class StoryContinuation extends LitElement {
           bubbles: true,
           composed: true
         });
+        
+        // Log the event details we're dispatching
+        console.log('Dispatching story-continued event with data:', {
+          contentLength: data.continuation_text?.length || 0,
+          difficulty: data.difficulty || options.difficulty,
+          vocabularyCount: (data.vocabulary || []).length,
+          summaryLength: this._summary?.length || 0,
+          summaryPreview: this._summary ? this._summary.substring(0, 50) + '...' : 'none',
+          quizQuestions: this._quiz?.length || 0,
+          focus: options.focus
+        });
+        
         this.dispatchEvent(event);
       } else {
         throw new Error('Received empty or invalid continuation response');
@@ -241,6 +253,8 @@ export class StoryContinuation extends LitElement {
           this._summary = focusTerm !== 'general' ?
             `This is a mock summary of the continuation focusing on "${focusTerm}". The characters explored this concept in depth.` :
             "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
+          
+          console.log('Generated mock summary for continuation:', this._summary);
           
           // Adjust mock quiz to reflect the focus
           this._quiz = [

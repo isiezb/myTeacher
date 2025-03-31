@@ -127,6 +127,22 @@ export class ContinuationResult extends LitElement {
     this.summary = '';
     this.quiz = [];
     this.difficulty = 'same_level';
+    console.log('ContinuationResult constructor called');
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('summary')) {
+      console.log('ContinuationResult summary updated:', this.summary);
+    }
+    if (changedProperties.has('continuationContent')) {
+      console.log('ContinuationResult content updated, length:', this.continuationContent?.length || 0);
+    }
+    if (changedProperties.has('vocabularyItems')) {
+      console.log('ContinuationResult vocabulary updated, count:', this.vocabularyItems?.length || 0);
+    }
+    if (changedProperties.has('quiz')) {
+      console.log('ContinuationResult quiz updated, count:', this.quiz?.length || 0);
+    }
   }
 
   _handleContinueStory() {

@@ -6,6 +6,18 @@ document.addEventListener('story-continued', (event) => {
     // Get the continuation data from the event
     const { continuation, difficulty, wordCount, vocabulary, summary, quiz } = event.detail;
     
+    // Log what we received
+    console.log('story-continued event received with data:', {
+        continuationLength: continuation?.length || 0,
+        difficulty,
+        wordCount,
+        vocabularyCount: vocabulary?.length || 0,
+        hasSummary: !!summary,
+        summaryLength: summary?.length || 0,
+        summaryPreview: summary ? summary.substring(0, 50) + '...' : 'none',
+        quizQuestions: quiz?.length || 0
+    });
+    
     // Find the story content element to append the continuation
     const storyContent = document.querySelector('.story-content');
     if (storyContent) {

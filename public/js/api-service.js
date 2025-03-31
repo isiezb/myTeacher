@@ -128,13 +128,13 @@ const apiService = (function() {
         'Accept': 'application/json'
       };
       
-      // Make sure to include the original story content and optional flags in the request
+      // Make sure to include the original story content and explicitly set flags to true
       const requestBody = {
         length: options.length || 300,
         difficulty: options.difficulty || 'same',
         original_story_content: options.original_story_content || '',
-        generate_summary: options.generate_summary || false,
-        generate_quiz: options.generate_quiz || false,
+        generate_summary: true, // Always generate summary
+        generate_quiz: true, // Always generate quiz
         focus: options.focus || 'general'
       };
       
@@ -173,11 +173,15 @@ const apiService = (function() {
           
           // Log if summary and quiz were included in the response
           if (data.summary) {
-            console.log('Response includes summary');
+            console.log('Response includes summary:', data.summary.substring(0, 100) + '...');
+          } else {
+            console.warn('API response does not include a summary!');
           }
           
           if (data.quiz && Array.isArray(data.quiz)) {
             console.log('Response includes quiz with', data.quiz.length, 'questions');
+          } else {
+            console.warn('API response does not include a quiz!');
           }
           
           // Process vocabulary items to add importance ranking
