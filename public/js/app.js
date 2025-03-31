@@ -252,11 +252,25 @@
         
         // After a short delay, scroll to the actual story content to ensure the user sees the beginning
         setTimeout(() => {
-          const storyContentElement = document.querySelector('.story-content .story-text');
-          if (storyContentElement) {
-            storyContentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // More specific selector to find the actual story text content
+          const storyText = document.querySelector('.story-content-container .story-text');
+          
+          if (storyText) {
+            console.log('Scrolling to story text content');
+            storyText.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Find the first paragraph and highlight it briefly to draw attention
+            const firstParagraph = storyText.querySelector('p');
+            if (firstParagraph) {
+              firstParagraph.classList.add('highlight-new-content');
+              setTimeout(() => {
+                firstParagraph.classList.remove('highlight-new-content');
+              }, 2000);
+            }
+          } else {
+            console.warn('Could not find story text element for scrolling');
           }
-        }, 300);
+        }, 600); // Increased delay to ensure DOM is fully updated
       }
 
       // Save the story to Supabase if storage is enabled
