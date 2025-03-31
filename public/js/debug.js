@@ -358,4 +358,134 @@ function showDebugPanel() {
   if (typeof window.showDebugPanel !== 'function') {
     initDebugPanel();
   }
+
+  // Add debug function for components
+  window.debugComponents = function() {
+    const componentStatus = {
+      'story-continuation': {
+        registered: !!customElements.get('story-continuation'),
+        instance: document.querySelector('story-continuation'),
+        container: document.querySelector('#storyContinuationContainer')
+      },
+      'continuation-form': {
+        registered: !!customElements.get('continuation-form'),
+        instance: document.querySelector('continuation-form')
+      },
+      'difficulty-selector': {
+        registered: !!customElements.get('difficulty-selector'),
+        instance: document.querySelector('difficulty-selector')
+      },
+      'difficulty-description': {
+        registered: !!customElements.get('difficulty-description'),
+        instance: document.querySelector('difficulty-description')
+      }
+    };
+
+    console.group('Component Debug Information');
+    
+    console.log('Component Registration Status:');
+    Object.entries(componentStatus).forEach(([name, info]) => {
+      console.log(`${name}: ${info.registered ? '✅ Registered' : '❌ Not registered'}`);
+      if (info.instance) {
+        console.log(`  - Instance found: ${info.instance.tagName}`);
+      } else {
+        console.log(`  - No instances in DOM`);
+      }
+      
+      if (info.container) {
+        console.log(`  - Container: ${info.container.tagName}, innerHTML: ${info.container.innerHTML.substring(0, 100)}...`);
+      }
+    });
+
+    // Check story in window
+    console.log('Current Story:', window.currentStory ? 
+      `ID: ${window.currentStory.id}, Content length: ${window.currentStory.content?.length || 0}` : 
+      'Not available');
+    
+    // Check continuation container
+    const continuationContainer = document.getElementById('continuation-container');
+    if (continuationContainer) {
+      console.log('Continuation container:', {
+        display: continuationContainer.style.display,
+        visibility: window.getComputedStyle(continuationContainer).visibility,
+        children: continuationContainer.children.length
+      });
+    } else {
+      console.log('Continuation container not found');
+    }
+
+    console.groupEnd();
+    
+    return componentStatus;
+  };
+
+  // Add the debug command to window to make it available in the console
+  window.debugCommands = window.debugCommands || {};
+  window.debugCommands.components = window.debugComponents;
+
+  // Auto run on continue button click
+  document.addEventListener('click', (event) => {
+    if (event.target.closest('.quiz-continue-button, .continue-button')) {
+      setTimeout(() => {
+        console.log('Auto-running component debug after continue button click:');
+        window.debugComponents();
+      }, 500);
+    }
+  });
+
+  // Add network request monitoring for script loading
+  window.monitorScriptLoading = function() {
+    console.log('Monitoring script loading...');
+    
+    // Monitor which scripts are actually loaded
+    const originalFetch = window.fetch;
+    window.fetch = function() {
+      console.log('Fetch request:', arguments[0]);
+      return originalFetch.apply(this, arguments);
+    };
+    
+    // Also monitor XMLHttpRequest
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function() {
+      console.log('XHR request:', arguments[1]);
+      return originalXHROpen.apply(this, arguments);
+    };
+    
+    // Log script tags
+    const scripts = document.querySelectorAll('script[src]');
+    console.log('Script tags in document:', Array.from(scripts).map(s => s.src));
+    
+    // Check for component imports
+    console.log('Checking for component scripts:');
+    const continuationFiles = [
+      '/components/continuation/difficulty-selector.js',
+      '/components/continuation/difficulty-description.js',
+      '/components/continuation/vocabulary-display.js',
+      '/components/continuation/continuation-form.js',
+      '/components/continuation/continuation-result.js',
+      '/components/continuation/error-message.js'
+    ];
+    
+    continuationFiles.forEach(file => {
+      // Create a probe request to check if the file exists and is accessible
+      fetch(file, { method: 'HEAD' })
+        .then(resp => {
+          console.log(`File ${file}: ${resp.ok ? '✅ Exists' : '❌ Not found'} (${resp.status})`);
+        })
+        .catch(err => {
+          console.error(`Error checking ${file}:`, err);
+        });
+    });
+  };
+
+  // Call monitoring on page load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      window.monitorScriptLoading();
+    }, 2000);
+  });
+
+  // Add the debug command to window
+  window.debugCommands = window.debugCommands || {};
+  window.debugCommands.monitorScripts = window.monitorScriptLoading;
 })(); 
