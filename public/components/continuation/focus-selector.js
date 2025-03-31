@@ -104,6 +104,7 @@ export class FocusSelector extends LitElement {
     @media (max-width: 500px) {
       .focus-options {
         gap: 0.5rem;
+        width: 100%;
       }
       
       .focus-options label {
@@ -111,26 +112,33 @@ export class FocusSelector extends LitElement {
       }
       
       .focus-buttons {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
         width: 100%;
       }
       
       .focus-button {
-        width: auto;
+        width: 100%;
         padding: 0.5rem 0.25rem;
         margin: 0;
         border-radius: 8px;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.5rem;
+        height: 36px;
       }
       
       .focus-icon {
         font-size: 1.2rem;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0;
+        margin-left: 0.25rem;
       }
       
       .focus-label {
-        font-size: 0.65rem;
+        font-size: 0.7rem;
+        text-align: left;
       }
       
       /* Make the general focus button stand out */

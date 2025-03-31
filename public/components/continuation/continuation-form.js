@@ -142,10 +142,9 @@ export class ContinuationForm extends LitElement {
     
     @media (max-width: 500px) {
       .selector-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.75rem;
+        display: block;
         width: 100%;
+        margin-top: 0;
       }
       
       .mobile-selector-header {
@@ -153,6 +152,7 @@ export class ContinuationForm extends LitElement {
         grid-template-columns: 1fr 1fr;
         width: 100%;
         margin-bottom: 0.5rem;
+        gap: 0.5rem;
       }
       
       .mobile-selector-header h4 {
@@ -162,6 +162,13 @@ export class ContinuationForm extends LitElement {
         color: var(--text-secondary, #6c757d);
         text-align: center;
         margin: 0;
+      }
+      
+      .selectors-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        width: 100%;
       }
       
       .separator {
@@ -292,18 +299,20 @@ export class ContinuationForm extends LitElement {
         </div>
         
         <div class="selector-container">
-          <difficulty-selector 
-            .difficulty=${this.settings.difficulty}
-            ?disabled=${this.isSubmitting}
-            @difficulty-change=${this._handleDifficultyChange}
-          ></difficulty-selector>
-          
-          <focus-selector
-            .focus=${this.settings.focus}
-            .vocabularyItems=${this.vocabularyItems}
-            ?disabled=${this.isSubmitting}
-            @focus-change=${this._handleFocusChange}
-          ></focus-selector>
+          <div class="selectors-grid">
+            <difficulty-selector 
+              .difficulty=${this.settings.difficulty}
+              ?disabled=${this.isSubmitting}
+              @difficulty-change=${this._handleDifficultyChange}
+            ></difficulty-selector>
+            
+            <focus-selector
+              .focus=${this.settings.focus}
+              .vocabularyItems=${this.vocabularyItems}
+              ?disabled=${this.isSubmitting}
+              @focus-change=${this._handleFocusChange}
+            ></focus-selector>
+          </div>
         </div>
         
         <difficulty-description .difficulty=${this.settings.difficulty}></difficulty-description>

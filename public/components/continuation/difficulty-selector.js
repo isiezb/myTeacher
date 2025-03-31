@@ -94,6 +94,7 @@ export class DifficultySelector extends LitElement {
     @media (max-width: 500px) {
       .difficulty-options {
         gap: 0.5rem;
+        width: 100%;
       }
       
       .difficulty-options label {
@@ -101,26 +102,27 @@ export class DifficultySelector extends LitElement {
       }
       
       .difficulty-buttons {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0.3rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
         width: 100%;
+        justify-content: space-between;
       }
       
       .difficulty-button {
-        width: auto;
-        padding: 0.5rem 0.25rem;
+        width: 19%;
+        padding: 0.4rem 0.1rem;
         margin: 0;
         border-radius: 8px;
       }
       
       .difficulty-emoji {
-        font-size: 1.3rem;
-        margin-bottom: 0.25rem;
+        font-size: 1.2rem;
+        margin-bottom: 0.2rem;
       }
       
       .difficulty-label {
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
