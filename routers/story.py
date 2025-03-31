@@ -56,10 +56,10 @@ async def continue_story(
     if request is None:
         request = StoryContinuationRequest()  # Use defaults if no request body
         
-    logger.info(f"Received story continuation request for story ID: {story_id}, difficulty: {request.difficulty}")
+    logger.info(f"Received story continuation request for story ID: {story_id}, difficulty: {request.difficulty}, focus: {request.focus}")
     try:
         continuation = await continue_story_content(story_id, request)
-        logger.info(f"Successfully generated story continuation of {continuation.word_count} words")
+        logger.info(f"Successfully generated story continuation of {continuation.word_count} words with focus on '{continuation.focus}'")
         return continuation
     except ValueError as ve:
         logger.error(f"Validation error during story continuation: {ve}")
