@@ -103,4 +103,8 @@ class StoryHeader extends LitElement {
   }
 }
 
-customElements.define('story-header', StoryHeader);
+
+// Guard against duplicate registration
+if (!customElements.get('story-header')) {
+  customElements.define('story-header', StoryHeader);
+}

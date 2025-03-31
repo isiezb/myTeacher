@@ -56,4 +56,8 @@ class StoryText extends LitElement {
   }
 }
 
-customElements.define('story-text', StoryText);
+
+// Guard against duplicate registration
+if (!customElements.get('story-text')) {
+  customElements.define('story-text', StoryText);
+}

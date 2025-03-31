@@ -339,4 +339,8 @@ class StoryQuiz extends LitElement {
   }
 }
 
-customElements.define('story-quiz', StoryQuiz);
+
+// Guard against duplicate registration
+if (!customElements.get('story-quiz')) {
+  customElements.define('story-quiz', StoryQuiz);
+}

@@ -103,4 +103,8 @@ export class StoryContent extends LitElement {
   }
 }
 
-customElements.define('story-content', StoryContent); 
+
+// Guard against duplicate registration
+if (!customElements.get('story-content-refactored')) {
+  customElements.define('story-content-refactored', StoryContent);
+} 

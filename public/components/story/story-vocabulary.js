@@ -85,4 +85,8 @@ class StoryVocabulary extends LitElement {
   }
 }
 
-customElements.define('story-vocabulary', StoryVocabulary);
+
+// Guard against duplicate registration
+if (!customElements.get('story-vocabulary')) {
+  customElements.define('story-vocabulary', StoryVocabulary);
+}

@@ -48,4 +48,8 @@ class StorySummary extends LitElement {
   }
 }
 
-customElements.define('story-summary', StorySummary);
+
+// Guard against duplicate registration
+if (!customElements.get('story-summary')) {
+  customElements.define('story-summary', StorySummary);
+}
