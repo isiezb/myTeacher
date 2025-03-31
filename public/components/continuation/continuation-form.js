@@ -257,10 +257,20 @@ export class ContinuationForm extends LitElement {
 
   _handleFocusChange(e) {
     const { focus } = e.detail;
+    console.log('ContinuationForm _handleFocusChange received:', {
+      receivedFocus: focus,
+      previousFocus: this.settings.focus,
+      eventDetail: JSON.stringify(e.detail)
+    });
+    
     this.settings = {
       ...this.settings,
       focus
     };
+    
+    console.log('ContinuationForm settings after focus change:', {
+      newSettings: JSON.stringify(this.settings)
+    });
     
     // Dispatch event for parent component
     this.dispatchEvent(new CustomEvent('settings-change', {

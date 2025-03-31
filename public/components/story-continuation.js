@@ -83,7 +83,19 @@ export class StoryContinuation extends LitElement {
   }
 
   _handleSettingsChange(e) {
+    console.log('StoryContinuation _handleSettingsChange received:', {
+      oldFocus: this._settings?.focus,
+      newFocus: e.detail.settings?.focus,
+      oldSettings: JSON.stringify(this._settings),
+      newSettings: JSON.stringify(e.detail.settings)
+    });
+    
     this._settings = e.detail.settings;
+    
+    console.log('StoryContinuation _settings after update:', {
+      settingsObject: JSON.stringify(this._settings),
+      focusValue: this._settings.focus
+    });
   }
 
   async _handleContinueRequested() {
@@ -137,6 +149,14 @@ export class StoryContinuation extends LitElement {
       'much_harder': 'much_harder'
     };
     
+    // Debug: Log current settings before creating options
+    console.log('STORY CONTINUATION DEBUG - Current settings before API call:', {
+      length: this._settings.length,
+      difficulty: this._settings.difficulty,
+      focus: this._settings.focus,
+      settings_object: JSON.stringify(this._settings)
+    });
+    
     // Prepare options with complete original story content
     const options = {
       length: parseInt(this._settings.length, 10),
@@ -146,6 +166,13 @@ export class StoryContinuation extends LitElement {
       generate_quiz: true,
       focus: this._settings.focus
     };
+    
+    // Debug: Log options after creation to verify focus is correctly copied
+    console.log('STORY CONTINUATION DEBUG - API options:', {
+      length: options.length,
+      difficulty: options.difficulty,
+      focus: options.focus
+    });
     
     // Log what we're about to do (limiting content length for logging)
     const logOptions = {...options};
