@@ -11,7 +11,19 @@ class FormCheckboxOptions extends LitElement {
     
     @media (max-width: 768px) {
       .checkbox-options {
-        gap: 1rem;
+        gap: 0.75rem;
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .checkbox-options {
+        gap: 0.5rem;
+        margin-top: 1rem;
+      }
+      
+      ::slotted(*) {
+        transform: scale(0.9);
+        transform-origin: left top;
       }
     }
   `;

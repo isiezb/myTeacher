@@ -95,6 +95,23 @@ class FormInputGroup extends LitElement {
       border: 2px solid rgba(94, 124, 230, 0.35);
       background-color: rgba(244, 246, 255, 0.5);
     }
+    
+    /* Mobile specific styling for checkboxes */
+    @media (max-width: 500px) {
+      .checkbox-label {
+        font-size: 0.85rem;
+        gap: 0.3rem;
+      }
+      
+      .checkbox-label input {
+        width: 16px;
+        height: 16px;
+      }
+      
+      .input-group {
+        margin-bottom: 0.75rem;
+      }
+    }
   `;
 
   constructor() {
