@@ -220,17 +220,28 @@
     const formData = event.detail.formData;
     console.log('Form data submitted:', formData);
 
-    // Show loading indicator
-    window.showLoading?.('Creating your educational story...');
-
-    // Find the form component - either direct tag or data-component
-    const formComponent = document.querySelector('story-form') || 
-                          document.querySelector('[data-component="story-form"]');
-    if (formComponent) {
-      formComponent.isSubmitting = true;
-    }
-
     try {
+      // Show loading indicator - make sure we call the global function
+      if (typeof window.showLoading === 'function') {
+        window.showLoading('Creating your educational story...');
+        console.log('Loading overlay should be shown now');
+      } else {
+        console.error('window.showLoading function not found');
+        // Fallback loading method
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+          loadingOverlay.setAttribute('visible', '');
+          loadingOverlay.message = 'Creating your educational story...';
+        }
+      }
+
+      // Find the form component - either direct tag or data-component
+      const formComponent = document.querySelector('story-form') || 
+                          document.querySelector('[data-component="story-form"]');
+      if (formComponent) {
+        formComponent.isSubmitting = true;
+      }
+
       // Call API to generate story
       const story = await generateStory(formData);
 
@@ -250,13 +261,27 @@
         
         if (storyComponent) {
           console.log(`Updating component <${storyComponentTag}>`, storyComponent.tagName);
+          // Directly set the story property
           storyComponent.story = story;
+          
+          // Force component update
+          if (typeof storyComponent.requestUpdate === 'function') {
+            storyComponent.requestUpdate();
+          }
+          
           // Trigger custom event for story update
           storyComponent.dispatchEvent(new CustomEvent('story-updated', {
             bubbles: true,
             composed: true,
             detail: { story: story }
           }));
+          
+          // Make sure story-result is visible
+          const storyResult = document.getElementById('story-result');
+          if (storyResult && storyResult.classList.contains('hidden')) {
+            console.log('Removing hidden class from story-result');
+            storyResult.classList.remove('hidden');
+          }
         } else {
            console.error(`Could not find component <${storyComponentTag}> inside or as #storyDisplayContainer`);
            window.showToast?.('Error updating display area.', 'error');
@@ -269,7 +294,13 @@
       // Show the story result container if hidden
       const storyResult = document.getElementById('story-result');
       if (storyResult) {
-        storyResult.classList.remove('hidden');
+        if (storyResult.classList.contains('hidden')) {
+          console.log('Removing hidden class from story-result again');
+          storyResult.classList.remove('hidden');
+        }
+        
+        // Force reflow
+        void storyResult.offsetWidth;
       }
 
       // Scroll to story display
@@ -327,7 +358,17 @@
       window.showToast?.('Failed to generate story. Please try again.', 'error');
     } finally {
       // Hide loading indicator
-      window.hideLoading?.();
+      if (typeof window.hideLoading === 'function') {
+        window.hideLoading();
+        console.log('Loading overlay should be hidden now');
+      } else {
+        console.error('window.hideLoading function not found');
+        // Fallback hide loading method
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+          loadingOverlay.removeAttribute('visible');
+        }
+      }
 
       // Reset form submitting state
       if (formComponent) {

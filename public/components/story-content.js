@@ -59,6 +59,20 @@ export class StoryContent extends LitElement {
     this.showSummary = true;
     this.showVocabulary = true;
     this.showQuiz = true;
+    
+    console.log('StoryContent component initialized');
+  }
+  
+  connectedCallback() {
+    super.connectedCallback();
+    console.log('StoryContent connected to DOM');
+    
+    // Check if we already have a story in the window
+    if (window.currentStory && !this.story) {
+      console.log('Found window.currentStory, using it');
+      this.story = window.currentStory;
+      this.requestUpdate();
+    }
   }
 
   updated(changedProperties) {
@@ -70,7 +84,7 @@ export class StoryContent extends LitElement {
       }
       
       // Log story details to help debug summary issues
-      console.log('StoryContent received story:', {
+      console.log('StoryContent updated with story:', {
         id: this.story.id,
         contentLength: this.story.content?.length || 0,
         hasSummary: !!this.story.summary,
@@ -83,12 +97,25 @@ export class StoryContent extends LitElement {
         showSummary: this.showSummary
       });
       
-      // Dispatch a custom event to notify parent components
+      // Dispatch custom events to notify parent components
       this.dispatchEvent(new CustomEvent('story-loaded', { 
         detail: { story: this.story },
         bubbles: true, 
         composed: true 
       }));
+      
+      this.dispatchEvent(new CustomEvent('story-updated', { 
+        detail: { story: this.story },
+        bubbles: true, 
+        composed: true 
+      }));
+      
+      // Make sure parent container is visible
+      const storyResult = this.closest('#story-result');
+      if (storyResult && storyResult.classList.contains('hidden')) {
+        console.log('Removing hidden class from story-result from within component');
+        storyResult.classList.remove('hidden');
+      }
     }
   }
 
@@ -112,6 +139,8 @@ export class StoryContent extends LitElement {
   }
 
   render() {
+    console.log('StoryContent render called, has story:', !!this.story);
+    
     if (!this.story) {
       return html`
         <div class="story-content-container">
@@ -122,6 +151,8 @@ export class StoryContent extends LitElement {
 
     // Only show the continue button if there's no quiz or showQuiz is false
     const shouldShowContinueButton = !this.showQuiz || !this.story.quiz;
+    
+    console.log('Rendering story with content length:', this.story.content?.length || 0);
 
     return html`
       <div class="story-content-container">

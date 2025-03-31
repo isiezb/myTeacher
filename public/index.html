@@ -190,6 +190,60 @@
   </script>
 
   <script>
+    // Add a debugging utility function
+    document.addEventListener('DOMContentLoaded', function() {
+      // Create a debug function
+      window.debugApp = function() {
+        console.log('======= EasyStory Debug Information =======');
+        console.log('story-form in DOM:', !!document.querySelector('story-form'));
+        console.log('story-content in DOM:', !!document.querySelector('story-content'));
+        console.log('loadingOverlay in DOM:', !!document.getElementById('loadingOverlay'));
+        console.log('story-result visibility:', !document.getElementById('story-result')?.classList.contains('hidden'));
+        console.log('window.currentStory exists:', !!window.currentStory);
+        if (window.currentStory) {
+          console.log('Story content length:', window.currentStory.content?.length || 0);
+          console.log('Story has summary:', !!window.currentStory.summary);
+          console.log('Story has vocabulary:', Array.isArray(window.currentStory.vocabulary));
+          console.log('Story has quiz:', Array.isArray(window.currentStory.quiz));
+        }
+        console.log('showLoading function exists:', typeof window.showLoading === 'function');
+        console.log('hideLoading function exists:', typeof window.hideLoading === 'function');
+        console.log('showToast function exists:', typeof window.showToast === 'function');
+        
+        // Check component definitions
+        console.log('story-form defined:', !!customElements.get('story-form'));
+        console.log('story-content defined:', !!customElements.get('story-content'));
+        console.log('loading-overlay defined:', !!customElements.get('loading-overlay'));
+        
+        // Force-fix issues if needed
+        if (document.getElementById('story-result')?.classList.contains('hidden') && window.currentStory) {
+          console.log('Force-fixing hidden story-result');
+          document.getElementById('story-result').classList.remove('hidden');
+        }
+        
+        // Check loadingOverlay state
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+          console.log('LoadingOverlay visible attribute:', overlay.hasAttribute('visible'));
+          console.log('LoadingOverlay display style:', window.getComputedStyle(overlay).display);
+        }
+        
+        console.log('========================================');
+      };
+      
+      // Add a keyboard shortcut for debugging (Ctrl+Shift+X)
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'x') {
+          window.debugApp();
+        }
+      });
+      
+      // Run debug automatically after loading
+      setTimeout(window.debugApp, 1000);
+    });
+  </script>
+
+  <script>
     // Update the handleContinueStory function
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize the continuation container with display: none
@@ -317,12 +371,40 @@
         handleContinueStory(event.detail?.story);
       });
 
-      // Listen for story-updated event to store the current story
+      // Listen for story-updated and story-loaded events
       document.addEventListener('story-updated', (event) => {
-        if (event.target && event.target.story) {
+        if (event.target && event.detail && event.detail.story) {
+          window.currentStory = event.detail.story;
+          console.log('Story updated event, stored story:', window.currentStory.id);
+          
+          // Make sure story container is visible
+          const storyResult = document.getElementById('story-result');
+          if (storyResult && storyResult.classList.contains('hidden')) {
+            console.log('Removing hidden class from story-result due to story-updated event');
+            storyResult.classList.remove('hidden');
+          }
+        } else if (event.target && event.target.story) {
           window.currentStory = event.target.story;
-          console.log('Story updated, stored in window.currentStory:', window.currentStory);
+          console.log('Story updated, stored in window.currentStory from target:', window.currentStory.id);
         }
+      });
+      
+      document.addEventListener('story-loaded', (event) => {
+        if (event.detail && event.detail.story) {
+          console.log('Story loaded event triggered');
+          
+          // Make sure story container is visible
+          const storyResult = document.getElementById('story-result');
+          if (storyResult && storyResult.classList.contains('hidden')) {
+            console.log('Removing hidden class from story-result due to story-loaded event');
+            storyResult.classList.remove('hidden');
+          }
+        }
+      });
+      
+      // Listen for story-form-submit events
+      document.addEventListener('story-form-submit', (event) => {
+        console.log('Story form submit event captured at document level');
       });
     });
   </script>
