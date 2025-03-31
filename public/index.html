@@ -39,10 +39,27 @@
 
   <header>
     <div class="container">
-      <h1>EASY STORY EASY LIFE</h1>
-      <p>Educational stories with AI</p>
+      <div class="header-content">
+        <div class="logo-container">
+          <h1>EASY STORY EASY LIFE</h1>
+          <p>Educational stories with AI</p>
+        </div>
+        <theme-toggle id="themeToggle"></theme-toggle>
+      </div>
     </div>
   </header>
+
+  <style>
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #themeToggle {
+      margin-left: auto;
+    }
+  </style>
 
   <main id="app" class="container">
     <div class="app-tabs">
@@ -299,6 +316,16 @@
           console.log('Story updated, stored in window.currentStory:', window.currentStory);
         }
       });
+    });
+  </script>
+
+  <script>
+    // Initialize theme from localStorage on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const darkMode = localStorage.getItem('darkMode') === 'true';
+      if (darkMode) {
+        document.body.classList.add('dark-theme');
+      }
     });
   </script>
 </body>
