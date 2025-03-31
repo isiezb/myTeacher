@@ -27,12 +27,14 @@ export function initializeComponents() {
   const storyFormContainers = document.querySelectorAll('[data-component="story-form"]');
   const storyContentContainers = document.querySelectorAll('[data-component="story-content"]');
   const storyContinuationContainers = document.querySelectorAll('[data-component="story-continuation"]');
+  const storiesGridContainers = document.querySelectorAll('[data-component="stories-grid"]');
   
   if (USE_REFACTORED_COMPONENTS) {
     // Replace with refactored components
     const formTag = 'story-form-refactored';
     const contentTag = 'story-content-refactored';
     const continuationTag = 'story-continuation-refactored';
+    const gridTag = 'stories-grid-refactored';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -51,12 +53,19 @@ export function initializeComponents() {
       storyContinuationContainers.forEach(container => initializeComponent(container, continuationTag));
     } else {
       console.warn(`⚠️ Component ${continuationTag} is not defined`);
+    }
+    
+    if (isElementDefined(gridTag)) {
+      storiesGridContainers.forEach(container => initializeComponent(container, gridTag));
+    } else {
+      console.warn(`⚠️ Component ${gridTag} is not defined`);
     }
   } else {
     // Use original components
     const formTag = 'story-form';
     const contentTag = 'story-content';
     const continuationTag = 'story-continuation';
+    const gridTag = 'stories-grid';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -75,6 +84,12 @@ export function initializeComponents() {
       storyContinuationContainers.forEach(container => initializeComponent(container, continuationTag));
     } else {
       console.warn(`⚠️ Component ${continuationTag} is not defined`);
+    }
+    
+    if (isElementDefined(gridTag)) {
+      storiesGridContainers.forEach(container => initializeComponent(container, gridTag));
+    } else {
+      console.warn(`⚠️ Component ${gridTag} is not defined`);
     }
   }
   
@@ -110,5 +125,6 @@ document.addEventListener('DOMContentLoaded', initializeComponents);
 export const components = {
   StoryForm: USE_REFACTORED_COMPONENTS ? 'story-form-refactored' : 'story-form',
   StoryContent: USE_REFACTORED_COMPONENTS ? 'story-content-refactored' : 'story-content',
-  StoryContinuation: USE_REFACTORED_COMPONENTS ? 'story-continuation-refactored' : 'story-continuation'
+  StoryContinuation: USE_REFACTORED_COMPONENTS ? 'story-continuation-refactored' : 'story-continuation',
+  StoriesGrid: USE_REFACTORED_COMPONENTS ? 'stories-grid-refactored' : 'stories-grid'
 };

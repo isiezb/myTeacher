@@ -49,10 +49,18 @@ const config = {
     '<script type="module" src="components/continuation/continuation-result.js"></script>',
     '<script type="module" src="components/continuation/error-message.js"></script>',
     
+    // Grid components
+    '<script type="module" src="components/grid/grid-loading.js"></script>',
+    '<script type="module" src="components/grid/grid-error.js"></script>',
+    '<script type="module" src="components/grid/grid-empty-state.js"></script>',
+    '<script type="module" src="components/grid/story-item.js"></script>',
+    '<script type="module" src="components/grid/refresh-button.js"></script>',
+    
     // Main refactored components
     '<script type="module" src="components/story-form-refactored.js"></script>',
     '<script type="module" src="components/story-content-refactored.js"></script>',
-    '<script type="module" src="components/story-continuation-refactored.js"></script>'
+    '<script type="module" src="components/story-continuation-refactored.js"></script>',
+    '<script type="module" src="components/stories-grid-refactored.js"></script>'
   ],
   APP_INIT_SCRIPTS: [
     '<script type="module" src="js/app.js"></script>'
