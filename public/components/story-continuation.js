@@ -40,6 +40,7 @@ export class StoryContinuation extends LitElement {
     super();
     this.originalStory = null;
     this.isSubmitting = false;
+    // Reset all content and state
     this._continuationContent = '';
     this._errorMessage = '';
     this._settings = {
@@ -50,6 +51,7 @@ export class StoryContinuation extends LitElement {
     this._vocabularyItems = [];
     this._summary = '';
     this._quiz = [];
+    console.log('StoryContinuation constructor called - all state reset');
   }
 
   updated(changedProperties) {
@@ -102,6 +104,7 @@ export class StoryContinuation extends LitElement {
       return;
     }
     
+    // Clear previous continuation content
     this.isSubmitting = true;
     this._continuationContent = '';
     this._errorMessage = '';

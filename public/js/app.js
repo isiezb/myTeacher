@@ -207,6 +207,20 @@
       formComponent.isSubmitting = true;
     }
 
+    // Clear any previous story continuation content
+    const continuationContainer = document.querySelector('.continuation-container');
+    if (continuationContainer) {
+      continuationContainer.classList.add('hidden');
+      const storyContinuation = continuationContainer.querySelector('story-continuation');
+      if (storyContinuation) {
+        // Reset the continuation component by removing and recreating it
+        continuationContainer.removeChild(storyContinuation);
+        const newStoryContinuation = document.createElement('story-continuation');
+        continuationContainer.appendChild(newStoryContinuation);
+        console.log('Reset story continuation component');
+      }
+    }
+
     try {
       // Call API to generate story
       const story = await generateStory(formData);
@@ -217,7 +231,7 @@
 
       // Find story content container and the component inside it
       const storyContainer = document.querySelector('#storyDisplayContainer'); // Use the correct container ID
-      const storyComponentTag = window.components?.StoryContent || 'story-content'; // Get tag name dynamically
+      const storyComponentTag = window.components?.StoryContent || 'story-content';
       
       if (storyContainer) {
         // Check if the container itself is the component or contains the component
@@ -576,17 +590,27 @@
       return;
     }
     
-    // Find or create the story-continuation component
-    let storyContinuation = continuationContainer.querySelector('story-continuation');
-    if (!storyContinuation) {
-      console.log('Creating story-continuation component');
-      storyContinuation = document.createElement('story-continuation');
-      continuationContainer.appendChild(storyContinuation);
+    // Reset any previous continuation content
+    const storyContinuation = continuationContainer.querySelector('story-continuation');
+    if (storyContinuation) {
+      // Reset the continuation component by removing and recreating it
+      continuationContainer.removeChild(storyContinuation);
+      const newStoryContinuation = document.createElement('story-continuation');
+      continuationContainer.appendChild(newStoryContinuation);
       componentStatus['story-continuation'] = true;
+      
+      // Set the original story on the component
+      newStoryContinuation.originalStory = originalStory;
+      console.log('Reset and created new story-continuation component');
+    } else {
+      console.log('Creating story-continuation component');
+      const newStoryContinuation = document.createElement('story-continuation');
+      continuationContainer.appendChild(newStoryContinuation);
+      componentStatus['story-continuation'] = true;
+      
+      // Set the original story on the component
+      newStoryContinuation.originalStory = originalStory;
     }
-    
-    // Set the original story on the component
-    storyContinuation.originalStory = originalStory;
     
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
@@ -661,22 +685,26 @@
       return;
     }
     
-    // Find or create the story-continuation component
-    let storyContinuation = continuationContainer.querySelector('story-continuation');
-    if (!storyContinuation) {
-      console.log('Creating story-continuation component');
-      storyContinuation = document.createElement('story-continuation');
-      continuationContainer.appendChild(storyContinuation);
-      componentStatus['story-continuation'] = true;
+    // Clear any previous continuation content by recreating the component
+    const storyContinuation = continuationContainer.querySelector('story-continuation');
+    if (storyContinuation) {
+      // Reset the continuation component by removing and recreating it
+      continuationContainer.removeChild(storyContinuation);
     }
     
-    // Set the enhanced original story on the component
-    storyContinuation.originalStory = enhancedStory;
+    // Create a new story-continuation component
+    const newStoryContinuation = document.createElement('story-continuation');
+    continuationContainer.appendChild(newStoryContinuation);
+    componentStatus['story-continuation'] = true;
+    
+    // Set the original story on the component
+    newStoryContinuation.originalStory = enhancedStory;
+    console.log('Created new story-continuation component for continued story');
     
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
     
-    // Scroll to the continuation container so it's visible at the top of the viewport
+    // Scroll to the continuation container
     setTimeout(() => {
       // Calculate position that places the container at the top with header clearance
       const headerHeight = 80; // Estimate header height, adjust as needed
@@ -688,21 +716,7 @@
         top: offsetTop,
         behavior: 'smooth'
       });
-      
-      // After a short delay, focus on the difficulty selector to draw attention
-      setTimeout(() => {
-        const difficultySelector = continuationContainer.querySelector('difficulty-selector');
-        if (difficultySelector) {
-          // Highlight the difficulty selector to draw attention
-          difficultySelector.classList.add('highlight-element');
-          setTimeout(() => {
-            difficultySelector.classList.remove('highlight-element');
-          }, 1500);
-        }
-      }, 300);
     }, 0); // Immediate execution to prevent visible delay
-    
-    window.showToast?.('Ready to continue your story further!', 'info');
   }
 
   // Handle restart story event
