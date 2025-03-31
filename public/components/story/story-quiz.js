@@ -276,6 +276,14 @@ class StoryQuiz extends LitElement {
     // Get the current story from the window object
     const story = window.currentStory;
     
+    // Make sure the quiz data is explicitly included
+    if (story && this.quiz && this.quiz.length > 0) {
+      if (!story.quiz || story.quiz.length === 0) {
+        story.quiz = this.quiz;
+        console.log('Added quiz data to story for continuation:', this.quiz);
+      }
+    }
+    
     // Dispatch a continue-story event with the story detail
     this.dispatchEvent(new CustomEvent('continue-story', {
       detail: { story },

@@ -632,8 +632,26 @@
       return;
     }
     
-    // Update the current story to the continued story
-    window.currentStory = story;
+    // Ensure the story has the required fields for continuing
+    const enhancedStory = {
+      ...story,
+      // Make sure these fields are always present
+      id: story.id || `continued-${Date.now()}`,
+      quiz: story.quiz || [],
+      vocabulary: story.vocabulary || [],
+      summary: story.summary || '',
+      difficulty: story.difficulty || 'same_level',
+      title: story.title || 'Story Continuation',
+      subject: story.subject || 'General',
+      grade_level: story.grade_level || 'Not specified',
+      word_count: story.word_count || (story.content ? story.content.split(/\s+/).length : 0),
+      focus: story.focus || 'general'
+    };
+    
+    // Update the current story to the enhanced continued story
+    window.currentStory = enhancedStory;
+    
+    console.log('Enhanced story with all required fields:', enhancedStory);
     
     // Find the continuation container
     const continuationContainer = document.querySelector('.continuation-container');
@@ -652,8 +670,8 @@
       componentStatus['story-continuation'] = true;
     }
     
-    // Set the original story on the component
-    storyContinuation.originalStory = story;
+    // Set the enhanced original story on the component
+    storyContinuation.originalStory = enhancedStory;
     
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
