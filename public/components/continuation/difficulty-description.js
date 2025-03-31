@@ -106,5 +106,5 @@ export class DifficultyDescription extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('difficulty-description')) {
-  customElements.define('difficulty-description'
+  customElements.define('difficulty-description', DifficultyDescription);
 } 

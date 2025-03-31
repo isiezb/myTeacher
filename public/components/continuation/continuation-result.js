@@ -76,5 +76,5 @@ export class ContinuationResult extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('continuation-result')) {
-  customElements.define('continuation-result'
+  customElements.define('continuation-result', ContinuationResult);
 } 

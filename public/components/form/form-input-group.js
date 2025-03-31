@@ -173,5 +173,5 @@ class FormInputGroup extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('form-input-group')) {
-  customElements.define('form-input-group'
+  customElements.define('form-input-group', FormInputGroup);
 } 

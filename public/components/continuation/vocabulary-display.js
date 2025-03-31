@@ -87,5 +87,5 @@ export class VocabularyDisplay extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('vocabulary-display')) {
-  customElements.define('vocabulary-display'
+  customElements.define('vocabulary-display', VocabularyDisplay);
 } 

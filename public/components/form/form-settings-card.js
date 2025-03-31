@@ -74,5 +74,5 @@ class FormSettingsCard extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('form-settings-card')) {
-  customElements.define('form-settings-card'
+  customElements.define('form-settings-card', FormSettingsCard);
 } 

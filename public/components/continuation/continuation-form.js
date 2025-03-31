@@ -202,5 +202,5 @@ export class ContinuationForm extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('continuation-form')) {
-  customElements.define('continuation-form'
+  customElements.define('continuation-form', ContinuationForm);
 } 

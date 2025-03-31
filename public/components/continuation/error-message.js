@@ -45,5 +45,5 @@ export class ErrorMessage extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('error-message')) {
-  customElements.define('error-message'
+  customElements.define('error-message', ErrorMessage);
 } 
