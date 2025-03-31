@@ -95,6 +95,9 @@ export class StoryContent extends LitElement {
       `;
     }
 
+    // Only show the continue button if there's no quiz or showQuiz is false
+    const shouldShowContinueButton = !this.showQuiz || !this.story.quiz;
+
     return html`
       <div class="story-content-container">
         ${this.showHeader ? 
@@ -119,9 +122,12 @@ export class StoryContent extends LitElement {
           ''
         }
         
-        <button class="continue-button" @click=${this._handleContinueStory}>
-          Continue Story
-        </button>
+        ${shouldShowContinueButton ? 
+          html`<button class="continue-button" @click=${this._handleContinueStory}>
+            Continue Story
+          </button>` : 
+          ''
+        }
       </div>
     `;
   }

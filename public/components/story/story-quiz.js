@@ -5,7 +5,8 @@ class StoryQuiz extends LitElement {
     quiz: { type: Array },
     currentQuizIndex: { type: Number },
     quizAnswers: { type: Array },
-    quizCompleted: { type: Boolean }
+    quizCompleted: { type: Boolean },
+    limitedQuiz: { type: Array }
   };
 
   static styles = css`
@@ -145,6 +146,7 @@ class StoryQuiz extends LitElement {
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
+      margin: 0 0.5rem;
     }
 
     .btn-primary {
@@ -173,14 +175,29 @@ class StoryQuiz extends LitElement {
     .btn-success:hover {
       background-color: var(--success-dark, #218838);
     }
+    
+    .btn-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
   `;
 
   constructor() {
     super();
     this.quiz = [];
+    this.limitedQuiz = [];
     this.currentQuizIndex = 0;
     this.quizAnswers = [];
     this.quizCompleted = false;
+  }
+  
+  updated(changedProperties) {
+    if (changedProperties.has('quiz') && this.quiz) {
+      // Limit the quiz to 3 questions
+      this.limitedQuiz = this.quiz.slice(0, 3);
+      this.resetQuiz();
+    }
   }
 
   connectedCallback() {
@@ -190,7 +207,7 @@ class StoryQuiz extends LitElement {
 
   resetQuiz() {
     this.currentQuizIndex = 0;
-    this.quizAnswers = this.quiz ? Array(this.quiz.length).fill(null) : [];
+    this.quizAnswers = this.limitedQuiz ? Array(this.limitedQuiz.length).fill(null) : [];
     this.quizCompleted = false;
   }
 
@@ -203,7 +220,7 @@ class StoryQuiz extends LitElement {
     this.quizAnswers = newAnswers;
     
     // Check if all questions have been answered
-    if (this.currentQuizIndex === this.quiz.length - 1) {
+    if (this.currentQuizIndex === this.limitedQuiz.length - 1) {
       this.quizCompleted = true;
     } else {
       // Move to the next question after a short delay
@@ -214,7 +231,7 @@ class StoryQuiz extends LitElement {
   }
 
   _handleNextQuestion() {
-    if (this.currentQuizIndex < this.quiz.length - 1) {
+    if (this.currentQuizIndex < this.limitedQuiz.length - 1) {
       this.currentQuizIndex++;
     }
   }
@@ -228,12 +245,20 @@ class StoryQuiz extends LitElement {
   _handleRestartQuiz() {
     this.resetQuiz();
   }
+  
+  _handleContinueStory() {
+    // Dispatch a continue-story event
+    this.dispatchEvent(new CustomEvent('continue-story', {
+      bubbles: true,
+      composed: true
+    }));
+  }
 
   _getQuizScore() {
-    if (!this.quiz || this.quiz.length === 0) return 0;
+    if (!this.limitedQuiz || this.limitedQuiz.length === 0) return 0;
     
     let correctAnswers = 0;
-    this.quiz.forEach((question, index) => {
+    this.limitedQuiz.forEach((question, index) => {
       if (this.quizAnswers[index] === question.correct_answer) {
         correctAnswers++;
       }
@@ -241,8 +266,8 @@ class StoryQuiz extends LitElement {
     
     return {
       score: correctAnswers,
-      total: this.quiz.length,
-      percentage: Math.round((correctAnswers / this.quiz.length) * 100)
+      total: this.limitedQuiz.length,
+      percentage: Math.round((correctAnswers / this.limitedQuiz.length) * 100)
     };
   }
 
@@ -254,7 +279,7 @@ class StoryQuiz extends LitElement {
     
     return html`
       <div class="quiz-item" style="${isCurrentQuestion ? '' : 'display: none;'}">
-        <div class="quiz-progress">Question ${index + 1} of ${this.quiz.length}</div>
+        <div class="quiz-progress">Question ${index + 1} of ${this.limitedQuiz.length}</div>
         <div class="quiz-question">${question.question}</div>
         <div class="quiz-options">
           ${question.options.map((option, optionIndex) => {
@@ -291,7 +316,7 @@ class StoryQuiz extends LitElement {
             >Previous</button>
             <button 
               class="btn btn-primary" 
-              ?disabled="${this.currentQuizIndex === this.quiz.length - 1 || !isAnswered}"
+              ?disabled="${this.currentQuizIndex === this.limitedQuiz.length - 1 || !isAnswered}"
               @click="${this._handleNextQuestion}"
             >Next</button>
           </div>
@@ -316,13 +341,16 @@ class StoryQuiz extends LitElement {
       <div class="quiz-results">
         <div class="quiz-results-score">${result.score}/${result.total} (${result.percentage}%)</div>
         <div class="quiz-results-message">${message}</div>
-        <button class="btn btn-primary" @click="${this._handleRestartQuiz}">Restart Quiz</button>
+        <div class="btn-container">
+          <button class="btn btn-secondary" @click="${this._handleRestartQuiz}">Restart Quiz</button>
+          <button class="btn btn-primary quiz-continue-button" @click="${this._handleContinueStory}">Continue Story</button>
+        </div>
       </div>
     `;
   }
 
   render() {
-    if (!this.quiz || this.quiz.length === 0) {
+    if (!this.limitedQuiz || this.limitedQuiz.length === 0) {
       return html``;
     }
 
@@ -332,7 +360,7 @@ class StoryQuiz extends LitElement {
         
         ${this.quizCompleted ? 
           this._renderQuizResults() : 
-          this.quiz.map((question, index) => this._renderQuizQuestion(question, index))
+          this.limitedQuiz.map((question, index) => this._renderQuizQuestion(question, index))
         }
       </div>
     `;
