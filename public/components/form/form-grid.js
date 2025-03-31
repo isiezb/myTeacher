@@ -5,14 +5,14 @@ class FormGrid extends LitElement {
     .story-elements-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
-      gap: 1.5rem;
+      gap: 2rem;
       margin-bottom: 1.5rem;
     }
 
     @media (max-width: 768px) {
       .story-elements-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 1.25rem;
       }
     }
   `;

@@ -31,7 +31,12 @@ class FormSettingsCard extends LitElement {
     }
 
     .card-content {
-      padding: 24px;
+      padding: 28px;
+    }
+
+    /* Add more space between card content and form field sections */
+    .card-content > * + * {
+      margin-top: 1.5rem;
     }
 
     @media (max-width: 768px) {
@@ -48,7 +53,7 @@ class FormSettingsCard extends LitElement {
       }
       
       .card-content {
-        padding: 16px;
+        padding: 20px;
       }
     }
   `;

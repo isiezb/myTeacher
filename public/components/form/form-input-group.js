@@ -55,6 +55,23 @@ class FormInputGroup extends LitElement {
       border: 2px solid rgba(0, 0, 0, 0.15);
     }
 
+    /* Special styling for optional fields */
+    .optional-field input,
+    .optional-field select {
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      border-width: 1px;
+      margin-bottom: 0.5rem;
+      /* Slightly smaller to prevent overlap */
+      max-width: 95%;
+    }
+
+    .optional-field label {
+      font-size: 0.95rem;
+      color: var(--text-secondary, #6c757d);
+      margin-bottom: 0.5rem;
+    }
+
     .checkbox-label {
       display: flex;
       align-items: center;
@@ -94,9 +111,15 @@ class FormInputGroup extends LitElement {
   }
 
   _handleInput(e) {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    let value;
+    if (this.type === 'checkbox') {
+      value = e.target.checked;
+    } else {
+      value = e.target.value;
+    }
+
+    this.value = value;
     
-    // Dispatch a custom event with the updated value
     this.dispatchEvent(new CustomEvent('input-change', {
       detail: {
         name: this.name,
@@ -112,7 +135,8 @@ class FormInputGroup extends LitElement {
       return html``;
     }
 
-    const containerClass = `input-group ${this.name === 'subject_specification' ? 'focus-field' : ''}`;
+    const isOptional = !this.required && this.label && this.label.includes('optional');
+    const containerClass = `input-group ${this.name === 'subject_specification' ? 'focus-field' : ''} ${isOptional ? 'optional-field' : ''}`;
 
     if (this.type === 'select') {
       return html`
@@ -169,7 +193,6 @@ class FormInputGroup extends LitElement {
     }
   }
 }
-
 
 // Guard against duplicate registration
 if (!customElements.get('form-input-group')) {
