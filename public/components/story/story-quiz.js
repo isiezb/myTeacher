@@ -270,8 +270,8 @@ class StoryQuiz extends LitElement {
     this.resetQuiz();
   }
   
-  _handleContinueStory() {
-    console.log('Continue Story button clicked in quiz component');
+  _handleContinueLearning() {
+    console.log('Continue Learning button clicked in quiz component');
     
     // Get the current story from the window object
     const story = window.currentStory;
@@ -382,9 +382,14 @@ class StoryQuiz extends LitElement {
       <div class="quiz-results">
         <div class="quiz-results-score">${result.score}/${result.total} (${result.percentage}%)</div>
         <div class="quiz-results-message">${message}</div>
+        <div class="quiz-results-message" style="margin-top: 1rem; font-weight: 600; color: var(--primary, #5e7ce6);">
+          Ready to continue your learning journey?
+        </div>
         <div class="btn-container">
           <button class="btn btn-secondary" @click="${this._handleRestartQuiz}">Restart Quiz</button>
-          <button class="btn btn-primary quiz-continue-button continue-button" @click="${this._handleContinueStory}">Continue Story</button>
+          <button class="btn btn-primary quiz-continue-button continue-button" 
+                  style="font-size: 1.1rem; font-weight: 700; padding: 0.85rem 1.75rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                  @click="${this._handleContinueLearning}">Continue Learning</button>
         </div>
       </div>
     `;
