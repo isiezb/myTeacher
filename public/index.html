@@ -12,62 +12,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Core configuration and services -->
+  <script src="js/env.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/api-service.js"></script>
+  <script src="js/proxy-service.js"></script>
   
-    <script type="module" src="js/component-debug.js"></script>
-    <!-- Dynamically updated script imports - Consolidated -->
-    <script type="module" src="https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js"></script>
-    <script type="module" src="js/api.js"></script>
-    <script type="module" src="js/utils.js"></script>
-    <script type="module" src="components/toast-container.js"></script>
-    <script type="module" src="components/loading-overlay.js"></script>
-    <script type="module" src="components/form/form-settings-card.js"></script>
-    <script type="module" src="components/form/form-input-group.js"></script>
-    <script type="module" src="components/form/form-grid.js"></script>
-    <script type="module" src="components/form/form-checkbox-options.js"></script>
-    <script type="module" src="components/form/submit-button.js"></script>
-    <script type="module" src="components/story/story-header.js"></script>
-    <script type="module" src="components/story/story-text.js"></script>
-    <script type="module" src="components/story/story-summary.js"></script>
-    <script type="module" src="components/story/story-vocabulary.js"></script>
-    <script type="module" src="components/story/story-quiz.js"></script>
-    <script type="module" src="components/continuation/difficulty-selector.js"></script>
-    <script type="module" src="components/continuation/difficulty-description.js"></script>
-    <script type="module" src="components/continuation/vocabulary-display.js"></script>
-    <script type="module" src="components/continuation/continuation-form.js"></script>
-    <script type="module" src="components/continuation/continuation-result.js"></script>
-    <script type="module" src="components/continuation/error-message.js"></script>
-    <script type="module" src="components/grid/grid-loading.js"></script>
-    <script type="module" src="components/grid/grid-error.js"></script>
-    <script type="module" src="components/grid/grid-empty-state.js"></script>
-    <script type="module" src="components/grid/story-item.js"></script>
-    <script type="module" src="components/grid/refresh-button.js"></script>
-    <script type="module" src="components/quiz/quiz-option.js"></script>
-    <script type="module" src="components/quiz/quiz-question.js"></script>
-    <script type="module" src="components/quiz/quiz-results.js"></script>
-    <script type="module" src="components/display/display-content.js"></script>
-    <script type="module" src="components/display/display-empty.js"></script>
-    <script type="module" src="components/display/display-error.js"></script>
-    <script type="module" src="components/display/display-controls.js"></script>
-    <script type="module" src="components/card/card-header.js"></script>
-    <script type="module" src="components/card/card-content.js"></script>
-    <script type="module" src="components/card/card-actions.js"></script>
-    <script type="module" src="components/story-form-refactored.js"></script>
-    <script type="module" src="components/story-content-refactored.js"></script>
-    <script type="module" src="components/story-continuation-refactored.js"></script>
-    <script type="module" src="components/stories-grid-refactored.js"></script>
-    <script type="module" src="components/quiz-component-refactored.js"></script>
-    <script type="module" src="components/story-display-refactored.js"></script>
-    <script type="module" src="components/story-card-refactored.js"></script>
-    <!-- Explicitly load original components needed for fallback or if USE_REFACTORED_COMPONENTS is false -->
-    <script type="module" src="components/story-display.js"></script> 
-    <script type="module" src="components/story-card.js"></script>
-    <!-- Load the fixed version for debugging/fallback -->
-    <!-- <script type="module" src="components/story-display-fixed.js"></script> --> 
-    <!-- Component Loader -->
-    <script type="module" src="js/component-loader.js"></script>
-    <!-- App Initialization -->
-    <script type="module" src="js/app.js"></script>
-    <script type="module" src="js/register-fix.js"></script>
+  <!-- Core dependencies -->
+  <script type="module" src="https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js"></script>
+  
+  <!-- Component system -->
+  <script type="module" src="components/index.js"></script>
+  
+  <!-- App Initialization -->
+  <script type="module" src="js/app.js"></script>
 </head>
 <body>
   <toast-container position="top-right"></toast-container>
@@ -89,17 +47,14 @@
     <div class="tab-content active" id="generator-tab">
       <div data-component="story-form"></div>
       <div id="story-result" class="story-result hidden">
-        <!-- Use story-content refactored component -->
-        <div data-component="story-content" id="storyDisplayContainer"></div> 
+        <div data-component="story-content" id="storyDisplayContainer"></div>
         <div class="story-actions">
           <!-- Continue Story button removed -->
         </div>
         <div id="quizContainer" class="hidden">
-          <!-- Use quiz-component refactored component -->
-          <div data-component="quiz" id="quizComponentContainer"></div> 
+          <div data-component="quiz-component" id="quizComponentContainer"></div>
         </div>
         <div id="continuation-container" class="continuation-container">
-           <!-- Use story-continuation refactored component -->
           <div data-component="story-continuation" id="storyContinuationContainer"></div>
         </div>
       </div>
@@ -110,12 +65,10 @@
         <h2>My Stories</h2>
         <p>Stories you've created and saved</p>
       </div>
-       <!-- Use stories-grid refactored component -->
       <div data-component="stories-grid" id="storiesGridContainer"></div>
       <div id="selected-story-view" class="hidden">
         <button id="backToListBtn" class="btn btn-secondary">Back to List</button>
-         <!-- Use story-content refactored component -->
-        <div data-component="story-content" id="storyContentContainer"></div> 
+        <div data-component="story-content" id="storyContentContainer"></div>
       </div>
     </div>
   </main>
@@ -127,14 +80,6 @@
   </footer>
 
 <!-- Non-module JavaScript Files needed before app logic -->
-  <script src="js/debug.js"></script>
-  <script src="js/env.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/supabase.js"></script>
-  <script src="js/api-service.js"></script>
-  <script src="js/proxy-service.js"></script>
-  
-  <!-- Inline scripts for basic UI functionality -->
   <script>
     // Simple tab functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -298,47 +243,5 @@
       });
     });
   </script>
-
-  <!-- Debug container for story-display -->
-  <div style="margin-top: 50px; padding: 20px; border: 2px dashed #ff6b6b; border-radius: 8px;">
-    <h3>Debug Container for Story Display</h3>
-    <div id="story-display-debug" data-component="story-display"></div>
-    
-    <script>
-      // Add a test story after page loads
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          console.log('🔍 Adding test story to debug container...');
-          const container = document.getElementById('story-display-debug');
-          
-          // Create a test story
-          const testStory = {
-            title: "Debug Test Story",
-            content: "This is a test story content.\n\nIt has multiple paragraphs for testing purposes.\n\nIf you can see this, the story-display component is working correctly."
-          };
-          
-          // Try direct access to the component if it exists
-          const component = container.querySelector('story-display') || container.firstElementChild;
-          if (component) {
-            console.log('✅ Found component in debug container, setting story property');
-            component.story = testStory;
-          } else {
-            console.error('❌ No component found in debug container');
-            
-            // Try to create it manually as a fallback
-            try {
-              console.log('⚠️ Attempting to create component manually...');
-              const displayEl = document.createElement('story-display');
-              displayEl.story = testStory;
-              container.appendChild(displayEl);
-              console.log('✅ Manually created component');
-            } catch (error) {
-              console.error('❌ Failed to create component manually:', error);
-            }
-          }
-        }, 2000); // Wait 2 seconds after page load
-      });
-    </script>
-  </div>
 </body>
 </html> 
