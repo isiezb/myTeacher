@@ -3,7 +3,7 @@ import { showToast } from './toast-container.js';
 import '/components/quiz/quiz-question.js';
 import '/components/quiz/quiz-results.js';
 
-export class QuizComponentRefactored extends LitElement {
+export class QuizComponent extends LitElement {
   static get properties() {
     return {
       quiz: { type: Object },
@@ -192,6 +192,6 @@ export class QuizComponentRefactored extends LitElement {
 }
 
 // Guard against duplicate registration
-if (!customElements.get('quiz-component-refactored')) {
-  customElements.define('quiz-component-refactored', QuizComponentRefactored);
+if (!customElements.get('quiz-component')) {
+  customElements.define('quiz-component', QuizComponent);
 } 

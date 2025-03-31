@@ -5,7 +5,7 @@ import './display/display-empty.js';
 import './display/display-error.js';
 import './display/display-controls.js';
 
-export class StoryDisplayRefactored extends LitElement {
+export class StoryDisplay extends LitElement {
   static get properties() {
     return {
       story: { type: Object },
@@ -94,6 +94,6 @@ export class StoryDisplayRefactored extends LitElement {
 }
 
 // Guard against duplicate registration
-if (!customElements.get('story-display-refactored')) {
-  customElements.define('story-display-refactored', StoryDisplayRefactored);
+if (!customElements.get('story-display')) {
+  customElements.define('story-display', StoryDisplay);
 } 
