@@ -138,6 +138,18 @@ export class StoryForm extends LitElement {
       // Add global access to the form for debugging
       window.mainStoryForm = this;
       
+      // Add direct event listener to native form element
+      const formElement = this.shadowRoot?.querySelector('form');
+      if (formElement && !formElement._hasSubmitListener) {
+        console.log('Adding direct submit listener to form element');
+        formElement.addEventListener('submit', (e) => {
+          e.preventDefault();
+          console.log('Native form submit intercepted in connectedCallback');
+          this._handleSubmit(e);
+        });
+        formElement._hasSubmitListener = true;
+      }
+      
       // Dispatch event to notify that the form is ready
       this.dispatchEvent(new CustomEvent('story-form-ready', {
         bubbles: true,

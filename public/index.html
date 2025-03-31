@@ -418,5 +418,106 @@
       }
     });
   </script>
+
+  <script>
+    // Add a self-repair mechanism to fix common issues
+    document.addEventListener('DOMContentLoaded', function() {
+      // Perform self-repair every second
+      setInterval(function() {
+        // 1. Check if loading overlay is stuck
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+          const isProcessing = window._isProcessing || false;
+          // If not processing but overlay is visible, hide it
+          if (!isProcessing && (loadingOverlay.hasAttribute('visible') || 
+              window.getComputedStyle(loadingOverlay).display !== 'none')) {
+            console.log('Self-repair: Loading overlay stuck visible, fixing...');
+            loadingOverlay.removeAttribute('visible');
+            loadingOverlay.style.display = 'none';
+            if (window._loadingOverlay) {
+              window._loadingOverlay.visible = false;
+            }
+          }
+        }
+        
+        // 2. Check if story-result should be visible but isn't
+        const storyResult = document.getElementById('story-result');
+        if (storyResult && window.currentStory && storyResult.classList.contains('hidden')) {
+          console.log('Self-repair: story-result should be visible but is hidden, fixing...');
+          storyResult.classList.remove('hidden');
+        }
+        
+        // 3. Check for form event listener
+        const mainStoryForm = document.getElementById('mainStoryForm');
+        if (mainStoryForm && !mainStoryForm._hasSubmitListener) {
+          console.log('Self-repair: Adding missing event listener to story form');
+          mainStoryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Form submit intercepted by self-repair');
+            // Dispatch form-submit event manually
+            const formData = {};
+            const formElements = mainStoryForm.querySelectorAll('input, select, textarea');
+            formElements.forEach(el => {
+              if (el.name) {
+                formData[el.name] = el.value;
+              }
+            });
+            
+            mainStoryForm.dispatchEvent(new CustomEvent('story-form-submit', {
+              detail: { formData },
+              bubbles: true,
+              composed: true
+            }));
+          });
+          mainStoryForm._hasSubmitListener = true;
+        }
+      }, 1000);
+      
+      // Add a global flag for processing state
+      window._isProcessing = false;
+      
+      // Override showLoading
+      const originalShowLoading = window.showLoading;
+      window.showLoading = function(message) {
+        window._isProcessing = true;
+        if (originalShowLoading) {
+          originalShowLoading(message);
+        }
+        // Force visibility through DOM
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+          loadingOverlay.setAttribute('visible', '');
+          loadingOverlay.style.display = 'flex';
+        }
+      };
+      
+      // Override hideLoading
+      const originalHideLoading = window.hideLoading;
+      window.hideLoading = function() {
+        window._isProcessing = false;
+        if (originalHideLoading) {
+          originalHideLoading();
+        }
+        // Force invisibility through DOM
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+          loadingOverlay.removeAttribute('visible');
+          loadingOverlay.style.display = 'none';
+        }
+      };
+      
+      // Ensure story result shows when story exists
+      const checkStoryVisibility = function() {
+        const storyResult = document.getElementById('story-result');
+        if (storyResult && window.currentStory && storyResult.classList.contains('hidden')) {
+          console.log('Periodic check: Making story-result visible');
+          storyResult.classList.remove('hidden');
+        }
+      };
+      
+      // Check periodically
+      setInterval(checkStoryVisibility, 500);
+    });
+  </script>
 </body>
 </html> 

@@ -99,7 +99,7 @@ export class LoadingOverlay extends LitElement {
   static get styles() {
     return css`
       :host {
-        display: none;
+        display: none !important;
         position: fixed;
         top: 0;
         left: 0;
@@ -114,6 +114,11 @@ export class LoadingOverlay extends LitElement {
       }
       
       :host([visible]) {
+        display: flex !important;
+      }
+
+      /* Direct style override to avoid CSS specificity issues */
+      :host([style*="display: flex"]) {
         display: flex !important;
       }
 
@@ -171,18 +176,40 @@ export class LoadingOverlay extends LitElement {
     `;
   }
   
+  updated(changedProps) {
+    if (changedProps.has('visible')) {
+      // Force update via DOM - important for WebKit and Firefox
+      if (this.visible) {
+        this.style.display = 'flex';
+        this.setAttribute('visible', '');
+        // Also update global processing flag
+        window._isProcessing = true;
+      } else {
+        this.style.display = 'none';
+        this.removeAttribute('visible');
+        // Also update global processing flag
+        window._isProcessing = false;
+      }
+    }
+  }
+  
   // Public API for direct manipulation
   show(message = 'Loading...') {
     this.message = message;
     this.visible = true;
     this.setAttribute('visible', '');
     this.style.display = 'flex';
+    // Also update global processing flag
+    window._isProcessing = true;
     this.requestUpdate();
   }
   
   hide() {
     this.visible = false;
     this.removeAttribute('visible');
+    this.style.display = 'none';
+    // Also update global processing flag
+    window._isProcessing = false;
     this.requestUpdate();
   }
 }
