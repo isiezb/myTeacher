@@ -8,6 +8,7 @@ import './continuation/vocabulary-display.js';
 import './continuation/continuation-form.js';
 import './continuation/continuation-result.js';
 import './continuation/error-message.js';
+import './continuation/focus-selector.js';
 import './story/story-quiz.js';
 
 export class StoryContinuation extends LitElement {
@@ -43,7 +44,8 @@ export class StoryContinuation extends LitElement {
     this._errorMessage = '';
     this._settings = {
       length: '300',
-      difficulty: 'same_level'
+      difficulty: 'same_level',
+      focus: 'general'
     };
     this._vocabularyItems = [];
     this._summary = '';
@@ -54,6 +56,13 @@ export class StoryContinuation extends LitElement {
     if (changedProperties.has('originalStory') && this.originalStory) {
       console.log('StoryContinuation: originalStory set:', this.originalStory.id);
       console.log('Content length:', this.originalStory.content?.length || 0);
+      
+      // Extract vocabulary items from the original story
+      if (this.originalStory.vocabulary && Array.isArray(this.originalStory.vocabulary)) {
+        this._vocabularyItems = this.originalStory.vocabulary;
+        console.log('Vocabulary items extracted from original story:', this._vocabularyItems);
+      }
+      
       // Reset any previous continuation content when a new story is set
       this._continuationContent = '';
       this._errorMessage = '';
@@ -118,7 +127,8 @@ export class StoryContinuation extends LitElement {
       difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
       original_story_content: originalContent,
       generate_summary: true,
-      generate_quiz: true
+      generate_quiz: true,
+      focus: this._settings.focus
     };
     
     // Log what we're about to do (limiting content length for logging)
@@ -169,7 +179,8 @@ export class StoryContinuation extends LitElement {
             wordCount: data.word_count || 0,
             vocabulary: data.vocabulary || [],
             summary: this._summary,
-            quiz: this._quiz
+            quiz: this._quiz,
+            focus: options.focus
           },
           bubbles: true,
           composed: true
@@ -186,18 +197,51 @@ export class StoryContinuation extends LitElement {
       if (window.ENV_USE_MOCK_DATA === true) {
         console.log('Using mock continuation data...');
         setTimeout(() => {
-          this._continuationContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
+          // Adjust the mock content based on the focus
+          let mockContent = '';
+          const focusTerm = this._settings.focus;
+          
+          if (focusTerm === 'general') {
+            mockContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
+          } else {
+            // Create a focus-specific mock continuation
+            mockContent = `This is a mock continuation of the story focusing on "${focusTerm}".\n\nThe characters dive deeper into understanding ${focusTerm} and its importance. They discuss various aspects of ${focusTerm} and how it relates to their subject.\n\nThrough practical examples and experiments, they gain a better comprehension of ${focusTerm}.`;
+          }
+          
+          this._continuationContent = mockContent;
           this._errorMessage = '';
+          
+          // Simulated vocabulary items with the focused term having higher importance if selected
           this._vocabularyItems = [
-            { term: "Sample Term 1", definition: "This is a sample definition for demonstration purposes.", importance: 9 },
-            { term: "Sample Term 2", definition: "Another sample definition to show how vocabulary works.", importance: 7 }
+            { 
+              term: focusTerm !== 'general' ? focusTerm : "Sample Term 1", 
+              definition: focusTerm !== 'general' ? 
+                "This term was the focus of your continuation request." : 
+                "This is a sample definition for demonstration purposes.", 
+              importance: 10 
+            },
+            { 
+              term: "Sample Term 2", 
+              definition: "Another sample definition to show how vocabulary works.", 
+              importance: 7 
+            }
           ];
-          this._summary = "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
+          
+          // Adjust mock summary to reflect the focus
+          this._summary = focusTerm !== 'general' ?
+            `This is a mock summary of the continuation focusing on "${focusTerm}". The characters explored this concept in depth.` :
+            "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
+          
+          // Adjust mock quiz to reflect the focus
           this._quiz = [
             { 
-              question: "What did the characters do in the continuation?", 
-              options: ["They went home", "They continued their adventure", "They went to sleep", "They had lunch"],
-              correct_answer: 1
+              question: focusTerm !== 'general' ? 
+                `What was the main focus of this continuation?` : 
+                "What did the characters do in the continuation?", 
+              options: focusTerm !== 'general' ? 
+                ["Another topic", focusTerm, "Nothing specific", "A different concept"] : 
+                ["They went home", "They continued their adventure", "They went to sleep", "They had lunch"],
+              correct_answer: focusTerm !== 'general' ? 1 : 1
             },
             {
               question: "What did the characters learn more about?",
@@ -205,6 +249,7 @@ export class StoryContinuation extends LitElement {
               correct_answer: 2
             }
           ];
+          
           this.requestUpdate();
         }, 1500);
       }
@@ -246,6 +291,7 @@ export class StoryContinuation extends LitElement {
         .settings=${this._settings}
         .isSubmitting=${this.isSubmitting}
         .hasOriginalStory=${!!this.originalStory}
+        .vocabularyItems=${this._vocabularyItems}
         @settings-change=${this._handleSettingsChange}
         @continue-requested=${this._handleContinueRequested}
       ></continuation-form>

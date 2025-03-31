@@ -134,7 +134,8 @@ const apiService = (function() {
         difficulty: options.difficulty || 'same',
         original_story_content: options.original_story_content || '',
         generate_summary: options.generate_summary || false,
-        generate_quiz: options.generate_quiz || false
+        generate_quiz: options.generate_quiz || false,
+        focus: options.focus || 'general'
       };
       
       // Log request details but limit content length in logs for readability

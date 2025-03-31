@@ -4,7 +4,8 @@ export class ContinuationForm extends LitElement {
   static properties = {
     settings: { type: Object },
     isSubmitting: { type: Boolean },
-    hasOriginalStory: { type: Boolean }
+    hasOriginalStory: { type: Boolean },
+    vocabularyItems: { type: Array }
   };
 
   static styles = css`
@@ -70,6 +71,13 @@ export class ContinuationForm extends LitElement {
       box-shadow: 0 0 0 3px rgba(94, 124, 230, 0.1);
     }
 
+    .separator {
+      width: 80%;
+      height: 1px;
+      background-color: var(--border, rgba(0, 0, 0, 0.1));
+      margin: 0.5rem 0;
+    }
+
     .continue-button {
       padding: 0.75rem 1.5rem;
       font-size: 1rem;
@@ -119,10 +127,12 @@ export class ContinuationForm extends LitElement {
     super();
     this.settings = {
       length: '300',
-      difficulty: 'same_level'
+      difficulty: 'same_level',
+      focus: 'general'
     };
     this.isSubmitting = false;
     this.hasOriginalStory = false;
+    this.vocabularyItems = [];
     console.log('ContinuationForm constructor called');
   }
 
@@ -140,6 +150,9 @@ export class ContinuationForm extends LitElement {
     }
     if (changedProperties.has('settings')) {
       console.log('ContinuationForm: settings updated to', this.settings);
+    }
+    if (changedProperties.has('vocabularyItems')) {
+      console.log('ContinuationForm: vocabularyItems updated:', this.vocabularyItems);
     }
   }
 
@@ -163,6 +176,21 @@ export class ContinuationForm extends LitElement {
     this.settings = {
       ...this.settings,
       difficulty
+    };
+    
+    // Dispatch event for parent component
+    this.dispatchEvent(new CustomEvent('settings-change', {
+      detail: { settings: this.settings },
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+  _handleFocusChange(e) {
+    const { focus } = e.detail;
+    this.settings = {
+      ...this.settings,
+      focus
     };
     
     // Dispatch event for parent component
@@ -204,6 +232,15 @@ export class ContinuationForm extends LitElement {
           ?disabled=${this.isSubmitting}
           @difficulty-change=${this._handleDifficultyChange}
         ></difficulty-selector>
+        
+        <div class="separator"></div>
+        
+        <focus-selector
+          .focus=${this.settings.focus}
+          .vocabularyItems=${this.vocabularyItems}
+          ?disabled=${this.isSubmitting}
+          @focus-change=${this._handleFocusChange}
+        ></focus-selector>
         
         <difficulty-description .difficulty=${this.settings.difficulty}></difficulty-description>
         
