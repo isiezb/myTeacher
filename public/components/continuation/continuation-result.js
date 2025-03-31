@@ -129,6 +129,34 @@ export class ContinuationResult extends LitElement {
     this.difficulty = 'same_level';
   }
 
+  firstUpdated() {
+    // After the component is first rendered, scroll to the first paragraph of the content
+    setTimeout(() => {
+      const continuationContent = this.shadowRoot.querySelector('.continuation-content');
+      if (continuationContent) {
+        const firstParagraph = continuationContent.querySelector('p');
+        if (firstParagraph) {
+          // Calculate position with header clearance
+          const headerHeight = 80; // Adjust if needed
+          const rect = firstParagraph.getBoundingClientRect();
+          const offsetTop = window.pageYOffset + rect.top - headerHeight;
+          
+          // Scroll to beginning of continuation content
+          window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+          });
+          
+          // Highlight the first paragraph briefly
+          firstParagraph.classList.add('highlight-new-content');
+          setTimeout(() => {
+            firstParagraph.classList.remove('highlight-new-content');
+          }, 2000);
+        }
+      }
+    }, 100); // Short timeout to ensure DOM is ready
+  }
+
   _handleContinueStory() {
     // Create a new story object that combines the original story and the continuation
     const continuedStory = {

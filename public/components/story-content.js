@@ -60,6 +60,36 @@ export class StoryContent extends LitElement {
     this.showQuiz = true;
   }
 
+  firstUpdated() {
+    // If there's a story and it's a newly loaded one, scroll to its first paragraph
+    if (this.story) {
+      setTimeout(() => {
+        const storyText = this.shadowRoot.querySelector('story-text');
+        if (storyText && storyText.shadowRoot) {
+          const firstParagraph = storyText.shadowRoot.querySelector('.story-text p');
+          if (firstParagraph) {
+            // Calculate position with header clearance
+            const headerHeight = 80; // Adjust based on your header height
+            const rect = firstParagraph.getBoundingClientRect();
+            const offsetTop = window.pageYOffset + rect.top - headerHeight;
+            
+            // Scroll to beginning of story content
+            window.scrollTo({
+              top: offsetTop,
+              behavior: 'smooth'
+            });
+            
+            // Highlight the first paragraph briefly
+            firstParagraph.classList.add('highlight-new-content');
+            setTimeout(() => {
+              firstParagraph.classList.remove('highlight-new-content');
+            }, 2000);
+          }
+        }
+      }, 100); // Short delay to ensure rendering is complete
+    }
+  }
+
   updated(changedProperties) {
     if (changedProperties.has('story') && this.story) {
       // Expose the story to the global window so it can be accessed by other components

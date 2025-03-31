@@ -402,9 +402,12 @@ Highlight Effects
 
 .highlight-new-content {
   animation: fade-highlight 2s ease-in-out;
-  border-left: 3px solid var(--primary, #5e7ce6);
+  border-left: 4px solid var(--primary, #5e7ce6);
   padding-left: 12px;
-  margin-left: -15px;
+  margin-left: -16px;
+  border-radius: 0 4px 4px 0;
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes pulse-highlight {
@@ -418,12 +421,20 @@ Highlight Effects
 
 @keyframes fade-highlight {
   0% {
-    background-color: rgba(94, 124, 230, 0.15);
+    background-color: rgba(94, 124, 230, 0.25);
+    transform: translateX(0);
+  }
+  10% {
+    transform: translateX(5px);
+  }
+  20% {
+    transform: translateX(0);
   }
   70% {
-    background-color: rgba(94, 124, 230, 0.05);
+    background-color: rgba(94, 124, 230, 0.1);
   }
   100% {
     background-color: transparent;
+    transform: translateX(0);
   }
 } 

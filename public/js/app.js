@@ -246,44 +246,31 @@
         storyResult.classList.remove('hidden');
       }
 
-      // Scroll to story display
-      if (storyResult) {
-        // First scroll to make the story container is visible
-        storyResult.scrollIntoView({ behavior: 'smooth' });
-        
-        // After a short delay, scroll to the actual story text content to ensure the user sees the beginning
-        setTimeout(() => {
-          // More specific selector to find the actual story text content
-          const storyText = document.querySelector('.story-content-container .story-text');
+      // Scroll to the actual story text content
+      const storyText = document.querySelector('.story-content-container .story-text');
+      if (storyText) {
+        // Find the first paragraph to scroll to
+        const firstParagraph = storyText.querySelector('p');
+        if (firstParagraph) {
+          // Calculate the position to scroll to with proper header clearance
+          const headerHeight = 80; // Adjust if needed based on your actual header height
+          const rect = firstParagraph.getBoundingClientRect();
+          const offsetTop = window.pageYOffset + rect.top - headerHeight;
           
-          if (storyText) {
-            console.log('Scrolling to story text content');
-            // Use scrollIntoView with block: 'start' to position at the top of the viewport
-            storyText.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // Find the first paragraph and highlight it briefly to draw attention
-            const firstParagraph = storyText.querySelector('p');
-            if (firstParagraph) {
-              // Calculate the position to scroll to
-              const headerHeight = 80; // Estimate header height, adjust as needed
-              const rect = firstParagraph.getBoundingClientRect();
-              const offsetTop = rect.top + window.pageYOffset - headerHeight;
-              
-              // Smoothly scroll to position the first paragraph at the top with header clearance
-              window.scrollTo({
-                top: offsetTop,
-                behavior: 'smooth'
-              });
-              
-              firstParagraph.classList.add('highlight-new-content');
-              setTimeout(() => {
-                firstParagraph.classList.remove('highlight-new-content');
-              }, 2000);
-            }
-          } else {
-            console.warn('Could not find story text element for scrolling');
-          }
-        }, 600); // Increased delay to ensure DOM is fully updated
+          // Smooth scroll to the beginning of the story content
+          window.scrollTo({
+            top: offsetTop,
+            behavior: 'smooth'
+          });
+          
+          // Add a temporary highlight effect
+          firstParagraph.classList.add('highlight-new-content');
+          setTimeout(() => {
+            firstParagraph.classList.remove('highlight-new-content');
+          }, 2000);
+        }
+      } else {
+        console.warn('Could not find story text element for scrolling');
       }
 
       // Save the story to Supabase if storage is enabled
