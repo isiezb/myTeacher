@@ -32,9 +32,9 @@
     </div>
 
     <div class="tab-content active" id="generator-tab">
-      <story-form></story-form>
+      <div data-component="story-form"></div>
       <div id="story-result" class="story-result hidden">
-        <story-content id="storyDisplay" showHeader="true" showSummary="true" showVocabulary="true" showQuiz="true"></story-content>
+        <div data-component="story-content" id="storyDisplay" showHeader="true" showSummary="true" showVocabulary="true" showQuiz="true"></div>
         <div class="story-actions">
           <!-- Continue Story button removed -->
         </div>
@@ -42,7 +42,7 @@
           <quiz-component id="quizComponent"></quiz-component>
         </div>
         <div id="continuation-container" class="continuation-container">
-          <story-continuation id="storyContinuation"></story-continuation>
+          <div data-component="story-continuation" id="storyContinuation"></div>
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@
       <stories-grid id="storiesGrid"></stories-grid>
       <div id="selected-story-view" class="hidden">
         <button id="backToListBtn" class="btn btn-secondary">Back to List</button>
-        <story-content id="storyContent"></story-content>
+        <div data-component="story-content" id="storyContent"></div>
       </div>
     </div>
   </main>
@@ -70,8 +70,16 @@
   <script src="js/debug.js"></script>
   <script src="js/env.js"></script>
   <script src="js/config.js"></script>
-  <!-- Import components first -->
-  <script type="module" src="components/index.js"></script>
+  
+  <!-- Use component loader instead of directly importing components -->
+  <script type="module" src="js/component-loader.js"></script>
+  
+  <!-- Other common components -->
+  <script type="module" src="components/toast-container.js"></script>
+  <script type="module" src="components/loading-overlay.js"></script>
+  <script type="module" src="components/stories-grid.js"></script>
+  <script type="module" src="components/quiz-component.js"></script>
+  
   <!-- Then load dependent scripts -->
   <script src="js/supabase.js"></script>
   <script src="js/api-service.js"></script>
@@ -152,12 +160,6 @@
       padding: 0 1rem;
     }
     
-    /* The Continue Story button has been removed, so this rule is no longer needed
-    .continuation-container + .story-actions button {
-      display: none;
-    }
-    */
-    
     /* Make the Continue Story button in the quiz results stand out */
     .quiz-continue-button {
       background-color: #22c55e !important;
@@ -187,9 +189,6 @@
       if (continuationContainer) {
         continuationContainer.style.display = 'none';
       }
-      
-      // We've removed the main Continue Story button, so this is no longer needed
-      // const continueStoryBtn = document.querySelector('.story-actions button');
       
       // Function to handle story continuation
       function handleContinueStory(storyObj) {
@@ -244,7 +243,7 @@
         // If we have a story and the continuation component
         if (window.currentStory) {
           // Find the continuation component
-          const continuationComponent = document.querySelector('story-continuation');
+          const continuationComponent = document.querySelector('#storyContinuation');
           
           if (continuationComponent) {
             // Set the original story
@@ -260,11 +259,6 @@
           window.showToast('No story to continue. Please generate a story first.', 'error');
         }
       }
-      
-      // The main button has been removed, so this listener is no longer needed
-      // if (continueStoryBtn) {
-      //   continueStoryBtn.addEventListener('click', () => handleContinueStory());
-      // }
       
       // Add event delegation for any "Continue Story" button
       document.addEventListener('click', (event) => {
