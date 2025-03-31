@@ -13,6 +13,8 @@ export class DifficultySelector extends LitElement {
       flex-direction: column;
       gap: 1rem;
       align-items: center;
+      margin: 0 auto;
+      max-width: 700px;
     }
     
     .difficulty-options label {
@@ -20,6 +22,7 @@ export class DifficultySelector extends LitElement {
       font-family: var(--font-heading, 'Inter', sans-serif);
       font-size: 1rem;
       color: var(--text-secondary, #6c757d);
+      text-align: center;
     }
     
     .difficulty-buttons {
@@ -28,6 +31,7 @@ export class DifficultySelector extends LitElement {
       justify-content: center;
       gap: 0.75rem;
       width: 100%;
+      margin: 0 auto;
     }
     
     .difficulty-button {
@@ -41,6 +45,7 @@ export class DifficultySelector extends LitElement {
       cursor: pointer;
       transition: all 0.2s ease;
       width: 110px;
+      margin: 0 5px;
     }
     
     .difficulty-button:hover {
@@ -65,6 +70,20 @@ export class DifficultySelector extends LitElement {
     }
 
     @media (max-width: 768px) {
+      .difficulty-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 500px;
+      }
+      
+      .difficulty-button {
+        width: 120px;
+        margin-bottom: 10px;
+      }
+    }
+
+    @media (max-width: 500px) {
       .difficulty-buttons {
         flex-direction: column;
         align-items: center;

@@ -11,6 +11,8 @@ export class ContinuationForm extends LitElement {
     :host {
       display: block;
       width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .continuation-form {
@@ -19,6 +21,7 @@ export class ContinuationForm extends LitElement {
       gap: 1.5rem;
       margin-bottom: 1.5rem;
       align-items: center;
+      width: 100%;
     }
 
     h3 {
@@ -28,6 +31,7 @@ export class ContinuationForm extends LitElement {
       margin-bottom: 1.5rem;
       font-weight: 700;
       text-align: center;
+      width: 100%;
     }
 
     .input-group {
@@ -36,6 +40,7 @@ export class ContinuationForm extends LitElement {
       gap: 0.5rem;
       width: 100%;
       max-width: 400px;
+      margin: 0 auto;
     }
 
     .input-group label {

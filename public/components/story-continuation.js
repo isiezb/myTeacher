@@ -23,6 +23,14 @@ export class StoryContinuation extends LitElement {
       border-top: 2px solid var(--border, rgba(0, 0, 0, 0.1));
       font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
       max-width: 800px;
+      width: 100%;
+      text-align: center;
+    }
+
+    :host > * {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
     }
   `;
 
