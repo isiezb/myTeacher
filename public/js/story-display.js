@@ -132,12 +132,16 @@ document.addEventListener('story-continued', (event) => {
         if (firstParagraph) {
             // Calculate the position to scroll to with proper header clearance
             const headerHeight = 80; // Adjust if needed based on your actual header height
-            const rect = firstParagraph.getBoundingClientRect();
-            const offsetTop = window.pageYOffset + rect.top - headerHeight;
+            
+            // Get the position of the element relative to the top of the document
+            const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
+            
+            // Subtract the header height to position it below the header
+            const offsetPosition = elementPosition - headerHeight;
             
             // Smooth scroll to the beginning of the new content
             window.scrollTo({
-                top: offsetTop,
+                top: offsetPosition,
                 behavior: 'smooth'
             });
             

@@ -138,12 +138,16 @@ export class ContinuationResult extends LitElement {
         if (firstParagraph) {
           // Calculate position with header clearance
           const headerHeight = 80; // Adjust if needed
-          const rect = firstParagraph.getBoundingClientRect();
-          const offsetTop = window.pageYOffset + rect.top - headerHeight;
+          
+          // Get the position of the element relative to the top of the document
+          const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
+          
+          // Subtract the header height to position it below the header
+          const offsetPosition = elementPosition - headerHeight;
           
           // Scroll to beginning of continuation content
           window.scrollTo({
-            top: offsetTop,
+            top: offsetPosition,
             behavior: 'smooth'
           });
           
