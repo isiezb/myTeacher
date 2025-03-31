@@ -118,6 +118,24 @@ export class ContinuationForm extends LitElement {
     };
     this.isSubmitting = false;
     this.hasOriginalStory = false;
+    console.log('ContinuationForm constructor called');
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    console.log('ContinuationForm connected', {
+      settings: this.settings,
+      hasOriginalStory: this.hasOriginalStory
+    });
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('hasOriginalStory')) {
+      console.log('ContinuationForm: hasOriginalStory updated to', this.hasOriginalStory);
+    }
+    if (changedProperties.has('settings')) {
+      console.log('ContinuationForm: settings updated to', this.settings);
+    }
   }
 
   _handleInputChange(e) {

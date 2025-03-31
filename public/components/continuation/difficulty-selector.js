@@ -87,18 +87,26 @@ export class DifficultySelector extends LitElement {
     super();
     this.difficulty = 'same_level';
     this.disabled = false;
+    console.log('DifficultySelector constructor called');
   }
 
-  _handleDifficultyChange(difficulty) {
-    this.difficulty = difficulty;
+  connectedCallback() {
+    super.connectedCallback();
+    console.log('DifficultySelector connected', {difficulty: this.difficulty});
+  }
+
+  _handleDifficultyChange(newDifficulty) {
+    console.log('DifficultySelector: difficulty changed to', newDifficulty);
+    this.difficulty = newDifficulty;
     this.dispatchEvent(new CustomEvent('difficulty-change', {
-      detail: { difficulty },
+      detail: { difficulty: newDifficulty },
       bubbles: true,
       composed: true
     }));
   }
 
   render() {
+    console.log('DifficultySelector render called with difficulty:', this.difficulty);
     return html`
       <div class="difficulty-options">
         <label>Difficulty Level</label>

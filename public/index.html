@@ -237,13 +237,28 @@
           const continuationComponent = document.querySelector('#storyContinuationContainer');
           
           if (continuationComponent) {
+            console.log('Found story continuation component:', continuationComponent.tagName);
+            
+            // Test if the component is properly defined
+            console.log('Component prototype chain:', 
+              Object.getPrototypeOf(continuationComponent).constructor.name);
+            
             // Set the original story
             continuationComponent.originalStory = window.currentStory;
+            console.log('Set originalStory on continuation component');
+            
+            // Force a render update
+            if (typeof continuationComponent.requestUpdate === 'function') {
+              continuationComponent.requestUpdate();
+              console.log('Requested update on continuation component');
+            }
             
             // Scroll to the continuation section
             continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
           } else {
             console.error('Continuation component not found!');
+            console.log('Available components in continuation container:', 
+              continuationContainer ? continuationContainer.innerHTML : 'N/A');
           }
         } else {
           console.error('No story to continue!');

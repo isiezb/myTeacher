@@ -174,6 +174,13 @@ export class StoryContinuation extends LitElement {
   }
 
   render() {
+    console.log('StoryContinuation render called', {
+      hasErrorMessage: !!this._errorMessage,
+      hasContinuationContent: !!this._continuationContent,
+      hasOriginalStory: !!this.originalStory,
+      storyId: this.originalStory?.id
+    });
+    
     // If there's an error message, show it
     if (this._errorMessage) {
       return html`<error-message .message=${this._errorMessage}></error-message>`;

@@ -89,6 +89,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('Error reporting initialized');
     }
 
+    // Add a debug function to log registered web components
+    console.log('Loading EasyStory components...');
+
+    // Add a function to help check if components are registered
+    window.checkComponentRegistration = function() {
+      console.log('Checking component registration:');
+      console.log('story-continuation registered:', !!customElements.get('story-continuation'));
+      console.log('continuation-form registered:', !!customElements.get('continuation-form'));
+      console.log('difficulty-selector registered:', !!customElements.get('difficulty-selector'));
+      console.log('difficulty-description registered:', !!customElements.get('difficulty-description'));
+      
+      // Check if continuation container exists
+      const contContainer = document.getElementById('continuation-container');
+      console.log('continuation-container exists:', !!contContainer);
+      if (contContainer) {
+        console.log('continuation-container contents:', contContainer.innerHTML);
+      }
+      
+      // Check if story continuation container exists
+      const storyContComponent = document.getElementById('storyContinuationContainer');
+      console.log('storyContinuationContainer exists:', !!storyContComponent);
+      if (storyContComponent) {
+        console.log('storyContinuationContainer tagName:', storyContComponent.tagName);
+      }
+    };
+
+    // Call the check function after a small delay to ensure components are loaded
+    setTimeout(() => {
+      window.checkComponentRegistration();
+    }, 1000);
+
   } catch (error) {
     console.error('Error initializing application:', error);
     // Show error in the app container
