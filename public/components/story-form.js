@@ -142,6 +142,14 @@ export class StoryForm extends LitElement {
       return;
     }
     
+    // Prevent submitting if already in progress
+    if (this.isSubmitting) {
+      return;
+    }
+    
+    // Update submission state
+    this.isSubmitting = true;
+    
     // Prepare data for submission
     const formData = { ...this._formData };
     
@@ -335,6 +343,7 @@ export class StoryForm extends LitElement {
             <submit-button
               ?isLoading=${this.isSubmitting}
               label="Generate Story"
+              @button-click=${this._handleSubmit}
             ></submit-button>
           </div>
         </form>

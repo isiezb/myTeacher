@@ -69,11 +69,26 @@ class SubmitButton extends LitElement {
     this.disabled = false;
     this.label = 'Submit';
   }
+  
+  _handleClick(e) {
+    // Prevent default button behavior
+    e.preventDefault();
+    
+    // If not disabled or loading, dispatch submit event
+    if (!this.isLoading && !this.disabled) {
+      this.dispatchEvent(new CustomEvent('button-click', {
+        bubbles: true,
+        composed: true
+      }));
+    }
+  }
 
   render() {
     return html`
       <div class="form-actions">
-        <button type="submit" ?disabled=${this.isLoading || this.disabled}>
+        <button type="submit" 
+          ?disabled=${this.isLoading || this.disabled}
+          @click=${this._handleClick}>
           <div class="spinner"></div>
           ${this.label}
         </button>
