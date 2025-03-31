@@ -10,6 +10,7 @@ const ENV = {
   // Feature flags and debug settings
   DEBUG: window.RENDER_DEBUG === "true" || false,
   ENABLE_STORAGE: window.RENDER_ENABLE_STORAGE !== "false", // Enabled by default
+  USE_MOCK_DATA: true, // Always use mock data for immediate loading
   
   // Error reporting configuration
   ERROR_REPORTING: {
