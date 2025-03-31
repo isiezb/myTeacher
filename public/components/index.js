@@ -92,6 +92,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Add a debug function to log registered web components
     console.log('Loading EasyStory components...');
 
+    // Check if custom elements are properly defined
+    const componentDefinitions = {
+      'story-continuation': 'StoryContinuation',
+      'continuation-form': 'ContinuationForm',
+      'difficulty-selector': 'DifficultySelector',
+      'difficulty-description': 'DifficultyDescription',
+      'story-content': 'StoryContent',
+      'story-form': 'StoryForm'
+    };
+
+    Object.entries(componentDefinitions).forEach(([tag, className]) => {
+      if (!customElements.get(tag)) {
+        console.error(`Critical: Custom element <${tag}> is not registered. UI may fail to display properly.`);
+      }
+    });
+
     // Add a function to help check if components are registered
     window.checkComponentRegistration = function() {
       console.log('Checking component registration:');
