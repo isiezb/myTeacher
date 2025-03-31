@@ -113,8 +113,22 @@ document.addEventListener('story-continued', (event) => {
             });
         }
         
-        // Scroll to the continuation
+        // First scroll to the continuation divider
         divider.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Then after a short delay, scroll to show the first paragraph of the continued story
+        setTimeout(() => {
+            const firstParagraph = continuationDiv.querySelector('p');
+            if (firstParagraph) {
+                firstParagraph.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Add a temporary highlight effect to help identify where the continuation begins
+                firstParagraph.classList.add('highlight-new-content');
+                setTimeout(() => {
+                    firstParagraph.classList.remove('highlight-new-content');
+                }, 2000);
+            }
+        }, 300);
         
         // Show a success message
         if (window.showToast) {

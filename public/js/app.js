@@ -248,7 +248,15 @@
 
       // Scroll to story display
       if (storyResult) {
-        storyResult.scrollIntoView({ behavior: 'smooth' });
+        storyResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // After a short delay, scroll to the actual story content to ensure the user sees the beginning
+        setTimeout(() => {
+          const storyContentElement = document.querySelector('.story-content .story-text');
+          if (storyContentElement) {
+            storyContentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 300);
       }
 
       // Save the story to Supabase if storage is enabled
@@ -502,8 +510,22 @@
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
     
-    // Scroll to the continuation container
-    continuationContainer.scrollIntoView({ behavior: 'smooth' });
+    // Scroll to the continuation container with focus on the form
+    continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // After a short delay, focus on the difficulty selector to draw attention
+    setTimeout(() => {
+      const difficultySelector = continuationContainer.querySelector('difficulty-selector');
+      if (difficultySelector) {
+        difficultySelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Add a temporary highlight effect to the difficulty selector
+        difficultySelector.classList.add('highlight-element');
+        setTimeout(() => {
+          difficultySelector.classList.remove('highlight-element');
+        }, 1500);
+      }
+    }, 300);
     
     window.showToast?.('Ready to continue your story!', 'info');
   }
@@ -546,8 +568,22 @@
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
     
-    // Scroll to the continuation container
-    continuationContainer.scrollIntoView({ behavior: 'smooth' });
+    // Scroll to the continuation container with focus on the form
+    continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // After a short delay, focus on the difficulty selector to draw attention
+    setTimeout(() => {
+      const difficultySelector = continuationContainer.querySelector('difficulty-selector');
+      if (difficultySelector) {
+        difficultySelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Add a temporary highlight effect to the difficulty selector
+        difficultySelector.classList.add('highlight-element');
+        setTimeout(() => {
+          difficultySelector.classList.remove('highlight-element');
+        }, 1500);
+      }
+    }, 300);
     
     window.showToast?.('Ready to continue your story further!', 'info');
   }
