@@ -98,21 +98,40 @@ export class ContinuationResult extends LitElement {
     .continue-button {
       display: block;
       margin: 2rem auto 1rem auto;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 0.85rem 1.75rem;
+      font-size: 1.1rem;
+      font-weight: 700;
       color: white;
       background: var(--primary, #5e7ce6);
       border: none;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .continue-button:hover {
       background: var(--primary-600, #4a63b9);
       transform: translateY(-2px);
-      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+      box-shadow: var(--shadow-md, 0 4px 8px rgba(0, 0, 0, 0.15));
+    }
+    
+    .continue-button-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+    }
+    
+    .continue-message {
+      font-family: var(--font-heading, 'Inter', sans-serif);
+      font-size: 1.1rem;
+      color: var(--text, #212529);
+      margin-bottom: 1rem;
+      font-weight: 600;
+      text-align: center;
     }
 
     @keyframes fadeIn {
@@ -249,9 +268,14 @@ export class ContinuationResult extends LitElement {
           </div>
         ` : ''}
         
-        <button class="continue-button" @click=${this._handleContinueStory}>
-          Continue Story
-        </button>
+        <div class="continue-button-container">
+          <div class="continue-message">
+            Ready to continue your learning journey?
+          </div>
+          <button class="continue-button" @click=${this._handleContinueStory}>
+            Continue Learning
+          </button>
+        </div>
       </div>
     `;
   }
