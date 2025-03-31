@@ -56,11 +56,17 @@ const config = {
     '<script type="module" src="components/grid/story-item.js"></script>',
     '<script type="module" src="components/grid/refresh-button.js"></script>',
     
+    // Quiz components
+    '<script type="module" src="components/quiz/quiz-option.js"></script>',
+    '<script type="module" src="components/quiz/quiz-question.js"></script>',
+    '<script type="module" src="components/quiz/quiz-results.js"></script>',
+    
     // Main refactored components
     '<script type="module" src="components/story-form-refactored.js"></script>',
     '<script type="module" src="components/story-content-refactored.js"></script>',
     '<script type="module" src="components/story-continuation-refactored.js"></script>',
-    '<script type="module" src="components/stories-grid-refactored.js"></script>'
+    '<script type="module" src="components/stories-grid-refactored.js"></script>',
+    '<script type="module" src="components/quiz-component-refactored.js"></script>'
   ],
   APP_INIT_SCRIPTS: [
     '<script type="module" src="js/app.js"></script>'

@@ -28,6 +28,7 @@ export function initializeComponents() {
   const storyContentContainers = document.querySelectorAll('[data-component="story-content"]');
   const storyContinuationContainers = document.querySelectorAll('[data-component="story-continuation"]');
   const storiesGridContainers = document.querySelectorAll('[data-component="stories-grid"]');
+  const quizContainers = document.querySelectorAll('[data-component="quiz"]');
   
   if (USE_REFACTORED_COMPONENTS) {
     // Replace with refactored components
@@ -35,6 +36,7 @@ export function initializeComponents() {
     const contentTag = 'story-content-refactored';
     const continuationTag = 'story-continuation-refactored';
     const gridTag = 'stories-grid-refactored';
+    const quizTag = 'quiz-component-refactored';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -59,6 +61,12 @@ export function initializeComponents() {
       storiesGridContainers.forEach(container => initializeComponent(container, gridTag));
     } else {
       console.warn(`⚠️ Component ${gridTag} is not defined`);
+    }
+    
+    if (isElementDefined(quizTag)) {
+      quizContainers.forEach(container => initializeComponent(container, quizTag));
+    } else {
+      console.warn(`⚠️ Component ${quizTag} is not defined`);
     }
   } else {
     // Use original components
@@ -66,6 +74,7 @@ export function initializeComponents() {
     const contentTag = 'story-content';
     const continuationTag = 'story-continuation';
     const gridTag = 'stories-grid';
+    const quizTag = 'quiz-component';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -90,6 +99,12 @@ export function initializeComponents() {
       storiesGridContainers.forEach(container => initializeComponent(container, gridTag));
     } else {
       console.warn(`⚠️ Component ${gridTag} is not defined`);
+    }
+    
+    if (isElementDefined(quizTag)) {
+      quizContainers.forEach(container => initializeComponent(container, quizTag));
+    } else {
+      console.warn(`⚠️ Component ${quizTag} is not defined`);
     }
   }
   
@@ -126,5 +141,6 @@ export const components = {
   StoryForm: USE_REFACTORED_COMPONENTS ? 'story-form-refactored' : 'story-form',
   StoryContent: USE_REFACTORED_COMPONENTS ? 'story-content-refactored' : 'story-content',
   StoryContinuation: USE_REFACTORED_COMPONENTS ? 'story-continuation-refactored' : 'story-continuation',
-  StoriesGrid: USE_REFACTORED_COMPONENTS ? 'stories-grid-refactored' : 'stories-grid'
+  StoriesGrid: USE_REFACTORED_COMPONENTS ? 'stories-grid-refactored' : 'stories-grid',
+  QuizComponent: USE_REFACTORED_COMPONENTS ? 'quiz-component-refactored' : 'quiz-component'
 };
