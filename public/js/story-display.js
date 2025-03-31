@@ -52,8 +52,11 @@ document.addEventListener('story-continued', (event) => {
             const vocabSection = document.createElement('section');
             vocabSection.className = 'story-vocabulary continuation-vocabulary';
             
+            // Limit to 4 vocabulary items
+            const limitedVocabulary = vocabulary.slice(0, 4);
+            
             let vocabHtml = '<h3>Vocabulary</h3><div class="vocabulary-list">';
-            for (const item of vocabulary) {
+            for (const item of limitedVocabulary) {
                 vocabHtml += `
                     <div class="vocabulary-item">
                         <div class="vocabulary-term">${item.term}</div>

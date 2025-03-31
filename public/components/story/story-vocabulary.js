@@ -69,11 +69,14 @@ class StoryVocabulary extends LitElement {
       return html``;
     }
 
+    // Limit vocabulary items to 4
+    const displayedVocabulary = this.vocabulary.slice(0, 4);
+
     return html`
       <div class="story-vocabulary">
         <h3 class="vocabulary-title">Vocabulary</h3>
         <div class="vocabulary-list">
-          ${this.vocabulary.map(item => html`
+          ${displayedVocabulary.map(item => html`
             <div class="vocabulary-item">
               <div class="vocabulary-term">${item.term}</div>
               <div class="vocabulary-definition">${item.definition}</div>

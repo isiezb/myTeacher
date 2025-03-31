@@ -154,8 +154,8 @@ def _build_llm_prompt(request: StoryGenerationRequest) -> Tuple[str, str]:
         output_schema["summary"] = "string (Concise 2-3 sentence summary)"
 
     if request.generate_vocabulary:
-        prompt_lines.append("- Generate a list of 5-7 key vocabulary words relevant to the grade level and subject, each with a simple definition.")
-        output_schema["vocabulary"] = '[{"term": "string", "definition": "string"}] (List of 5-7 vocabulary words and definitions)'
+        prompt_lines.append("- Generate a list of 4 key vocabulary words relevant to the grade level and subject, each with a simple definition.")
+        output_schema["vocabulary"] = '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words and definitions)'
 
     if request.generate_quiz:
         prompt_lines.append("- Generate a quiz with 3-5 multiple-choice questions about the story content. Each question should have 4 options with one correct answer.")
@@ -275,12 +275,12 @@ def _build_continuation_prompt(story_id: str, request: StoryContinuationRequest)
         "\nRequirements:",
         "- Generate a natural continuation of the story that picks up exactly where the original left off.",
         "- Maintain consistent characters, setting, and educational themes.",
-        "- Include 3-5 relevant vocabulary items that align with the specified difficulty level."
+        "- Include 4 relevant vocabulary items that align with the specified difficulty level."
     ]
 
     output_schema = {
         "continuation_text": "string (The continuation of the story, with paragraphs separated by double line breaks '\\n\\n')",
-        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 3-5 vocabulary words used in the continuation)'
+        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words used in the continuation)'
     }
 
     # Describe the JSON structure for the system prompt

@@ -68,11 +68,14 @@ export class VocabularyDisplay extends LitElement {
       return html``;
     }
 
+    // Limit vocabulary items to 4
+    const displayedVocabulary = this.vocabularyItems.slice(0, 4);
+
     return html`
       <div class="vocabulary-section">
         <h3>New Vocabulary</h3>
         <div class="vocabulary-list">
-          ${this.vocabularyItems.map(item => html`
+          ${displayedVocabulary.map(item => html`
             <div class="vocabulary-item">
               <h4 class="vocabulary-term">${item.term}</h4>
               <p class="vocabulary-definition">${item.definition}</p>
