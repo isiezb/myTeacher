@@ -127,22 +127,6 @@ export class ContinuationResult extends LitElement {
     this.summary = '';
     this.quiz = [];
     this.difficulty = 'same_level';
-    console.log('ContinuationResult constructor called');
-  }
-
-  updated(changedProperties) {
-    if (changedProperties.has('summary')) {
-      console.log('ContinuationResult summary updated:', this.summary);
-    }
-    if (changedProperties.has('continuationContent')) {
-      console.log('ContinuationResult content updated, length:', this.continuationContent?.length || 0);
-    }
-    if (changedProperties.has('vocabularyItems')) {
-      console.log('ContinuationResult vocabulary updated, count:', this.vocabularyItems?.length || 0);
-    }
-    if (changedProperties.has('quiz')) {
-      console.log('ContinuationResult quiz updated, count:', this.quiz?.length || 0);
-    }
   }
 
   _handleContinueStory() {
@@ -175,14 +159,6 @@ export class ContinuationResult extends LitElement {
     const formattedContinuation = this.continuationContent
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>');
-      
-    // Create a story object to pass to the story-utilities component
-    const storyData = {
-      content: this.continuationContent,
-      summary: this.summary,
-      vocabulary: this.vocabularyItems,
-      quiz: this.quiz
-    };
       
     return html`
       <div class="continuation-result">
@@ -218,8 +194,6 @@ export class ContinuationResult extends LitElement {
             <story-quiz .quiz=${this.quiz}></story-quiz>
           </div>
         ` : ''}
-        
-        <story-utilities .story=${storyData}></story-utilities>
         
         <button class="continue-button" @click=${this._handleContinueStory}>
           Continue Story

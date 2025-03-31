@@ -126,47 +126,21 @@
 
   // Set up story components
   async function setupStoryComponents() {
-    // Set up story form with retry mechanism
+    // Set up story form
     const generatorTab = document.getElementById('generator-tab');
     if (generatorTab) {
-      // Create a function to set up the story form with retry
-      const setupStoryForm = () => {
-        // Look for direct tag first, then data-component
-        let storyForm = generatorTab.querySelector('story-form');
-        if (!storyForm) {
-          storyForm = generatorTab.querySelector('[data-component="story-form"]');
-        }
-        
-        // If not found, create it
-        if (!storyForm) {
-          console.log('Setting up story form');
-          storyForm = document.createElement('story-form');
-          generatorTab.insertBefore(storyForm, generatorTab.firstChild);
-          componentStatus['story-form'] = true;
-          
-          // Add event listener for form submission
-          storyForm.addEventListener('story-form-submit', handleStoryFormSubmit);
-          
-          return true; // Successfully created
-        } else {
-          console.log('Story form already exists');
-          return true; // Already exists
-        }
-      };
+      // Look for direct tag first, then data-component
+      let storyForm = generatorTab.querySelector('story-form');
+      if (!storyForm) {
+        storyForm = generatorTab.querySelector('[data-component="story-form"]');
+      }
       
-      // Try to set up the story form
-      let success = setupStoryForm();
-      
-      // If not successful initially, retry after a delay
-      if (!success) {
-        console.log('Initial story form setup failed, retrying in 500ms');
-        setTimeout(() => {
-          success = setupStoryForm();
-          if (!success) {
-            console.error('Failed to set up story form component after retry');
-            window.showToast?.('Error setting up story form', 'error');
-          }
-        }, 500);
+      // If not found, create it
+      if (!storyForm) {
+        console.log('Setting up story form');
+        storyForm = document.createElement('story-form');
+        generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+        componentStatus['story-form'] = true;
       }
     }
 
@@ -220,28 +194,17 @@
     const formData = event.detail.formData;
     console.log('Form data submitted:', formData);
 
-    try {
-      // Show loading indicator - make sure we call the global function
-      if (typeof window.showLoading === 'function') {
-        window.showLoading('Creating your educational story...');
-        console.log('Loading overlay should be shown now');
-      } else {
-        console.error('window.showLoading function not found');
-        // Fallback loading method
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-          loadingOverlay.setAttribute('visible', '');
-          loadingOverlay.message = 'Creating your educational story...';
-        }
-      }
+    // Show loading indicator
+    window.showLoading?.('Creating your educational story...');
 
-      // Find the form component - either direct tag or data-component
-      const formComponent = document.querySelector('story-form') || 
+    // Find the form component - either direct tag or data-component
+    const formComponent = document.querySelector('story-form') || 
                           document.querySelector('[data-component="story-form"]');
-      if (formComponent) {
-        formComponent.isSubmitting = true;
-      }
+    if (formComponent) {
+      formComponent.isSubmitting = true;
+    }
 
+    try {
       // Call API to generate story
       const story = await generateStory(formData);
 
@@ -261,27 +224,13 @@
         
         if (storyComponent) {
           console.log(`Updating component <${storyComponentTag}>`, storyComponent.tagName);
-          // Directly set the story property
           storyComponent.story = story;
-          
-          // Force component update
-          if (typeof storyComponent.requestUpdate === 'function') {
-            storyComponent.requestUpdate();
-          }
-          
           // Trigger custom event for story update
           storyComponent.dispatchEvent(new CustomEvent('story-updated', {
             bubbles: true,
             composed: true,
             detail: { story: story }
           }));
-          
-          // Make sure story-result is visible
-          const storyResult = document.getElementById('story-result');
-          if (storyResult && storyResult.classList.contains('hidden')) {
-            console.log('Removing hidden class from story-result');
-            storyResult.classList.remove('hidden');
-          }
         } else {
            console.error(`Could not find component <${storyComponentTag}> inside or as #storyDisplayContainer`);
            window.showToast?.('Error updating display area.', 'error');
@@ -294,13 +243,7 @@
       // Show the story result container if hidden
       const storyResult = document.getElementById('story-result');
       if (storyResult) {
-        if (storyResult.classList.contains('hidden')) {
-          console.log('Removing hidden class from story-result again');
-          storyResult.classList.remove('hidden');
-        }
-        
-        // Force reflow
-        void storyResult.offsetWidth;
+        storyResult.classList.remove('hidden');
       }
 
       // Scroll to story display
@@ -358,17 +301,7 @@
       window.showToast?.('Failed to generate story. Please try again.', 'error');
     } finally {
       // Hide loading indicator
-      if (typeof window.hideLoading === 'function') {
-        window.hideLoading();
-        console.log('Loading overlay should be hidden now');
-      } else {
-        console.error('window.hideLoading function not found');
-        // Fallback hide loading method
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-          loadingOverlay.removeAttribute('visible');
-        }
-      }
+      window.hideLoading?.();
 
       // Reset form submitting state
       if (formComponent) {
@@ -442,12 +375,10 @@
   function mockGenerateStory(formData) {
     // Mock response for testing
     console.log('Using mock story generation (no API service available)');
-    console.log('Mock generation with form data:', formData);
     
     // Simulating network delay
     return new Promise(resolve => setTimeout(() => {
-      // Create mock story with guaranteed summary, vocabulary, and quiz
-      const mockStory = {
+      resolve({
         id: 'mock-story-' + Date.now(),
         title: `A Story About ${formData.subject}`,
         content: `Once upon a time in ${formData.setting || 'a magical land'}, there was ${formData.main_character || 'a curious student'} who loved learning about ${formData.subject}.\n\n` +
@@ -459,19 +390,13 @@
         academic_grade: formData.academic_grade,
         subject: formData.subject,
         word_count: formData.word_count,
-        
-        // Always include summary regardless of form setting
-        summary: `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.`,
-        
-        // Always include vocabulary with importance ranking
-        vocabulary: [
+        summary: formData.generate_summary ? `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.` : null,
+        vocabulary: formData.generate_vocabulary ? [
           { term: `${formData.subject} Term 1`, definition: 'Definition for the first term related to the subject.', importance: 10 },
           { term: `${formData.subject} Term 2`, definition: 'Definition for the second term related to the subject.', importance: 8 },
           { term: `${formData.subject} Term 3`, definition: 'Definition for the third term related to the subject.', importance: 6 }
-        ],
-        
-        // Always include quiz regardless of form setting
-        quiz: [
+        ] : null,
+        quiz: formData.generate_quiz ? [
           {
             question: `What is the main subject of this story?`,
             options: [formData.subject, 'History', 'Mathematics', 'Art'],
@@ -487,11 +412,8 @@
             options: ['Kindergarten', 'Elementary', 'Middle School', formData.academic_grade],
             correct_answer: 3
           }
-        ]
-      };
-      
-      console.log('Mock story generated with summary:', mockStory.summary?.substring(0, 50) + '...');
-      resolve(mockStory);
+        ] : null
+      });
     }, 2000));
   }
 

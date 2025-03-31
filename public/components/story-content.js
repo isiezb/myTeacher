@@ -4,7 +4,6 @@ import './story/story-text.js';
 import './story/story-summary.js';
 import './story/story-vocabulary.js';
 import './story/story-quiz.js';
-import './story/story-utilities.js';
 
 export class StoryContent extends LitElement {
   static properties = {
@@ -59,20 +58,6 @@ export class StoryContent extends LitElement {
     this.showSummary = true;
     this.showVocabulary = true;
     this.showQuiz = true;
-    
-    console.log('StoryContent component initialized');
-  }
-  
-  connectedCallback() {
-    super.connectedCallback();
-    console.log('StoryContent connected to DOM');
-    
-    // Check if we already have a story in the window
-    if (window.currentStory && !this.story) {
-      console.log('Found window.currentStory, using it');
-      this.story = window.currentStory;
-      this.requestUpdate();
-    }
   }
 
   updated(changedProperties) {
@@ -83,39 +68,12 @@ export class StoryContent extends LitElement {
         window.currentStory = this.story;
       }
       
-      // Log story details to help debug summary issues
-      console.log('StoryContent updated with story:', {
-        id: this.story.id,
-        contentLength: this.story.content?.length || 0,
-        hasSummary: !!this.story.summary,
-        summaryLength: this.story.summary?.length || 0,
-        summaryPreview: this.story.summary ? this.story.summary.substring(0, 50) + '...' : 'none',
-        hasVocabulary: !!this.story.vocabulary && Array.isArray(this.story.vocabulary),
-        vocabularyCount: (this.story.vocabulary || []).length,
-        hasQuiz: !!this.story.quiz && Array.isArray(this.story.quiz),
-        quizCount: (this.story.quiz || []).length,
-        showSummary: this.showSummary
-      });
-      
-      // Dispatch custom events to notify parent components
+      // Dispatch a custom event to notify parent components
       this.dispatchEvent(new CustomEvent('story-loaded', { 
         detail: { story: this.story },
         bubbles: true, 
         composed: true 
       }));
-      
-      this.dispatchEvent(new CustomEvent('story-updated', { 
-        detail: { story: this.story },
-        bubbles: true, 
-        composed: true 
-      }));
-      
-      // Make sure parent container is visible
-      const storyResult = this.closest('#story-result');
-      if (storyResult && storyResult.classList.contains('hidden')) {
-        console.log('Removing hidden class from story-result from within component');
-        storyResult.classList.remove('hidden');
-      }
     }
   }
 
@@ -139,8 +97,6 @@ export class StoryContent extends LitElement {
   }
 
   render() {
-    console.log('StoryContent render called, has story:', !!this.story);
-    
     if (!this.story) {
       return html`
         <div class="story-content-container">
@@ -151,8 +107,6 @@ export class StoryContent extends LitElement {
 
     // Only show the continue button if there's no quiz or showQuiz is false
     const shouldShowContinueButton = !this.showQuiz || !this.story.quiz;
-    
-    console.log('Rendering story with content length:', this.story.content?.length || 0);
 
     return html`
       <div class="story-content-container">
@@ -177,8 +131,6 @@ export class StoryContent extends LitElement {
           html`<story-quiz .quiz=${this.story.quiz}></story-quiz>` : 
           ''
         }
-        
-        <story-utilities .story=${this.story}></story-utilities>
         
         ${shouldShowContinueButton ? 
           html`<button class="continue-button" @click=${this._handleContinueStory}>

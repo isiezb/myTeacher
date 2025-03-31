@@ -32,23 +32,13 @@ class StorySummary extends LitElement {
   constructor() {
     super();
     this.summary = '';
-    console.log('StorySummary component initialized');
-  }
-
-  updated(changedProperties) {
-    if (changedProperties.has('summary')) {
-      console.log('StorySummary summary updated:', this.summary ? 
-        this.summary.substring(0, 50) + '...' : 'empty');
-    }
   }
 
   render() {
     if (!this.summary) {
-      console.log('StorySummary render called but summary is empty');
       return html``;
     }
 
-    console.log('StorySummary rendering with summary of length:', this.summary.length);
     return html`
       <div class="story-summary">
         <h3 class="summary-title">Summary</h3>

@@ -30,14 +30,6 @@
   <!-- Component system -->
   <script type="module" src="components/index.js"></script>
   
-  <!-- Ensure critical form components are loaded directly -->
-  <script type="module" src="components/form/form-settings-card.js"></script>
-  <script type="module" src="components/form/form-input-group.js"></script>
-  <script type="module" src="components/form/form-grid.js"></script>
-  <script type="module" src="components/form/form-checkbox-options.js"></script>
-  <script type="module" src="components/form/submit-button.js"></script>
-  <script type="module" src="components/story-form.js"></script>
-  
   <!-- App Initialization -->
   <script type="module" src="js/app.js"></script>
 </head>
@@ -47,27 +39,10 @@
 
   <header>
     <div class="container">
-      <div class="header-content">
-        <div class="logo-container">
-          <h1>EASY STORY EASY LIFE</h1>
-          <p>Educational stories with AI</p>
-        </div>
-        <theme-toggle id="themeToggle"></theme-toggle>
-      </div>
+      <h1>EASY STORY EASY LIFE</h1>
+      <p>Educational stories with AI</p>
     </div>
   </header>
-
-  <style>
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    #themeToggle {
-      margin-left: auto;
-    }
-  </style>
 
   <main id="app" class="container">
     <div class="app-tabs">
@@ -76,7 +51,7 @@
     </div>
 
     <div class="tab-content active" id="generator-tab">
-      <story-form id="mainStoryForm"></story-form>
+      <story-form></story-form>
       <div id="story-result" class="story-result hidden">
         <story-content id="storyDisplayContainer"></story-content>
         <div class="story-actions">
@@ -186,60 +161,6 @@
           }
         }
       });
-    });
-  </script>
-
-  <script>
-    // Add a debugging utility function
-    document.addEventListener('DOMContentLoaded', function() {
-      // Create a debug function
-      window.debugApp = function() {
-        console.log('======= EasyStory Debug Information =======');
-        console.log('story-form in DOM:', !!document.querySelector('story-form'));
-        console.log('story-content in DOM:', !!document.querySelector('story-content'));
-        console.log('loadingOverlay in DOM:', !!document.getElementById('loadingOverlay'));
-        console.log('story-result visibility:', !document.getElementById('story-result')?.classList.contains('hidden'));
-        console.log('window.currentStory exists:', !!window.currentStory);
-        if (window.currentStory) {
-          console.log('Story content length:', window.currentStory.content?.length || 0);
-          console.log('Story has summary:', !!window.currentStory.summary);
-          console.log('Story has vocabulary:', Array.isArray(window.currentStory.vocabulary));
-          console.log('Story has quiz:', Array.isArray(window.currentStory.quiz));
-        }
-        console.log('showLoading function exists:', typeof window.showLoading === 'function');
-        console.log('hideLoading function exists:', typeof window.hideLoading === 'function');
-        console.log('showToast function exists:', typeof window.showToast === 'function');
-        
-        // Check component definitions
-        console.log('story-form defined:', !!customElements.get('story-form'));
-        console.log('story-content defined:', !!customElements.get('story-content'));
-        console.log('loading-overlay defined:', !!customElements.get('loading-overlay'));
-        
-        // Force-fix issues if needed
-        if (document.getElementById('story-result')?.classList.contains('hidden') && window.currentStory) {
-          console.log('Force-fixing hidden story-result');
-          document.getElementById('story-result').classList.remove('hidden');
-        }
-        
-        // Check loadingOverlay state
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) {
-          console.log('LoadingOverlay visible attribute:', overlay.hasAttribute('visible'));
-          console.log('LoadingOverlay display style:', window.getComputedStyle(overlay).display);
-        }
-        
-        console.log('========================================');
-      };
-      
-      // Add a keyboard shortcut for debugging (Ctrl+Shift+X)
-      document.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'x') {
-          window.debugApp();
-        }
-      });
-      
-      // Run debug automatically after loading
-      setTimeout(window.debugApp, 1000);
     });
   </script>
 
@@ -371,152 +292,13 @@
         handleContinueStory(event.detail?.story);
       });
 
-      // Listen for story-updated and story-loaded events
+      // Listen for story-updated event to store the current story
       document.addEventListener('story-updated', (event) => {
-        if (event.target && event.detail && event.detail.story) {
-          window.currentStory = event.detail.story;
-          console.log('Story updated event, stored story:', window.currentStory.id);
-          
-          // Make sure story container is visible
-          const storyResult = document.getElementById('story-result');
-          if (storyResult && storyResult.classList.contains('hidden')) {
-            console.log('Removing hidden class from story-result due to story-updated event');
-            storyResult.classList.remove('hidden');
-          }
-        } else if (event.target && event.target.story) {
+        if (event.target && event.target.story) {
           window.currentStory = event.target.story;
-          console.log('Story updated, stored in window.currentStory from target:', window.currentStory.id);
+          console.log('Story updated, stored in window.currentStory:', window.currentStory);
         }
       });
-      
-      document.addEventListener('story-loaded', (event) => {
-        if (event.detail && event.detail.story) {
-          console.log('Story loaded event triggered');
-          
-          // Make sure story container is visible
-          const storyResult = document.getElementById('story-result');
-          if (storyResult && storyResult.classList.contains('hidden')) {
-            console.log('Removing hidden class from story-result due to story-loaded event');
-            storyResult.classList.remove('hidden');
-          }
-        }
-      });
-      
-      // Listen for story-form-submit events
-      document.addEventListener('story-form-submit', (event) => {
-        console.log('Story form submit event captured at document level');
-      });
-    });
-  </script>
-
-  <script>
-    // Initialize theme from localStorage on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      const darkMode = localStorage.getItem('darkMode') === 'true';
-      if (darkMode) {
-        document.body.classList.add('dark-theme');
-      }
-    });
-  </script>
-
-  <script>
-    // Add a self-repair mechanism to fix common issues
-    document.addEventListener('DOMContentLoaded', function() {
-      // Perform self-repair every second
-      setInterval(function() {
-        // 1. Check if loading overlay is stuck
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-          const isProcessing = window._isProcessing || false;
-          // If not processing but overlay is visible, hide it
-          if (!isProcessing && (loadingOverlay.hasAttribute('visible') || 
-              window.getComputedStyle(loadingOverlay).display !== 'none')) {
-            console.log('Self-repair: Loading overlay stuck visible, fixing...');
-            loadingOverlay.removeAttribute('visible');
-            loadingOverlay.style.display = 'none';
-            if (window._loadingOverlay) {
-              window._loadingOverlay.visible = false;
-            }
-          }
-        }
-        
-        // 2. Check if story-result should be visible but isn't
-        const storyResult = document.getElementById('story-result');
-        if (storyResult && window.currentStory && storyResult.classList.contains('hidden')) {
-          console.log('Self-repair: story-result should be visible but is hidden, fixing...');
-          storyResult.classList.remove('hidden');
-        }
-        
-        // 3. Check for form event listener
-        const mainStoryForm = document.getElementById('mainStoryForm');
-        if (mainStoryForm && !mainStoryForm._hasSubmitListener) {
-          console.log('Self-repair: Adding missing event listener to story form');
-          mainStoryForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            console.log('Form submit intercepted by self-repair');
-            // Dispatch form-submit event manually
-            const formData = {};
-            const formElements = mainStoryForm.querySelectorAll('input, select, textarea');
-            formElements.forEach(el => {
-              if (el.name) {
-                formData[el.name] = el.value;
-              }
-            });
-            
-            mainStoryForm.dispatchEvent(new CustomEvent('story-form-submit', {
-              detail: { formData },
-              bubbles: true,
-              composed: true
-            }));
-          });
-          mainStoryForm._hasSubmitListener = true;
-        }
-      }, 1000);
-      
-      // Add a global flag for processing state
-      window._isProcessing = false;
-      
-      // Override showLoading
-      const originalShowLoading = window.showLoading;
-      window.showLoading = function(message) {
-        window._isProcessing = true;
-        if (originalShowLoading) {
-          originalShowLoading(message);
-        }
-        // Force visibility through DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-          loadingOverlay.setAttribute('visible', '');
-          loadingOverlay.style.display = 'flex';
-        }
-      };
-      
-      // Override hideLoading
-      const originalHideLoading = window.hideLoading;
-      window.hideLoading = function() {
-        window._isProcessing = false;
-        if (originalHideLoading) {
-          originalHideLoading();
-        }
-        // Force invisibility through DOM
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-          loadingOverlay.removeAttribute('visible');
-          loadingOverlay.style.display = 'none';
-        }
-      };
-      
-      // Ensure story result shows when story exists
-      const checkStoryVisibility = function() {
-        const storyResult = document.getElementById('story-result');
-        if (storyResult && window.currentStory && storyResult.classList.contains('hidden')) {
-          console.log('Periodic check: Making story-result visible');
-          storyResult.classList.remove('hidden');
-        }
-      };
-      
-      // Check periodically
-      setInterval(checkStoryVisibility, 500);
     });
   </script>
 </body>

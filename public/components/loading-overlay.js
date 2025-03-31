@@ -2,35 +2,20 @@ import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/co
 
 // Global loading functions
 window.showLoading = function(message = 'Loading...') {
-  console.log('showLoading called with message:', message);
   const event = new CustomEvent('show-loading', {
     detail: { message },
     bubbles: true,
     composed: true
   });
   document.dispatchEvent(event);
-  
-  // Direct access fallback
-  const overlay = document.querySelector('loading-overlay');
-  if (overlay) {
-    overlay.visible = true;
-    overlay.message = message;
-  }
 };
 
 window.hideLoading = function() {
-  console.log('hideLoading called');
   const event = new CustomEvent('hide-loading', {
     bubbles: true,
     composed: true
   });
   document.dispatchEvent(event);
-  
-  // Direct access fallback
-  const overlay = document.querySelector('loading-overlay');
-  if (overlay) {
-    overlay.visible = false;
-  }
 };
 
 export class LoadingOverlay extends LitElement {
@@ -49,57 +34,33 @@ export class LoadingOverlay extends LitElement {
     // Bind methods
     this._handleShowLoading = this._handleShowLoading.bind(this);
     this._handleHideLoading = this._handleHideLoading.bind(this);
-    
-    console.log('LoadingOverlay component initialized');
   }
 
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener('show-loading', this._handleShowLoading);
     document.addEventListener('hide-loading', this._handleHideLoading);
-    console.log('LoadingOverlay connected, added event listeners');
-    
-    // Make this component accessible globally
-    if (!window._loadingOverlay) {
-      window._loadingOverlay = this;
-    }
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
     document.removeEventListener('show-loading', this._handleShowLoading);
     document.removeEventListener('hide-loading', this._handleHideLoading);
-    
-    // Remove global reference
-    if (window._loadingOverlay === this) {
-      window._loadingOverlay = null;
-    }
   }
 
   _handleShowLoading(event) {
-    console.log('Loading overlay received show-loading event');
     this.message = event.detail.message || 'Loading...';
     this.visible = true;
-    this.requestUpdate();
-    
-    // Force visibility through DOM
-    this.style.display = 'flex';
-    this.setAttribute('visible', '');
   }
 
   _handleHideLoading() {
-    console.log('Loading overlay received hide-loading event');
     this.visible = false;
-    this.requestUpdate();
-    
-    // Force visibility through DOM
-    this.removeAttribute('visible');
   }
 
   static get styles() {
     return css`
       :host {
-        display: none !important;
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
@@ -114,12 +75,7 @@ export class LoadingOverlay extends LitElement {
       }
       
       :host([visible]) {
-        display: flex !important;
-      }
-
-      /* Direct style override to avoid CSS specificity issues */
-      :host([style*="display: flex"]) {
-        display: flex !important;
+        display: flex;
       }
 
       .loading-container {
@@ -174,43 +130,6 @@ export class LoadingOverlay extends LitElement {
         <p class="message">${this.message}</p>
       </div>
     `;
-  }
-  
-  updated(changedProps) {
-    if (changedProps.has('visible')) {
-      // Force update via DOM - important for WebKit and Firefox
-      if (this.visible) {
-        this.style.display = 'flex';
-        this.setAttribute('visible', '');
-        // Also update global processing flag
-        window._isProcessing = true;
-      } else {
-        this.style.display = 'none';
-        this.removeAttribute('visible');
-        // Also update global processing flag
-        window._isProcessing = false;
-      }
-    }
-  }
-  
-  // Public API for direct manipulation
-  show(message = 'Loading...') {
-    this.message = message;
-    this.visible = true;
-    this.setAttribute('visible', '');
-    this.style.display = 'flex';
-    // Also update global processing flag
-    window._isProcessing = true;
-    this.requestUpdate();
-  }
-  
-  hide() {
-    this.visible = false;
-    this.removeAttribute('visible');
-    this.style.display = 'none';
-    // Also update global processing flag
-    window._isProcessing = false;
-    this.requestUpdate();
   }
 }
 

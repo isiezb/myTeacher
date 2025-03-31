@@ -2,11 +2,11 @@ import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/co
 import { showToast } from './toast-container.js';
 
 // Import refactored form components
-import './form/form-settings-card.js';
-import './form/form-input-group.js';
-import './form/form-grid.js';
-import './form/form-checkbox-options.js';
-import './form/submit-button.js';
+import '/components/form/form-settings-card.js';
+import '/components/form/form-input-group.js';
+import '/components/form/form-grid.js';
+import '/components/form/form-checkbox-options.js';
+import '/components/form/submit-button.js';
 
 export class StoryForm extends LitElement {
   static get properties() {
@@ -58,7 +58,6 @@ export class StoryForm extends LitElement {
 
   constructor() {
     super();
-    console.log('StoryForm constructor called');
     this.isSubmitting = false;
     
     this.subjects = [
@@ -120,44 +119,6 @@ export class StoryForm extends LitElement {
     this._showOtherSubject = false;
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    console.log('StoryForm connected to DOM');
-    
-    // Check if form is in shadow DOM
-    setTimeout(() => {
-      const formSection = this.shadowRoot?.querySelector('.form-section');
-      console.log('StoryForm shadow DOM rendered:', !!formSection);
-      
-      // Register with window for debugging
-      if (!window._storyFormElements) {
-        window._storyFormElements = [];
-      }
-      window._storyFormElements.push(this);
-      
-      // Add global access to the form for debugging
-      window.mainStoryForm = this;
-      
-      // Add direct event listener to native form element
-      const formElement = this.shadowRoot?.querySelector('form');
-      if (formElement && !formElement._hasSubmitListener) {
-        console.log('Adding direct submit listener to form element');
-        formElement.addEventListener('submit', (e) => {
-          e.preventDefault();
-          console.log('Native form submit intercepted in connectedCallback');
-          this._handleSubmit(e);
-        });
-        formElement._hasSubmitListener = true;
-      }
-      
-      // Dispatch event to notify that the form is ready
-      this.dispatchEvent(new CustomEvent('story-form-ready', {
-        bubbles: true,
-        composed: true
-      }));
-    }, 100);
-  }
-
   _handleInputChange(e) {
     const { name, value } = e.detail;
     
@@ -191,21 +152,6 @@ export class StoryForm extends LitElement {
     
     // Prepare data for submission
     const formData = { ...this._formData };
-    
-    // Ensure summary, vocabulary, and quiz generation are always enabled
-    formData.generate_summary = true;
-    formData.generate_vocabulary = true;
-    formData.generate_quiz = true;
-    
-    // Log the final form data
-    console.log('Submitting story form with data:', {
-      ...formData,
-      subject: formData.subject,
-      academic_grade: formData.academic_grade,
-      generate_summary: formData.generate_summary,
-      generate_vocabulary: formData.generate_vocabulary,
-      generate_quiz: formData.generate_quiz
-    });
     
     // Handle special case for other subject
     if (formData.subject === 'other' && formData.other_subject) {
