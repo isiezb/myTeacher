@@ -6,40 +6,40 @@
  */
 
 // Original components  
-import './toast-container.js';
-import './loading-overlay.js';
-import './story-form.js';
-import './story-content.js';
-import './story-continuation.js';
-import './stories-grid.js';
-import './quiz-component.js';
+import '/components/toast-container.js';
+import '/components/loading-overlay.js';
+import '/components/story-form.js';
+import '/components/story-content.js';
+import '/components/story-continuation.js';
+import '/components/stories-grid.js';
+import '/components/quiz-component.js';
 
 // Refactored components
-import './story-form-refactored.js';
-import './story-content-refactored.js';
-import './story-continuation-refactored.js';
+import '/components/story-form-refactored.js';
+import '/components/story-content-refactored.js';
+import '/components/story-continuation-refactored.js';
 
 // Form components
-import './form/form-settings-card.js';
-import './form/form-input-group.js';
-import './form/form-grid.js';
-import './form/form-checkbox-options.js';
-import './form/submit-button.js';
+import '/components/form/form-settings-card.js';
+import '/components/form/form-input-group.js';
+import '/components/form/form-grid.js';
+import '/components/form/form-checkbox-options.js';
+import '/components/form/submit-button.js';
 
 // Story components
-import './story/story-header.js';
-import './story/story-text.js';
-import './story/story-summary.js';
-import './story/story-vocabulary.js';
-import './story/story-quiz.js';
+import '/components/story/story-header.js';
+import '/components/story/story-text.js';
+import '/components/story/story-summary.js';
+import '/components/story/story-vocabulary.js';
+import '/components/story/story-quiz.js';
 
 // Continuation components
-import './continuation/difficulty-selector.js';
-import './continuation/difficulty-description.js';
-import './continuation/vocabulary-display.js';
-import './continuation/continuation-form.js';
-import './continuation/continuation-result.js';
-import './continuation/error-message.js';
+import '/components/continuation/difficulty-selector.js';
+import '/components/continuation/difficulty-description.js';
+import '/components/continuation/vocabulary-display.js';
+import '/components/continuation/continuation-form.js';
+import '/components/continuation/continuation-result.js';
+import '/components/continuation/error-message.js';
 
 // Re-export components for external use
 export * from './story-form.js';

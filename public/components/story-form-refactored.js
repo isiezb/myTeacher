@@ -2,11 +2,11 @@ import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/co
 import { showToast } from './toast-container.js';
 
 // Import refactored form components
-import './form/form-settings-card.js';
-import './form/form-input-group.js';
-import './form/form-grid.js';
-import './form/form-checkbox-options.js';
-import './form/submit-button.js';
+import '/components/form/form-settings-card.js';
+import '/components/form/form-input-group.js';
+import '/components/form/form-grid.js';
+import '/components/form/form-checkbox-options.js';
+import '/components/form/submit-button.js';
 
 export class StoryFormRefactored extends LitElement {
   static properties = {

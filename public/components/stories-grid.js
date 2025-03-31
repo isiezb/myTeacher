@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
-import './story-card.js';
+import '/components/story-card.js';
 
 export class StoriesGrid extends LitElement {
   static get properties() {

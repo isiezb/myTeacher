@@ -1,9 +1,9 @@
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
-import './story/story-header.js';
-import './story/story-text.js';
-import './story/story-summary.js';
-import './story/story-vocabulary.js';
-import './story/story-quiz.js';
+import '/components/story/story-header.js';
+import '/components/story/story-text.js';
+import '/components/story/story-summary.js';
+import '/components/story/story-vocabulary.js';
+import '/components/story/story-quiz.js';
 
 export class StoryContent extends LitElement {
   static properties = {
