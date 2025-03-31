@@ -21,6 +21,7 @@ export class StoryContent extends LitElement {
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       padding: 1.5rem;
       margin-bottom: 2rem;
+      padding-bottom: 5rem; /* Add extra padding to bottom for fixed button */
     }
 
     .empty-state {
@@ -51,10 +52,18 @@ export class StoryContent extends LitElement {
     }
     
     .button-container {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 0;
+      right: 0;
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      margin-top: 2rem;
+      z-index: 100;
+      background-color: white;
+      padding: 1rem;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      border-top: 1px solid var(--border, rgba(0, 0, 0, 0.05));
     }
     
     .restart-button {
