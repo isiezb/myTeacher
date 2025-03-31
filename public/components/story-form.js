@@ -153,6 +153,21 @@ export class StoryForm extends LitElement {
     // Prepare data for submission
     const formData = { ...this._formData };
     
+    // Ensure summary, vocabulary, and quiz generation are always enabled
+    formData.generate_summary = true;
+    formData.generate_vocabulary = true;
+    formData.generate_quiz = true;
+    
+    // Log the final form data
+    console.log('Submitting story form with data:', {
+      ...formData,
+      subject: formData.subject,
+      academic_grade: formData.academic_grade,
+      generate_summary: formData.generate_summary,
+      generate_vocabulary: formData.generate_vocabulary,
+      generate_quiz: formData.generate_quiz
+    });
+    
     // Handle special case for other subject
     if (formData.subject === 'other' && formData.other_subject) {
       formData.subject = formData.other_subject;

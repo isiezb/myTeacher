@@ -375,10 +375,12 @@
   function mockGenerateStory(formData) {
     // Mock response for testing
     console.log('Using mock story generation (no API service available)');
+    console.log('Mock generation with form data:', formData);
     
     // Simulating network delay
     return new Promise(resolve => setTimeout(() => {
-      resolve({
+      // Create mock story with guaranteed summary, vocabulary, and quiz
+      const mockStory = {
         id: 'mock-story-' + Date.now(),
         title: `A Story About ${formData.subject}`,
         content: `Once upon a time in ${formData.setting || 'a magical land'}, there was ${formData.main_character || 'a curious student'} who loved learning about ${formData.subject}.\n\n` +
@@ -390,13 +392,19 @@
         academic_grade: formData.academic_grade,
         subject: formData.subject,
         word_count: formData.word_count,
-        summary: formData.generate_summary ? `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.` : null,
-        vocabulary: formData.generate_vocabulary ? [
+        
+        // Always include summary regardless of form setting
+        summary: `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.`,
+        
+        // Always include vocabulary with importance ranking
+        vocabulary: [
           { term: `${formData.subject} Term 1`, definition: 'Definition for the first term related to the subject.', importance: 10 },
           { term: `${formData.subject} Term 2`, definition: 'Definition for the second term related to the subject.', importance: 8 },
           { term: `${formData.subject} Term 3`, definition: 'Definition for the third term related to the subject.', importance: 6 }
-        ] : null,
-        quiz: formData.generate_quiz ? [
+        ],
+        
+        // Always include quiz regardless of form setting
+        quiz: [
           {
             question: `What is the main subject of this story?`,
             options: [formData.subject, 'History', 'Mathematics', 'Art'],
@@ -412,8 +420,11 @@
             options: ['Kindergarten', 'Elementary', 'Middle School', formData.academic_grade],
             correct_answer: 3
           }
-        ] : null
-      });
+        ]
+      };
+      
+      console.log('Mock story generated with summary:', mockStory.summary?.substring(0, 50) + '...');
+      resolve(mockStory);
     }, 2000));
   }
 

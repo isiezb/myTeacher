@@ -57,11 +57,18 @@ const apiService = (function() {
         'Accept': 'application/json'
       };
       
+      // Make sure generate_summary is always true
+      const modifiedFormData = {
+        ...formData,
+        generate_summary: true,
+        generate_quiz: true
+      };
+      
       console.log('Request Details:', {
         url: fullUrl,
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(formData).substring(0, 200) + '...'
+        body: JSON.stringify(modifiedFormData).substring(0, 200) + '...'
       });
       
       const postResponse = await fetch(fullUrl, {
@@ -69,7 +76,7 @@ const apiService = (function() {
         headers: headers,
         mode: 'cors',
         credentials: 'omit',
-        body: JSON.stringify(formData)
+        body: JSON.stringify(modifiedFormData)
       });
       
       console.log('POST response status:', postResponse.status);
@@ -78,6 +85,19 @@ const apiService = (function() {
         try {
           const data = await postResponse.json();
           console.log('Story generated successfully via POST');
+          
+          // Log if summary and quiz were included in the response
+          if (data.summary) {
+            console.log('Response includes summary:', data.summary.substring(0, 100) + '...');
+          } else {
+            console.warn('API response does not include a summary!');
+          }
+          
+          if (data.quiz && Array.isArray(data.quiz)) {
+            console.log('Response includes quiz with', data.quiz.length, 'questions');
+          } else {
+            console.warn('API response does not include a quiz!');
+          }
           
           // Process vocabulary items to add importance ranking
           if (data.vocabulary && Array.isArray(data.vocabulary)) {

@@ -68,6 +68,20 @@ export class StoryContent extends LitElement {
         window.currentStory = this.story;
       }
       
+      // Log story details to help debug summary issues
+      console.log('StoryContent received story:', {
+        id: this.story.id,
+        contentLength: this.story.content?.length || 0,
+        hasSummary: !!this.story.summary,
+        summaryLength: this.story.summary?.length || 0,
+        summaryPreview: this.story.summary ? this.story.summary.substring(0, 50) + '...' : 'none',
+        hasVocabulary: !!this.story.vocabulary && Array.isArray(this.story.vocabulary),
+        vocabularyCount: (this.story.vocabulary || []).length,
+        hasQuiz: !!this.story.quiz && Array.isArray(this.story.quiz),
+        quizCount: (this.story.quiz || []).length,
+        showSummary: this.showSummary
+      });
+      
       // Dispatch a custom event to notify parent components
       this.dispatchEvent(new CustomEvent('story-loaded', { 
         detail: { story: this.story },
