@@ -318,8 +318,6 @@ export class ContinuationForm extends LitElement {
           </div>
         </div>
         
-        <difficulty-description .difficulty=${this.settings.difficulty}></difficulty-description>
-        
         <button 
           class="continue-button ${this.isSubmitting ? 'loading' : ''}" 
           @click="${this._handleContinue}"

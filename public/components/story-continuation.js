@@ -3,7 +3,6 @@ import { showToast } from './toast-container.js';
 
 // Import subcomponents
 import './continuation/difficulty-selector.js';
-import './continuation/difficulty-description.js';
 import './continuation/vocabulary-display.js';
 import './continuation/continuation-form.js';
 import './continuation/continuation-result.js';
