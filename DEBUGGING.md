@@ -12,6 +12,8 @@ This document summarizes the debugging process and fixes applied to resolve runt
 
 4. **Component Loading Order** - Proper sequencing of script loading to prevent dependency issues.
 
+5. **Duplicate Component Registrations** - Preventing `Cannot define multiple custom elements with the same tag name` errors.
+
 ## Fix Scripts Created
 
 The following utility scripts were created to help debug and fix the application:
@@ -40,13 +42,19 @@ The following utility scripts were created to help debug and fix the application
 - Updates HTML dependencies for proper loading order
 - Ensures components load in the correct sequence
 
+### 7. `scripts/fix_duplicate_registrations.js`
+- Adds guards around all component registrations to prevent duplicates
+- Uses `customElements.get()` to check if a component is already registered before defining it
+
 ## Component Loading Strategy
 
 The `component-loader.js` was enhanced to properly manage the transition between original and refactored components. It:
 
 1. Controls which version of components to use via `USE_REFACTORED_COMPONENTS` flag
-2. Dynamically replaces containers with appropriate components
-3. Copies attributes from containers to components
+2. No longer imports components directly to avoid double registration
+3. Dynamically replaces containers with appropriate components
+4. Copies attributes from containers to components
+5. Checks if custom elements are defined before attempting to create them
 
 ## Component Dependency Order
 
@@ -71,15 +79,19 @@ For proper loading, components should be imported in this order:
 ### Issue: Component not found
 **Solution**: Ensure the component is imported in the HTML file or by a parent component, and that the custom element name matches the registration.
 
+### Issue: Duplicate component registration
+**Solution**: Add guards around all `customElements.define()` calls to prevent attempting to register the same component multiple times. The `fix_duplicate_registrations.js` script adds these guards automatically.
+
 ### Issue: Supabase credential errors
 **Solution**: The application gracefully handles missing Supabase credentials by using mock data, so these errors are not critical for basic functionality.
 
 ## Testing After Fixes
 
-After applying these fixes, the application should load without module resolution errors. The component structure has been audited for proper registration and dependency management.
+After applying these fixes, the application should load without module resolution errors or duplicate registration errors. The component structure has been audited for proper registration and dependency management.
 
 ## Future Improvements
 
 1. Create a proper build/bundling system to avoid runtime dependency issues
 2. Implement a component testing framework to catch problems before runtime
-3. Add automatic code quality checks as part of the CI/CD process 
+3. Add automatic code quality checks as part of the CI/CD process
+4. Consider using a module bundler like Rollup or Webpack to handle dependencies more reliably 
