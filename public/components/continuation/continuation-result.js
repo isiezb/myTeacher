@@ -271,9 +271,8 @@ export class ContinuationResult extends LitElement {
       
     return html`
       <div class="continuation-result">
-        <h3>Story Continuation</h3>
+        <h3>${this.title}</h3>
         <div class="story-metadata">
-          ${this.title ? html`<div class="metadata-item"><span class="metadata-item-icon">📖</span>${this.title}</div>` : ''}
           ${this.subject ? html`<div class="metadata-item"><span class="metadata-item-icon">🏷️</span>${this.subject}</div>` : ''}
           ${this.gradeLevel ? html`<div class="metadata-item"><span class="metadata-item-icon">🎓</span>${this.gradeLevel}</div>` : ''}
           ${this.wordCount ? html`<div class="metadata-item"><span class="metadata-item-icon">📄</span>${this.wordCount} words</div>` : ''}
