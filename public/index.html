@@ -58,15 +58,14 @@
     <script type="module" src="components/quiz-component-refactored.js"></script>
     <script type="module" src="components/story-display-refactored.js"></script>
     <script type="module" src="components/story-card-refactored.js"></script>
-    <script type="module" src="components/story-display.js"></script>
+    <!-- Explicitly load original components needed for fallback or if USE_REFACTORED_COMPONENTS is false -->
+    <script type="module" src="components/story-display.js"></script> 
     <script type="module" src="components/story-card.js"></script>
-    <script type="module" src="components/story-form.js"></script>
-    <script type="module" src="components/story-content.js"></script>
-    <script type="module" src="components/story-continuation.js"></script>
-    <script type="module" src="components/stories-grid.js"></script>
-    <script type="module" src="components/quiz-component.js"></script>
-    <script type="module" src="components/story-display-fixed.js"></script>
+    <!-- Load the fixed version for debugging/fallback -->
+    <!-- <script type="module" src="components/story-display-fixed.js"></script> --> 
+    <!-- Component Loader -->
     <script type="module" src="js/component-loader.js"></script>
+    <!-- App Initialization -->
     <script type="module" src="js/app.js"></script>
     <script type="module" src="js/register-fix.js"></script>
 </head>

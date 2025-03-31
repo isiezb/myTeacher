@@ -23,16 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn(`⚠️ Component ${component.name} not defined, attempting to fix...`);
         
         try {
-          // Option 1: Try re-importing the script
+          // Option 1: Try re-importing the script (REMOVED - This seems to cause double definition errors)
+          /* 
+          console.log(`Attempting re-import of ${component.path}`);
           const script = document.createElement('script');
           script.type = 'module';
           script.src = component.path;
           script.onload = () => console.log(`✅ Reimported ${component.path}`) 
           script.onerror = (e) => console.error(`❌ Failed to reimport ${component.path}`, e);
           document.head.appendChild(script);
+          */
           
           // Option 2: If we have a fallback, forcibly define the component
           if (component.fallback) {
+            console.log(`Attempting fallback definition for ${component.name}`);
             try {
               const { LitElement, html, css } = await import('https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js');
               
