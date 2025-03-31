@@ -148,11 +148,9 @@ export class ContinuationForm extends LitElement {
       }
       
       .mobile-selector-header {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: block;
         width: 100%;
         margin-bottom: 0.5rem;
-        gap: 0.5rem;
       }
       
       .mobile-selector-header h4 {
@@ -160,14 +158,28 @@ export class ContinuationForm extends LitElement {
         font-size: 1rem;
         font-weight: 600;
         color: var(--text-secondary, #6c757d);
-        text-align: center;
+        text-align: left;
         margin: 0;
+        margin-bottom: 0.5rem;
+      }
+      
+      .focus-header {
+        margin-top: 1.25rem;
+        display: block;
+      }
+      
+      .focus-header h4 {
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-secondary, #6c757d);
+        text-align: left;
+        margin: 0;
+        margin-bottom: 0.5rem;
       }
       
       .selectors-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0.5rem;
+        display: block;
         width: 100%;
       }
       
@@ -295,7 +307,6 @@ export class ContinuationForm extends LitElement {
         
         <div class="mobile-selector-header">
           <h4>Difficulty Level</h4>
-          <h4>Story Focus</h4>
         </div>
         
         <div class="selector-container">
@@ -305,6 +316,10 @@ export class ContinuationForm extends LitElement {
               ?disabled=${this.isSubmitting}
               @difficulty-change=${this._handleDifficultyChange}
             ></difficulty-selector>
+            
+            <div class="focus-header">
+              <h4>Story Focus</h4>
+            </div>
             
             <focus-selector
               .focus=${this.settings.focus}
