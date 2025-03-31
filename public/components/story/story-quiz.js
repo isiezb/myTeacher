@@ -244,7 +244,7 @@ class StoryQuiz extends LitElement {
     }
     
     this.currentQuizIndex = 0;
-    this.quizAnswers = this.limitedQuiz.map(() => -1); // -1 means unanswered
+    this.quizAnswers = this.limitedQuiz.map(() => null); // Use null for unanswered questions
     this.quizCompleted = false;
     this.requestUpdate();
   }
@@ -331,7 +331,7 @@ class StoryQuiz extends LitElement {
   _renderQuizQuestion(question, index) {
     const isCurrentQuestion = index === this.currentQuizIndex;
     const userAnswer = this.quizAnswers[index];
-    const isAnswered = userAnswer !== null;
+    const isAnswered = userAnswer !== null && userAnswer !== undefined;
     const correctAnswer = question.correct_answer;
     
     return html`
