@@ -861,4 +861,8 @@ export class StoryContent extends LitElement {
 }
 
 // Register the component
-customElements.define('story-content', StoryContent);
+
+// Guard against duplicate registration
+if (!customElements.get('story-content')) {
+  customElements.define('story-content', StoryContent);
+}
