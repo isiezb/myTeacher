@@ -136,7 +136,12 @@ export class StoryForm extends LitElement {
   }
 
   _handleSubmit(e) {
-    e.preventDefault();
+    // Prevent default form submission
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+    
+    console.log('_handleSubmit called');
     
     // Validate form
     if (!this._validate()) {
@@ -145,11 +150,14 @@ export class StoryForm extends LitElement {
     
     // Prevent submitting if already in progress
     if (this.isSubmitting) {
+      console.log('Form submission already in progress, ignoring');
       return;
     }
     
     // Update submission state
     this.isSubmitting = true;
+    console.log('Setting isSubmitting to true');
+    this.requestUpdate();
     
     // Prepare data for submission
     const formData = { ...this._formData };
@@ -163,11 +171,14 @@ export class StoryForm extends LitElement {
     // Convert word_count to number
     formData.word_count = parseInt(formData.word_count, 10);
     
+    console.log('Dispatching story-form-submit event with formData:', formData);
+    
     // Dispatch form submit event
     this.dispatchEvent(new CustomEvent('story-form-submit', {
       detail: { formData },
       bubbles: true,
-      composed: true
+      composed: true,
+      cancelable: true
     }));
   }
 

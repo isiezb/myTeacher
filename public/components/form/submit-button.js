@@ -74,11 +74,16 @@ class SubmitButton extends LitElement {
     // Prevent default button behavior
     e.preventDefault();
     
+    console.log('Submit button clicked, isLoading:', this.isLoading, 'disabled:', this.disabled);
+    
     // If not disabled or loading, dispatch submit event
     if (!this.isLoading && !this.disabled) {
+      console.log('Dispatching button-click event');
+      
       this.dispatchEvent(new CustomEvent('button-click', {
         bubbles: true,
-        composed: true
+        composed: true,
+        cancelable: true
       }));
     }
   }
