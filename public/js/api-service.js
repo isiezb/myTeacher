@@ -128,6 +128,22 @@ const apiService = (function() {
         'Accept': 'application/json'
       };
       
+      // Process focus to add more emphasis
+      let focusData = {
+        term: options.focus || 'general',
+        emphasis: 'normal'
+      };
+      
+      // If focus is not general, give it strong emphasis
+      if (options.focus && options.focus !== 'general') {
+        focusData = {
+          term: options.focus,
+          emphasis: 'strong',
+          instructions: `Pay special attention to incorporating and explaining "${options.focus}" throughout the continuation. Make it a central theme.`
+        };
+        console.log(`Adding strong emphasis on focus term: ${options.focus}`);
+      }
+      
       // Make sure to include the original story content and optional flags in the request
       const requestBody = {
         length: options.length || 300,
@@ -135,7 +151,7 @@ const apiService = (function() {
         original_story_content: options.original_story_content || '',
         generate_summary: options.generate_summary || false,
         generate_quiz: options.generate_quiz || false,
-        focus: options.focus || 'general'
+        focus: focusData
       };
       
       // Log request details but limit content length in logs for readability
