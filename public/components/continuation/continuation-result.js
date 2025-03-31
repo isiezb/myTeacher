@@ -7,7 +7,12 @@ export class ContinuationResult extends LitElement {
     vocabularyItems: { type: Array },
     summary: { type: String },
     quiz: { type: Array },
-    difficulty: { type: String }
+    difficulty: { type: String },
+    title: { type: String },
+    subject: { type: String },
+    gradeLevel: { type: String },
+    wordCount: { type: Number },
+    focus: { type: String }
   };
 
   static styles = css`
@@ -28,9 +33,30 @@ export class ContinuationResult extends LitElement {
       color: var(--primary, #5e7ce6);
       font-family: var(--font-heading, 'Inter', sans-serif);
       font-size: 1.5rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
       font-weight: 700;
       text-align: center;
+    }
+    
+    .story-metadata {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      color: var(--text-secondary, #6c757d);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    
+    .metadata-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    .metadata-item-icon {
+      opacity: 0.7;
     }
 
     .continuation-content {
@@ -147,6 +173,11 @@ export class ContinuationResult extends LitElement {
     this.summary = '';
     this.quiz = [];
     this.difficulty = 'same_level';
+    this.title = 'Story Continuation';
+    this.subject = 'General';
+    this.gradeLevel = 'Not specified';
+    this.wordCount = 0;
+    this.focus = 'general';
   }
 
   firstUpdated() {
@@ -210,7 +241,12 @@ export class ContinuationResult extends LitElement {
       summary: this.summary,
       vocabulary: this.vocabularyItems,
       quiz: this.quiz,
-      difficulty: this.difficulty
+      difficulty: this.difficulty,
+      title: this.title,
+      subject: this.subject,
+      grade_level: this.gradeLevel,
+      word_count: this.wordCount,
+      focus: this.focus
     };
     
     console.log('Continue button clicked in continuation-result, dispatching event with:', continuedStory);
@@ -236,6 +272,13 @@ export class ContinuationResult extends LitElement {
     return html`
       <div class="continuation-result">
         <h3>Story Continuation</h3>
+        <div class="story-metadata">
+          ${this.title ? html`<div class="metadata-item"><span class="metadata-item-icon">📖</span>${this.title}</div>` : ''}
+          ${this.subject ? html`<div class="metadata-item"><span class="metadata-item-icon">🏷️</span>${this.subject}</div>` : ''}
+          ${this.gradeLevel ? html`<div class="metadata-item"><span class="metadata-item-icon">🎓</span>${this.gradeLevel}</div>` : ''}
+          ${this.wordCount ? html`<div class="metadata-item"><span class="metadata-item-icon">📄</span>${this.wordCount} words</div>` : ''}
+          ${this.focus ? html`<div class="metadata-item"><span class="metadata-item-icon">🔍</span>${this.focus}</div>` : ''}
+        </div>
         <div class="continuation-content">
           <p .innerHTML=${formattedContinuation}></p>
         </div>
