@@ -49,7 +49,7 @@ class StoryQuiz extends LitElement {
       border-radius: 8px;
       padding: 1rem;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
     }
@@ -67,11 +67,13 @@ class StoryQuiz extends LitElement {
     .quiz-option.correct {
       border-color: var(--success, #28a745);
       background-color: rgba(40, 167, 69, 0.1);
+      transition: all 0.3s ease;
     }
 
     .quiz-option.incorrect {
       border-color: var(--danger, #dc3545);
       background-color: rgba(220, 53, 69, 0.1);
+      transition: all 0.3s ease;
     }
 
     .quiz-option-marker {
@@ -86,6 +88,7 @@ class StoryQuiz extends LitElement {
       margin-right: 0.75rem;
       font-weight: 600;
       flex-shrink: 0;
+      transition: all 0.3s ease;
     }
 
     .quiz-option.selected .quiz-option-marker {
@@ -101,6 +104,22 @@ class StoryQuiz extends LitElement {
     .quiz-option.incorrect .quiz-option-marker {
       background: var(--danger, #dc3545);
       color: white;
+    }
+
+    .feedback-message {
+      background-color: white;
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      font-weight: 500;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .quiz-navigation {
@@ -219,15 +238,20 @@ class StoryQuiz extends LitElement {
     newAnswers[this.currentQuizIndex] = optionIndex;
     this.quizAnswers = newAnswers;
     
-    // Check if all questions have been answered
-    if (this.currentQuizIndex === this.limitedQuiz.length - 1) {
-      this.quizCompleted = true;
-    } else {
-      // Move to the next question after a short delay
-      setTimeout(() => {
+    // Get the current question
+    const currentQuestion = this.limitedQuiz[this.currentQuizIndex];
+    const isCorrect = optionIndex === currentQuestion.correct_answer;
+    
+    // Show immediate feedback and delay moving to the next question
+    setTimeout(() => {
+      // Check if all questions have been answered
+      if (this.currentQuizIndex === this.limitedQuiz.length - 1) {
+        this.quizCompleted = true;
+      } else {
+        // Move to the next question after showing feedback
         this.currentQuizIndex++;
-      }, 500);
-    }
+      }
+    }, 1500); // Allow 1.5 seconds to see the feedback
   }
 
   _handleNextQuestion() {
@@ -291,11 +315,14 @@ class StoryQuiz extends LitElement {
           ${question.options.map((option, optionIndex) => {
             let optionClass = '';
             
-            if (isAnswered && this.quizCompleted) {
+            // Show immediate feedback for the current question after answering
+            if (isAnswered) {
               if (optionIndex === correctAnswer) {
                 optionClass = 'correct';
               } else if (userAnswer === optionIndex && userAnswer !== correctAnswer) {
                 optionClass = 'incorrect';
+              } else if (userAnswer === optionIndex) {
+                optionClass = 'selected';
               }
             } else if (userAnswer === optionIndex) {
               optionClass = 'selected';
@@ -312,6 +339,14 @@ class StoryQuiz extends LitElement {
             `;
           })}
         </div>
+        
+        ${isAnswered && isCurrentQuestion ? html`
+          <div class="feedback-message" style="text-align: center; margin-top: 1rem; font-weight: 500; ${userAnswer === correctAnswer ? 'color: var(--success, #28a745);' : 'color: var(--danger, #dc3545);'}">
+            ${userAnswer === correctAnswer ? 
+              'Correct! Well done.' : 
+              `Incorrect. The correct answer is ${String.fromCharCode(65 + correctAnswer)}: ${question.options[correctAnswer]}.`}
+          </div>
+        ` : ''}
         
         ${!this.quizCompleted ? html`
           <div class="quiz-navigation">
