@@ -1,35 +1,45 @@
 // Environment variables for frontend
 const ENV = {
-  API_URL: "", // API is now served from the same origin
+  // API and database configuration
+  API_URL: window.RENDER_API_URL || "", // Fallback to same origin if not provided
+  SUPABASE_URL: window.RENDER_SUPABASE_URL || "",
+  SUPABASE_KEY: window.RENDER_SUPABASE_KEY || "",
+  OPENROUTER_URL: window.RENDER_OPENROUTER_URL || "",
+  OPENROUTER_KEY: window.RENDER_OPENROUTER_KEY || "",
   
-  // ===== IMPORTANT: SUPABASE SETUP INSTRUCTIONS =====
-  // 1. Create a free Supabase account at https://supabase.com
-  // 2. Create a new project
-  // 3. Get your URL and anon key from Settings > API in your Supabase dashboard
-  // 4. Replace the placeholder values below with your actual credentials
-  // 5. Create a table called 'stories' with these columns:
-  //    - id: uuid (primary key, default: uuid_generate_v4())
-  //    - created_at: timestamp with timezone (default: now())
-  //    - title: text
-  //    - content: text
-  //    - summary: text
-  //    - academic_grade: text
-  //    - subject: text
-  //    - word_count: integer
-  //    - vocab_list: jsonb
-  //    - quiz_data: jsonb
-  // ===================================================
-  SUPABASE_URL: "https://YOUR_SUPABASE_URL.supabase.co",
-  SUPABASE_KEY: "YOUR_SUPABASE_KEY",
+  // Feature flags and debug settings
+  DEBUG: window.RENDER_DEBUG === "true" || false,
+  ENABLE_STORAGE: window.RENDER_ENABLE_STORAGE !== "false", // Enabled by default
   
-  DEBUG: true,
-  ENABLE_STORAGE: true // Set to false to disable story saving
+  // Error reporting configuration
+  ERROR_REPORTING: {
+    ENABLED: true,
+    MAX_ERRORS: 10, // Maximum number of errors to track
+    REPORTING_INTERVAL: 60000 // Report errors every minute
+  }
 };
 
-// Make environment variables available globally
+// Make environment variables available globally and validate configuration
 (function loadEnv() {
+  // Validate required configuration
+  const requiredVars = ['SUPABASE_URL', 'SUPABASE_KEY', 'OPENROUTER_URL', 'OPENROUTER_KEY'];
+  const missingVars = requiredVars.filter(key => !ENV[key]);
+  
+  if (missingVars.length > 0) {
+    console.warn('Missing required environment variables:', missingVars);
+  }
+
+  // Make variables available globally with ENV_ prefix
   Object.keys(ENV).forEach(key => {
     window[`ENV_${key}`] = ENV[key];
   });
-  console.log("Environment variables loaded:", ENV);
+
+  // Log configuration status in debug mode
+  if (ENV.DEBUG) {
+    console.log('Environment configuration loaded:', {
+      ...ENV,
+      SUPABASE_KEY: ENV.SUPABASE_KEY ? '[HIDDEN]' : undefined,
+      OPENROUTER_KEY: ENV.OPENROUTER_KEY ? '[HIDDEN]' : undefined
+    });
+  }
 })(); 

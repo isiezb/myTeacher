@@ -5,7 +5,9 @@ export class QuizResults extends LitElement {
     return {
       score: { type: Number },
       correctAnswers: { type: Number },
-      totalQuestions: { type: Number }
+      totalQuestions: { type: Number },
+      loading: { type: Boolean },
+      error: { type: String }
     };
   }
 
@@ -43,6 +45,29 @@ export class QuizResults extends LitElement {
         color: var(--text-secondary, #6c757d);
       }
 
+      .error-message {
+        color: var(--error, #dc3545);
+        padding: 1rem;
+        border: 1px solid currentColor;
+        border-radius: 8px;
+        margin: 1rem 0;
+      }
+
+      .loading {
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      /* High contrast mode support */
+      @media (forced-colors: active) {
+        .quiz-results {
+          border: 2px solid CanvasText;
+        }
+        .quiz-score {
+          color: CanvasText;
+        }
+      }
+
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
@@ -55,6 +80,8 @@ export class QuizResults extends LitElement {
     this.score = 0;
     this.correctAnswers = 0;
     this.totalQuestions = 0;
+    this.loading = false;
+    this.error = '';
   }
 
   _getScoreFeedback(score) {
@@ -64,11 +91,38 @@ export class QuizResults extends LitElement {
     return "Keep studying! Try reviewing the content and taking the quiz again.";
   }
 
+  _getScoreDescription(score) {
+    return `Your score is ${score} percent, which means ${this._getScoreFeedback(score).toLowerCase()}`;
+  }
+
   render() {
+    if (this.error) {
+      return html`
+        <div class="quiz-results" role="alert">
+          <div class="error-message">
+            ${this.error}
+          </div>
+        </div>
+      `;
+    }
+
+    const resultClass = this.loading ? 'quiz-results loading' : 'quiz-results';
+    const scoreDescription = this._getScoreDescription(this.score);
+
     return html`
-      <div class="quiz-results">
-        <div class="quiz-score">Score: ${this.score}%</div>
-        <div class="quiz-score-text">
+      <div 
+        class="${resultClass}"
+        role="region" 
+        aria-label="Quiz Results"
+        aria-live="polite"
+      >
+        <div class="quiz-score" role="heading" aria-level="2">
+          Score: ${this.score}%
+        </div>
+        <div 
+          class="quiz-score-text"
+          aria-label="${scoreDescription}"
+        >
           You got ${this.correctAnswers} out of ${this.totalQuestions} questions correct.
         </div>
         <div class="quiz-feedback">
