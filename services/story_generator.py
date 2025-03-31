@@ -283,10 +283,26 @@ def _build_continuation_prompt(story_id: str, request: StoryContinuationRequest)
         "Maintain the same level of vocabulary and sentence complexity as the original story."
     )
     
+    # Handle focus instructions
+    focus_instruction = ""
+    if request.focus and request.focus != "general":
+        focus_instruction = f"""
+Focus: Make '{request.focus}' a central theme in this continuation.
+- Introduce '{request.focus}' early in the continuation
+- Explain the concept of '{request.focus}' in a clear, educational way
+- Demonstrate practical examples of '{request.focus}' within the story's context
+- Have characters discuss or engage directly with '{request.focus}'
+- Make '{request.focus}' essential to resolving a challenge or advancing the narrative
+- Revisit '{request.focus}' in the conclusion to reinforce its importance
+
+This focus term is explicitly selected by the user as a learning priority, so make it unmistakably central to the continuation.
+"""
+    
     prompt_lines = [
         f"Continue the following educational story with approximately {request.length} more words.",
         f"Difficulty adjustment: {difficulty_instruction}",
         "Ensure the continuation flows naturally from the original story and maintains the educational themes.",
+        focus_instruction,
         "\nOriginal Story:",
         f"{request.original_story_content}",
         "\nRequirements:",
