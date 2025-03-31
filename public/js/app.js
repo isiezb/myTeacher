@@ -392,9 +392,9 @@
         word_count: formData.word_count,
         summary: formData.generate_summary ? `This is a mock summary of a story about ${formData.subject} for grade ${formData.academic_grade} students. It covers basic concepts in an engaging way.` : null,
         vocabulary: formData.generate_vocabulary ? [
-          { term: `${formData.subject} Term 1`, definition: 'Definition for the first term related to the subject.' },
-          { term: `${formData.subject} Term 2`, definition: 'Definition for the second term related to the subject.' },
-          { term: `${formData.subject} Term 3`, definition: 'Definition for the third term related to the subject.' }
+          { term: `${formData.subject} Term 1`, definition: 'Definition for the first term related to the subject.', importance: 10 },
+          { term: `${formData.subject} Term 2`, definition: 'Definition for the second term related to the subject.', importance: 8 },
+          { term: `${formData.subject} Term 3`, definition: 'Definition for the third term related to the subject.', importance: 6 }
         ] : null,
         quiz: formData.generate_quiz ? [
           {

@@ -189,8 +189,8 @@ export class StoryContinuation extends LitElement {
           this._continuationContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
           this._errorMessage = '';
           this._vocabularyItems = [
-            { term: "Sample Term 1", definition: "This is a sample definition for demonstration purposes." },
-            { term: "Sample Term 2", definition: "Another sample definition to show how vocabulary works." }
+            { term: "Sample Term 1", definition: "This is a sample definition for demonstration purposes.", importance: 9 },
+            { term: "Sample Term 2", definition: "Another sample definition to show how vocabulary works.", importance: 7 }
           ];
           this._summary = "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
           this._quiz = [

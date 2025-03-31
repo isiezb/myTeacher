@@ -2,6 +2,40 @@
 const apiService = (function() {
   // Private variables or helper functions can go here if needed
 
+  // Helper function to add importance ranking to vocabulary items
+  function processVocabularyItems(vocabulary) {
+    if (!vocabulary || !Array.isArray(vocabulary) || vocabulary.length === 0) {
+      return vocabulary;
+    }
+    
+    // Process each vocabulary item to add an importance ranking
+    return vocabulary.map((item, index) => {
+      // Calculate importance based on:
+      // 1. Position in the array (earlier items often more important)
+      // 2. Length of the term (longer terms often more complex or specific)
+      // 3. Length of definition (more detailed definitions often for more important terms)
+      const positionScore = Math.max(10 - index, 1); // Earlier items get higher scores
+      const termLength = item.term ? item.term.length : 0;
+      const definitionLength = item.definition ? item.definition.length : 0;
+      
+      // Weighted scoring formula - adjust weights as needed
+      let importanceScore = (
+        (positionScore * 0.5) + 
+        (Math.min(termLength / 5, 2) * 0.25) + 
+        (Math.min(definitionLength / 50, 2) * 0.25)
+      );
+      
+      // Normalize to 1-10 range and round
+      importanceScore = Math.max(1, Math.min(10, Math.round(importanceScore)));
+      
+      // Return the item with the new importance property
+      return {
+        ...item,
+        importance: importanceScore
+      };
+    });
+  }
+
   async function generateStory(formData) {
     // Initialize with the configured base URL from env.js
     // An empty string means use the current origin
@@ -44,6 +78,13 @@ const apiService = (function() {
         try {
           const data = await postResponse.json();
           console.log('Story generated successfully via POST');
+          
+          // Process vocabulary items to add importance ranking
+          if (data.vocabulary && Array.isArray(data.vocabulary)) {
+            data.vocabulary = processVocabularyItems(data.vocabulary);
+            console.log('Added importance ranking to vocabulary items');
+          }
+          
           return data;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);
@@ -136,6 +177,13 @@ const apiService = (function() {
           
           if (data.quiz && Array.isArray(data.quiz)) {
             console.log('Response includes quiz with', data.quiz.length, 'questions');
+          }
+          
+          // Process vocabulary items to add importance ranking
+          if (data.vocabulary && Array.isArray(data.vocabulary)) {
+            data.vocabulary = processVocabularyItems(data.vocabulary);
+            console.log('Added importance ranking to vocabulary items:', 
+              data.vocabulary.map(v => `${v.term} (${v.importance})`).join(', '));
           }
           
           return data;
@@ -231,13 +279,14 @@ const apiService = (function() {
     const subject = formData.subject || 'general knowledge';
     const grade = formData.academic_grade || '5';
     
+    // Create mock data with importance ranking already added
     return {
       title: `${subject.charAt(0).toUpperCase() + subject.slice(1)} Exploration (Fallback)`,
       content: `This is a fallback story generated due to API issues. It would normally contain an educational story about ${subject} for grade ${grade} students.`,
       summary: 'API response could not be parsed correctly. This is fallback content.',
       vocabulary: [
-        { word: 'fallback', definition: 'An alternative plan that may be used in an emergency' },
-        { word: 'parse', definition: 'To analyze (a string or text) into logical syntactic components' }
+        { term: 'fallback', definition: 'An alternative plan that may be used in an emergency', importance: 9 },
+        { term: 'parse', definition: 'To analyze (a string or text) into logical syntactic components', importance: 7 }
       ],
       metadata: {
         grade: grade,
