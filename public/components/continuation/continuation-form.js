@@ -280,8 +280,6 @@ export class ContinuationForm extends LitElement {
   render() {
     return html`
       <div class="continuation-form">
-        <h3>Continue the Story</h3>
-        
         <div class="input-group">
           <label for="length">Length</label>
           <select 
