@@ -99,17 +99,28 @@ class FormInputGroup extends LitElement {
     /* Mobile specific styling for checkboxes */
     @media (max-width: 500px) {
       .checkbox-label {
-        font-size: 0.85rem;
-        gap: 0.3rem;
+        font-size: 0.8rem;
+        gap: 0.25rem;
+        padding: 0.2rem 0;
       }
       
       .checkbox-label input {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
       }
       
       .input-group {
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      /* Specific styling for checkbox form inputs */
+      .input-group:has(input[type="checkbox"]) {
+        margin-bottom: 0.1rem;
+      }
+      
+      /* Make text more compact */
+      .checkbox-label span {
+        line-height: 1.1;
       }
     }
   `;
