@@ -128,11 +128,20 @@
   async function setupStoryComponents() {
     // Set up story form
     const generatorTab = document.getElementById('generator-tab');
-    if (generatorTab && !generatorTab.querySelector('story-form')) {
-      console.log('Setting up story form');
-      const storyForm = document.createElement('story-form');
-      generatorTab.insertBefore(storyForm, generatorTab.firstChild);
-      componentStatus['story-form'] = true;
+    if (generatorTab) {
+      // Look for direct tag first, then data-component
+      let storyForm = generatorTab.querySelector('story-form');
+      if (!storyForm) {
+        storyForm = generatorTab.querySelector('[data-component="story-form"]');
+      }
+      
+      // If not found, create it
+      if (!storyForm) {
+        console.log('Setting up story form');
+        storyForm = document.createElement('story-form');
+        generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+        componentStatus['story-form'] = true;
+      }
     }
 
     // Set up story display
@@ -141,20 +150,28 @@
       const storyContainer = storyResult.querySelector('#storyDisplayContainer');
       if (storyContainer) {
         // Create story content component if it doesn't exist
-        if (!storyContainer.querySelector('story-content')) {
+        // Try both ways of finding the component - direct tag or within container
+        let storyContent = storyContainer.querySelector('story-content');
+        if (!storyContent && storyContainer.tagName !== 'STORY-CONTENT') {
           console.log('Creating story content component');
-          const storyContent = document.createElement('story-content');
+          storyContent = document.createElement('story-content');
           storyContainer.appendChild(storyContent);
           componentStatus['story-content'] = true;
+        } else if (storyContainer.tagName === 'STORY-CONTENT') {
+          storyContent = storyContainer;
         }
 
-        // Add story update listener
-        const storyComponent = storyContainer.querySelector('story-content');
+        // Add story update listener - handle both scenarios
+        const storyComponent = storyContent || storyContainer;
         if (storyComponent) {
-          storyComponent.addEventListener('story-updated', () => {
-            storyResult.classList.remove('hidden');
-          });
-          console.log('Added story-updated listener to story-content component');
+          // Only add event listener if it doesn't already exist
+          if (!storyComponent._hasUpdateListener) {
+            storyComponent.addEventListener('story-updated', () => {
+              storyResult.classList.remove('hidden');
+            });
+            storyComponent._hasUpdateListener = true;
+            console.log('Added story-updated listener to story-content component');
+          }
         }
       }
     }
@@ -174,8 +191,9 @@
     // Show loading indicator
     window.showLoading?.('Creating your educational story...');
 
-    // Find the form component
-    const formComponent = document.querySelector('story-form');
+    // Find the form component - either direct tag or data-component
+    const formComponent = document.querySelector('story-form') || 
+                          document.querySelector('[data-component="story-form"]');
     if (formComponent) {
       formComponent.isSubmitting = true;
     }
@@ -193,9 +211,13 @@
       const storyComponentTag = window.components?.StoryContent || 'story-content'; // Get tag name dynamically
       
       if (storyContainer) {
-        const storyComponent = storyContainer.querySelector(storyComponentTag);
+        // Check if the container itself is the component or contains the component
+        const storyComponent = storyContainer.tagName === storyComponentTag.toUpperCase() ?
+                               storyContainer :
+                               storyContainer.querySelector(storyComponentTag);
+        
         if (storyComponent) {
-          console.log(`Updating component <${storyComponentTag}> inside #storyDisplayContainer`);
+          console.log(`Updating component <${storyComponentTag}>`, storyComponent.tagName);
           storyComponent.story = story;
           // Trigger custom event for story update
           storyComponent.dispatchEvent(new CustomEvent('story-updated', {
@@ -204,7 +226,7 @@
             detail: { story: story }
           }));
         } else {
-           console.error(`Could not find component <${storyComponentTag}> inside #storyDisplayContainer`);
+           console.error(`Could not find component <${storyComponentTag}> inside or as #storyDisplayContainer`);
            window.showToast?.('Error updating display area.', 'error');
         }
       } else {

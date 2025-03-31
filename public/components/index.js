@@ -43,8 +43,14 @@ async function loadComponent(name) {
       COMPONENT_LOAD_ORDER[name].loaded = true;
     }
 
-    // Find all instances of this component
-    const elements = document.querySelectorAll(`[data-component="${name}"]`);
+    // Find all instances of this component - both with data-component and direct tag name
+    const dataAttrElements = document.querySelectorAll(`[data-component="${name}"]`);
+    const directTagElements = document.querySelectorAll(name);
+    
+    // Combine both sets of elements
+    const elements = [...Array.from(dataAttrElements), ...Array.from(directTagElements)];
+    
+    console.log(`Found ${elements.length} ${name} components (${dataAttrElements.length} with data-attribute, ${directTagElements.length} with direct tag)`);
     
     // Wrap each component with error boundary
     elements.forEach(element => {
@@ -57,8 +63,8 @@ async function loadComponent(name) {
 
   } catch (error) {
     console.error(`Error loading component ${name}:`, error);
-    // Show error in the component's place
-    const elements = document.querySelectorAll(`[data-component="${name}"]`);
+    // Show error in the component's place - look for both types of elements
+    const elements = document.querySelectorAll(`[data-component="${name}"], ${name}`);
     elements.forEach(element => {
       const errorBoundary = document.createElement('error-boundary');
       errorBoundary.setAttribute('data-error', error.message);

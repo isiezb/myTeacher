@@ -7,7 +7,7 @@
   <meta name="description" content="Generate educational stories based on grade level, subject, and custom elements">
   <meta name="keywords" content="education, stories, learning, children, teaching">
   <title>EASY STORY EASY LIFE</title>
-  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJESURBVFhH7ZZNaBNBFMf/m93EJk1JW4OKFgQrKB56qCAIgop48KAHEVQQDx5E8KgHQQ8evIgexENB8KgHEUU8iYJ48CCCI0XxozQftE2atE3SJN3NfvgmO4nZ3eyuYdGTPwgzb2bem/nvvJkJNcMwcJQRj7T/QcSK169fw7ZtTE5O4vHjx2hvbw+vHhwrKyuYmprC7OwsyuUyZmZm0NPTg0gkEl45GKyA+fl5jI2NYXR0FPF4HMlkEoVCAcPDw3j79i3OnTuHVCqFrq4u9Pb2IhaLQdM0JBIJ9PX1IRaLhXfcH1bA0tISrly5gqGhIbx8+RLPnz/Hp0+fUK1WcfLkSbx48QKPHj3CzZs3ce/ePVy/fh2XLl3C7du38fr1a9y5cwfnz5/H5cuXw7vujxVgmibevHmDhw8fYnFxEYqiQJZlvHr1CmNjY7h79y5kScL09DTu37+PJ0+eYGJiAm/evMGHDx8QjUbx+fNnLC8v4+vXr+Fd94cVQFOt6zpu3LiBgYEBnD59GvF4HMvLy/j+/TsymQyuXr2KTCaDrq4u5HI5fPz4EcViEfl8HhcvXkRHRwfa2trQ3t4e3nV/WAF0GvL5PEZGRpDNZpHL5aBpGnp6epBOp/Hw4UNks1mcOXMGt27dwuDgIEZGRpDJZNDf34+2tjZEo1FomhbedX+sgPX1dSwsLGB9fR2JRAIXL1xAIplEsVhEuVzGxsYGvn37hmQqhZMnTmBzcxNbW1vY3t6GLMtQVRV/d3bCO+4PK+BfwP4T/gn+qgDDMHZN078F/QECHYZz0p1SyAAAAABJRU5ErkJggg==">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJESURBVFhH7ZZNaBNBFMf/m93EJk1JW4OKFgQrKB56qCAIgop48KAHEVQQDx5E8KgHQQ8evIgexENB8KgHEUU8iYJ48CCCI0XxozQftE3SJN3NfvgmO4nZ3eyuYdGTPwgzb2bem/nvvJkJNcMwcJQRj7T/QcSK169fw7ZtTE5O4vHjx2hvbw+vHhwrKyuYmprC7OwsyuUyZmZm0NPTg0gkEl45GKyA+fl5jI2NYXR0FPF4HMlkEoVCAcPDw3j79i3OnTuHVCqFrq4u9Pb2IhaLQdM0JBIJ9PX1IRaLhXfcH1bA0tISrly5gqGhIbx8+RLPnz/Hp0+fUK1WcfLkSbx48QKPHj3CzZs3ce/ePVy/fh2XLl3C7du38fr1a9y5cwfnz5/H5cuXw7vujxVgmibevHmDhw8fYnFxEYqiQJZlvHr1CmNjY7h79y5kScL09DTu37+PJ0+eYGJiAm/evMGHDx8QjUbx+fNnLC8v4+vXr+Fd94cVQFOt6zpu3LiBgYEBnD59GvF4HMvLy/j+/TsymQyuXr2KTCaDrq4u5HI5fPz4EcViEfl8HhcvXkRHRwfa2trQ3t4e3nV/WAF0GvL5PEZGRpDNZpHL5aBpGnp6epBOp/Hw4UNks1mcOXMGt27dwuDgIEZGRpDJZNDf34+2tjZEo1FomhbedX+sgPX1dSwsLGB9fR2JRAIXL1xAIplEsVhEuVzGxsYGvn37hmQqhZMnTmBzcxNbW1vY3t6GLMtQVRV/d3bCO+4PK+BfwP4T/gn+qgDDMHZN078F/QECHYZz0p1SyAAAAABJRU5ErkJggg==">
   <!-- CSS Files -->
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -51,14 +51,14 @@
     </div>
 
     <div class="tab-content active" id="generator-tab">
-      <div data-component="story-form"></div>
+      <story-form></story-form>
       <div id="story-result" class="story-result hidden">
-        <div data-component="story-content" id="storyDisplayContainer"></div>
+        <story-content id="storyDisplayContainer"></story-content>
         <div class="story-actions">
           <!-- Continue Story button removed -->
         </div>
         <div id="quizContainer" class="hidden">
-          <div data-component="quiz-component" id="quizComponentContainer"></div>
+          <quiz-component id="quizComponentContainer"></quiz-component>
         </div>
         <div id="continuation-container" class="continuation-container">
           <story-continuation id="storyContinuationContainer"></story-continuation>
@@ -71,10 +71,10 @@
         <h2>My Stories</h2>
         <p>Stories you've created and saved</p>
       </div>
-      <div data-component="stories-grid" id="storiesGridContainer"></div>
+      <stories-grid id="storiesGridContainer"></stories-grid>
       <div id="selected-story-view" class="hidden">
         <button id="backToListBtn" class="btn btn-secondary">Back to List</button>
-        <div data-component="story-content" id="storyContentContainer"></div>
+        <story-content id="storyContentContainer"></story-content>
       </div>
     </div>
   </main>
