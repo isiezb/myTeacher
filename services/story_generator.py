@@ -3,7 +3,7 @@ import os
 import json
 from dotenv import load_dotenv
 from models.story import StoryGenerationRequest, StoryGenerationResponse, VocabularyItem, QuizItem, StoryContinuationRequest, StoryContinuationResponse
-from typing import Tuple, Optional, List, Dict
+from typing import Tuple, Optional, List, Dict, Any
 
 load_dotenv() # Load environment variables from .env file
 
@@ -227,13 +227,30 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
                 except Exception as e:
                     print(f"Warning: Could not parse vocabulary list: {e}")
                     vocabulary_list = None
+                    
+            # Process quiz if present
+            quiz_list = None
+            if "quiz" in generated_data:
+                try:
+                    raw_quiz = generated_data["quiz"]
+                    if isinstance(raw_quiz, list):
+                        quiz_list = [QuizItem(**item) for item in raw_quiz
+                                    if isinstance(item, dict) and "question" in item and "options" in item and "correct_answer" in item]
+                except Exception as e:
+                    print(f"Warning: Could not parse quiz: {e}")
+                    quiz_list = None
+                    
+            # Extract summary
+            summary = generated_data.get("summary")
 
             return StoryContinuationResponse(
                 story_id=story_id,
                 continuation_text=continuation_text,
                 word_count=actual_word_count,
                 difficulty=request.difficulty,
-                vocabulary=vocabulary_list
+                vocabulary=vocabulary_list,
+                summary=summary,
+                quiz=quiz_list
             )
 
         except httpx.HTTPStatusError as e:
@@ -275,12 +292,16 @@ def _build_continuation_prompt(story_id: str, request: StoryContinuationRequest)
         "\nRequirements:",
         "- Generate a natural continuation of the story that picks up exactly where the original left off.",
         "- Maintain consistent characters, setting, and educational themes.",
-        "- Include 4 relevant vocabulary items that align with the specified difficulty level."
+        "- Include 4 relevant vocabulary items that align with the specified difficulty level.",
+        "- Generate a short summary of the continuation (2-3 sentences).",
+        "- Generate 3-4 multiple-choice quiz questions about the continuation content, each with 4 options and one correct answer."
     ]
 
     output_schema = {
         "continuation_text": "string (The continuation of the story, with paragraphs separated by double line breaks '\\n\\n')",
-        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words used in the continuation)'
+        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words used in the continuation)',
+        "summary": "string (Concise 2-3 sentence summary of the continuation)",
+        "quiz": '[{"question": "string", "options": ["string"], "correct_answer": int}] (List of quiz questions, each with an array of 4 options and the index of the correct answer (0-3))'
     }
 
     # Describe the JSON structure for the system prompt

@@ -57,4 +57,6 @@ class StoryContinuationResponse(BaseModel):
     continuation_text: str = Field(..., description="The generated continuation text")
     word_count: int = Field(..., description="Actual word count of the continuation")
     difficulty: str = Field(..., description="The difficulty level that was applied")
-    vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Additional vocabulary items for the continuation") 
+    vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Additional vocabulary items for the continuation")
+    summary: Optional[str] = Field(None, description="Summary of the continuation")
+    quiz: Optional[List[QuizItem]] = Field(None, description="Quiz questions for the continuation") 
