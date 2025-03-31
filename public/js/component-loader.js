@@ -5,106 +5,101 @@
  * by providing a way to select which version to use.
  */
 
-// Import original components
-import '../components/story-form.js';
-import '../components/story-content.js';
-import '../components/story-continuation.js';
-// Import refactored components
-import '../components/story-form-refactored.js';
-import '../components/story-content-refactored.js';
-import '../components/story-continuation-refactored.js';
+// DO NOT import components directly here to avoid double registration
+// Components are now imported via HTML scripts in the correct order
 
 // Configuration flag to enable refactored components
 const USE_REFACTORED_COMPONENTS = true;
 
 /**
+ * Check if a custom element is already defined
+ */
+function isElementDefined(tagName) {
+  return !!customElements.get(tagName);
+}
+
+/**
  * Initialize the appropriate components based on configuration
  */
 export function initializeComponents() {
+  console.log('🔄 Initializing components...');
+  
   const storyFormContainers = document.querySelectorAll('[data-component="story-form"]');
   const storyContentContainers = document.querySelectorAll('[data-component="story-content"]');
   const storyContinuationContainers = document.querySelectorAll('[data-component="story-continuation"]');
   
   if (USE_REFACTORED_COMPONENTS) {
     // Replace with refactored components
-    storyFormContainers.forEach(container => {
-      const storyForm = document.createElement('story-form-refactored');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyForm.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyForm);
-    });
+    const formTag = 'story-form-refactored';
+    const contentTag = 'story-content-refactored';
+    const continuationTag = 'story-continuation-refactored';
     
-    storyContentContainers.forEach(container => {
-      const storyContent = document.createElement('story-content-refactored');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyContent.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyContent);
-    });
+    // Only create components if they're defined
+    if (isElementDefined(formTag)) {
+      storyFormContainers.forEach(container => initializeComponent(container, formTag));
+    } else {
+      console.warn(`⚠️ Component ${formTag} is not defined`);
+    }
     
-    storyContinuationContainers.forEach(container => {
-      const storyContinuation = document.createElement('story-continuation-refactored');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyContinuation.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyContinuation);
-    });
+    if (isElementDefined(contentTag)) {
+      storyContentContainers.forEach(container => initializeComponent(container, contentTag));
+    } else {
+      console.warn(`⚠️ Component ${contentTag} is not defined`);
+    }
+    
+    if (isElementDefined(continuationTag)) {
+      storyContinuationContainers.forEach(container => initializeComponent(container, continuationTag));
+    } else {
+      console.warn(`⚠️ Component ${continuationTag} is not defined`);
+    }
   } else {
     // Use original components
-    storyFormContainers.forEach(container => {
-      const storyForm = document.createElement('story-form');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyForm.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyForm);
+    const formTag = 'story-form';
+    const contentTag = 'story-content';
+    const continuationTag = 'story-continuation';
+    
+    // Only create components if they're defined
+    if (isElementDefined(formTag)) {
+      storyFormContainers.forEach(container => initializeComponent(container, formTag));
+    } else {
+      console.warn(`⚠️ Component ${formTag} is not defined`);
+    }
+    
+    if (isElementDefined(contentTag)) {
+      storyContentContainers.forEach(container => initializeComponent(container, contentTag));
+    } else {
+      console.warn(`⚠️ Component ${contentTag} is not defined`);
+    }
+    
+    if (isElementDefined(continuationTag)) {
+      storyContinuationContainers.forEach(container => initializeComponent(container, continuationTag));
+    } else {
+      console.warn(`⚠️ Component ${continuationTag} is not defined`);
+    }
+  }
+  
+  console.log('✅ Components initialized successfully');
+}
+
+/**
+ * Initialize a single component in a container
+ */
+function initializeComponent(container, tagName) {
+  try {
+    const component = document.createElement(tagName);
+    
+    // Copy any attributes from the container to the component
+    Array.from(container.attributes).forEach(attr => {
+      if (attr.name !== 'data-component') {
+        component.setAttribute(attr.name, attr.value);
+      }
     });
     
-    storyContentContainers.forEach(container => {
-      const storyContent = document.createElement('story-content');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyContent.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyContent);
-    });
-    
-    storyContinuationContainers.forEach(container => {
-      const storyContinuation = document.createElement('story-continuation');
-      // Copy any attributes from the container to the component
-      Array.from(container.attributes).forEach(attr => {
-        if (attr.name !== 'data-component') {
-          storyContinuation.setAttribute(attr.name, attr.value);
-        }
-      });
-      // Clear the container and append the new component
-      container.innerHTML = '';
-      container.appendChild(storyContinuation);
-    });
+    // Clear the container and append the new component
+    container.innerHTML = '';
+    container.appendChild(component);
+  } catch (error) {
+    console.error(`❌ Error initializing ${tagName}:`, error);
   }
 }
 
