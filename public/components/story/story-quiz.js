@@ -205,29 +205,48 @@ class StoryQuiz extends LitElement {
   constructor() {
     super();
     this.quiz = [];
-    this.limitedQuiz = [];
     this.currentQuizIndex = 0;
     this.quizAnswers = [];
     this.quizCompleted = false;
+    this.limitedQuiz = [];
+    console.log('StoryQuiz constructor called');
   }
   
   updated(changedProperties) {
-    if (changedProperties.has('quiz') && this.quiz) {
-      // Limit the quiz to 3 questions
-      this.limitedQuiz = this.quiz.slice(0, 3);
+    if (changedProperties.has('quiz')) {
+      console.log('StoryQuiz quiz property updated:', {
+        quiz: this.quiz,
+        quizType: typeof this.quiz,
+        isArray: Array.isArray(this.quiz),
+        quizLength: this.quiz ? this.quiz.length : 0,
+        quizData: JSON.stringify(this.quiz)
+      });
       this.resetQuiz();
     }
   }
 
   connectedCallback() {
     super.connectedCallback();
+    console.log('StoryQuiz connected with quiz data:', this.quiz);
     this.resetQuiz();
   }
 
   resetQuiz() {
+    console.log('Resetting quiz with data:', this.quiz);
+    
+    if (this.quiz && Array.isArray(this.quiz)) {
+      // Limit the quiz to 3 questions
+      this.limitedQuiz = this.quiz.slice(0, 3);
+      console.log('Set limitedQuiz to:', this.limitedQuiz);
+    } else {
+      this.limitedQuiz = [];
+      console.warn('Quiz is not available or not an array');
+    }
+    
     this.currentQuizIndex = 0;
-    this.quizAnswers = this.limitedQuiz ? Array(this.limitedQuiz.length).fill(null) : [];
+    this.quizAnswers = this.limitedQuiz.map(() => -1); // -1 means unanswered
     this.quizCompleted = false;
+    this.requestUpdate();
   }
 
   _handleQuizOptionClick(optionIndex) {

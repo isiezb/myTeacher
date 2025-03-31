@@ -59,22 +59,24 @@ async def generate_story_content(request: StoryGenerationRequest) -> StoryGenera
             vocabulary_list = None
             if request.generate_vocabulary and "vocabulary" in generated_data:
                 try:
-                    # Ensure vocabulary is a list of dicts with 'term' and 'definition'
                     raw_vocab = generated_data["vocabulary"]
+                    print(f"Raw vocabulary data: {raw_vocab}")
                     if isinstance(raw_vocab, list):
-                         vocabulary_list = [VocabularyItem(**item) for item in raw_vocab if isinstance(item, dict) and "term" in item and "definition" in item]
-                    if not vocabulary_list:
-                        print("Warning: Vocabulary requested but format from LLM was invalid or empty.")
+                        vocabulary_list = [VocabularyItem(**item) for item in raw_vocab 
+                                          if isinstance(item, dict) and "term" in item and "definition" in item]
+                        print(f"Processed vocabulary items: {len(vocabulary_list)} items")
+                    else:
+                        print(f"Vocabulary is not a list: {type(raw_vocab)}")
                 except Exception as e:
                     print(f"Warning: Could not parse vocabulary list: {e}")
-                    vocabulary_list = None # Fallback if parsing fails
+                    vocabulary_list = None
                     
             # Process quiz if present
             quiz_list = None
             if request.generate_quiz and "quiz" in generated_data:
                 try:
-                    # Ensure quiz is a list of dicts with 'question', 'options', and 'correct_answer'
                     raw_quiz = generated_data["quiz"]
+                    print(f"Raw quiz data: {raw_quiz}")
                     if isinstance(raw_quiz, list):
                         quiz_list = []
                         for item in raw_quiz:
@@ -85,8 +87,9 @@ async def generate_story_content(request: StoryGenerationRequest) -> StoryGenera
                                 elif isinstance(item["correct_answer"], str) and item["correct_answer"].isdigit():
                                     item["correct_answer"] = int(item["correct_answer"])
                                     quiz_list.append(QuizItem(**item))
-                    if not quiz_list:
-                        print("Warning: Quiz requested but format from LLM was invalid or empty.")
+                        print(f"Processed quiz items: {len(quiz_list)} questions")
+                    else:
+                        print(f"Quiz is not a list: {type(raw_quiz)}")
                 except Exception as e:
                     print(f"Warning: Could not parse quiz list: {e}")
                     quiz_list = None # Fallback if parsing fails
@@ -221,9 +224,13 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
             if "vocabulary" in generated_data:
                 try:
                     raw_vocab = generated_data["vocabulary"]
+                    print(f"Raw vocabulary data: {raw_vocab}")
                     if isinstance(raw_vocab, list):
                         vocabulary_list = [VocabularyItem(**item) for item in raw_vocab 
                                           if isinstance(item, dict) and "term" in item and "definition" in item]
+                        print(f"Processed vocabulary items: {len(vocabulary_list)} items")
+                    else:
+                        print(f"Vocabulary is not a list: {type(raw_vocab)}")
                 except Exception as e:
                     print(f"Warning: Could not parse vocabulary list: {e}")
                     vocabulary_list = None
@@ -233,9 +240,13 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
             if "quiz" in generated_data:
                 try:
                     raw_quiz = generated_data["quiz"]
+                    print(f"Raw quiz data: {raw_quiz}")
                     if isinstance(raw_quiz, list):
                         quiz_list = [QuizItem(**item) for item in raw_quiz
                                     if isinstance(item, dict) and "question" in item and "options" in item and "correct_answer" in item]
+                        print(f"Processed quiz items: {len(quiz_list)} questions")
+                    else:
+                        print(f"Quiz is not a list: {type(raw_quiz)}")
                 except Exception as e:
                     print(f"Warning: Could not parse quiz: {e}")
                     quiz_list = None
@@ -248,6 +259,7 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
                 continuation_text=continuation_text,
                 word_count=actual_word_count,
                 difficulty=request.difficulty,
+                focus=request.focus or "general",
                 vocabulary=vocabulary_list,
                 summary=summary,
                 quiz=quiz_list

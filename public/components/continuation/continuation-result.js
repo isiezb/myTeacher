@@ -285,7 +285,9 @@ export class ContinuationResult extends LitElement {
       quizType: typeof this.quiz,
       isArray: Array.isArray(this.quiz),
       quizLength: this.quiz && Array.isArray(this.quiz) ? this.quiz.length : 0,
-      quizItems: this.quiz && Array.isArray(this.quiz) ? JSON.stringify(this.quiz) : 'No quiz items'
+      quizItems: this.quiz && Array.isArray(this.quiz) ? JSON.stringify(this.quiz) : 'No quiz items',
+      vocabularyItems: this.vocabularyItems,
+      vocabularyLength: this.vocabularyItems && Array.isArray(this.vocabularyItems) ? this.vocabularyItems.length : 0
     });
 
     // Process the text with proper paragraph breaks
@@ -313,7 +315,7 @@ export class ContinuationResult extends LitElement {
           </div>
         ` : ''}
         
-        ${this.vocabularyItems && this.vocabularyItems.length > 0 ? html`
+        ${this.vocabularyItems && Array.isArray(this.vocabularyItems) && this.vocabularyItems.length > 0 ? html`
           <div class="vocabulary-section">
             <h4>Vocabulary</h4>
             <div class="vocabulary-list">
@@ -327,8 +329,9 @@ export class ContinuationResult extends LitElement {
           </div>
         ` : ''}
         
-        ${this.quiz && this.quiz.length > 0 ? html`
+        ${this.quiz && Array.isArray(this.quiz) && this.quiz.length > 0 ? html`
           <div class="quiz-section">
+            <h4>Quiz</h4>
             <story-quiz .quiz=${this.quiz}></story-quiz>
           </div>
         ` : ''}

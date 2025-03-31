@@ -199,7 +199,10 @@ export class StoryContinuation extends LitElement {
         if (data.vocabulary && Array.isArray(data.vocabulary)) {
           console.log('New vocabulary items:', data.vocabulary);
           this._vocabularyItems = data.vocabulary;
+          console.log('Set vocabulary items to component:', this._vocabularyItems);
         } else {
+          console.warn('No vocabulary items in response or invalid format:', 
+            typeof data.vocabulary, data.vocabulary);
           this._vocabularyItems = [];
         }
         
@@ -207,12 +210,36 @@ export class StoryContinuation extends LitElement {
         if (data.summary) {
           this._summary = data.summary;
           console.log('Continuation summary:', this._summary);
+        } else {
+          console.warn('No summary in response');
         }
         
         if (data.quiz && Array.isArray(data.quiz)) {
           this._quiz = data.quiz;
           console.log('Continuation quiz:', this._quiz);
+          console.log('Quiz structure check:', {
+            length: this._quiz.length,
+            firstItem: this._quiz.length > 0 ? JSON.stringify(this._quiz[0]) : 'No items'
+          });
+        } else {
+          console.warn('No quiz in response or invalid format:', 
+            typeof data.quiz, data.quiz);
+          this._quiz = [];
         }
+        
+        // Full response debug
+        console.log('Complete continuation response data:', {
+          continuation_text_length: data.continuation_text?.length || 0,
+          word_count: data.word_count,
+          difficulty: data.difficulty,
+          focus: data.focus,
+          has_vocabulary: !!data.vocabulary,
+          vocabulary_length: data.vocabulary?.length || 0,
+          has_summary: !!data.summary,
+          has_quiz: !!data.quiz,
+          quiz_length: data.quiz?.length || 0,
+          full_data: JSON.stringify(data)
+        });
         
         // Dispatch event that continuation is ready
         const event = new CustomEvent('story-continued', { 

@@ -1,0 +1,99 @@
+{
+  "projectName": "EasyStory",
+  "maxLinesPerFile": 350,
+  "formatOnSave": true,
+  "lineWidth": 100,
+  "tabSize": 2,
+  "useTabs": false,
+  "trailingComma": "es5",
+  "singleQuote": true,
+  "bracketSpacing": true,
+  "arrowParenthesis": "always",
+  "endOfLine": "lf",
+  "fileStructure": {
+    "services": {
+      "description": "Backend service modules implementing business logic",
+      "maxLinesPerFile": 350,
+      "refactoringStrategies": [
+        "Split by functionality into separate files",
+        "Extract utility functions to common modules",
+        "Separate prompting logic from API interaction"
+      ]
+    },
+    "models": {
+      "description": "Data models and schemas",
+      "maxLinesPerFile": 200
+    },
+    "routers": {
+      "description": "API endpoint definitions",
+      "maxLinesPerFile": 200
+    },
+    "public": {
+      "description": "Frontend static assets",
+      "js": {
+        "maxLinesPerFile": 350
+      },
+      "css": {
+        "maxLinesPerFile": 250
+      },
+      "components": {
+        "description": "Web components using lit-element",
+        "maxLinesPerFile": 350,
+        "refactoringStrategies": [
+          "Extract sub-components for complex UI sections",
+          "Move business logic to separate service files",
+          "Create utility/helper files for shared functions",
+          "Split large components into base + extensions"
+        ]
+      }
+    }
+  },
+  "lintRules": {
+    "python": {
+      "maxComplexity": 10,
+      "maxNestedBlocks": 3,
+      "docstrings": "required"
+    },
+    "javascript": {
+      "semicolons": "always",
+      "preferConst": true,
+      "noVar": true,
+      "maxNestedCallbacks": 3
+    }
+  },
+  "componentStructure": {
+    "namePattern": "${name}.js",
+    "templates": {
+      "lit-component": {
+        "template": "import { LitElement, html, css } from 'lit';\n\nclass ${Name} extends LitElement {\n  static properties = {\n    // Define properties here\n  };\n\n  static styles = css`\n    /* Component styles */\n  `;\n\n  constructor() {\n    super();\n    // Initialize properties\n  }\n\n  render() {\n    return html`\n      <!-- Component template -->\n    `;\n  }\n}\n\ncustomElements.define('${tag-name}', ${Name});"
+      }
+    }
+  },
+  "refactorTriggers": {
+    "fileExceedsMaxLines": true,
+    "functionExceedsMaxLines": {
+      "enabled": true,
+      "maxLines": 50,
+      "excludeFunctions": ["generate_story_content", "continue_story_content", "render"]
+    },
+    "cyclomaticComplexityTooHigh": {
+      "enabled": true,
+      "threshold": 15
+    },
+    "tooManyProperties": {
+      "enabled": true,
+      "threshold": 10,
+      "message": "Consider breaking this component into smaller sub-components"
+    }
+  },
+  "componentRefactorGuide": {
+    "story-form.js": "Break into input/field sub-components and a form controller",
+    "story-content.js": "Extract vocabulary, quiz, and summary sections into separate components",
+    "story-continuation.js": "Separate form and results display into different components"
+  },
+  "errorDetection": {
+    "unusedImports": true,
+    "unusedVariables": true,
+    "duplicateCode": true
+  }
+} 
