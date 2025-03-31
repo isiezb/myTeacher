@@ -3,6 +3,7 @@ import { showToast } from './toast-container.js';
 
 // Import subcomponents
 import './continuation/difficulty-selector.js';
+import './continuation/difficulty-description.js';
 import './continuation/vocabulary-display.js';
 import './continuation/continuation-form.js';
 import './continuation/continuation-result.js';
@@ -108,6 +109,9 @@ export class StoryContinuation extends LitElement {
     this._quiz = [];
     this.requestUpdate();
     
+    // Show loading overlay
+    window.showLoading?.('Continuing your educational story...');
+    
     // Ensure we have a valid story object
     const originalStory = this.originalStory || {};
     
@@ -130,10 +134,6 @@ export class StoryContinuation extends LitElement {
       'much_harder': 'much_harder'
     };
     
-    // Get the focus term
-    const focusTerm = this._settings.focus;
-    console.log(`Story focus set to: ${focusTerm}`);
-    
     // Prepare options with complete original story content
     const options = {
       length: parseInt(this._settings.length, 10),
@@ -141,7 +141,7 @@ export class StoryContinuation extends LitElement {
       original_story_content: originalContent,
       generate_summary: true,
       generate_quiz: true,
-      focus: focusTerm
+      focus: this._settings.focus
     };
     
     // Log what we're about to do (limiting content length for logging)
@@ -217,13 +217,8 @@ export class StoryContinuation extends LitElement {
           if (focusTerm === 'general') {
             mockContent = "This is a mock continuation of the story. It would normally come from the API but is being generated locally for development purposes.\n\nThe characters continue their adventure with enthusiasm, learning more about their subject along the way.";
           } else {
-            // Create a focus-specific mock continuation with stronger emphasis
-            mockContent = `This is a mock continuation of the story focusing heavily on "${focusTerm}".\n\n` +
-              `The characters dive deep into understanding ${focusTerm} and its importance. They thoroughly explore ${focusTerm} ` +
-              `from multiple angles. Through detailed discussion, they learn that ${focusTerm} is a critical concept in their field.\n\n` +
-              `"${focusTerm} is fascinating," says one character. "I never realized how central it is to understanding this topic."\n\n` +
-              `They conduct experiments specifically designed to demonstrate the principles of ${focusTerm} and document their findings. ` +
-              `By the end, they have a much more comprehensive understanding of ${focusTerm} and how it applies to real-world scenarios.`;
+            // Create a focus-specific mock continuation
+            mockContent = `This is a mock continuation of the story focusing on "${focusTerm}".\n\nThe characters dive deeper into understanding ${focusTerm} and its importance. They discuss various aspects of ${focusTerm} and how it relates to their subject.\n\nThrough practical examples and experiments, they gain a better comprehension of ${focusTerm}.`;
           }
           
           this._continuationContent = mockContent;
@@ -234,7 +229,7 @@ export class StoryContinuation extends LitElement {
             { 
               term: focusTerm !== 'general' ? focusTerm : "Sample Term 1", 
               definition: focusTerm !== 'general' ? 
-                `${focusTerm} is a key concept that was the central focus of this continuation. It plays a critical role in understanding the subject matter.` : 
+                "This term was the focus of your continuation request." : 
                 "This is a sample definition for demonstration purposes.", 
               importance: 10 
             },
@@ -245,25 +240,16 @@ export class StoryContinuation extends LitElement {
             }
           ];
           
-          // Add related terms if not general focus
-          if (focusTerm !== 'general') {
-            this._vocabularyItems.push({
-              term: `${focusTerm} application`,
-              definition: `The practical use of ${focusTerm} in real-world contexts, as demonstrated in the story.`,
-              importance: 8
-            });
-          }
-          
-          // Adjust mock summary to reflect the stronger focus
+          // Adjust mock summary to reflect the focus
           this._summary = focusTerm !== 'general' ?
-            `This continuation focuses extensively on "${focusTerm}". The characters thoroughly explore this concept, discussing its definition, importance, and practical applications. Through experiments and discussion, they gain a comprehensive understanding of ${focusTerm} and how it relates to their broader subject.` :
+            `This is a mock summary of the continuation focusing on "${focusTerm}". The characters explored this concept in depth.` :
             "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
           
-          // Adjust mock quiz to reflect the focus with more questions about the focus term
+          // Adjust mock quiz to reflect the focus
           this._quiz = [
             { 
               question: focusTerm !== 'general' ? 
-                `What was the primary focus of this continuation?` : 
+                `What was the main focus of this continuation?` : 
                 "What did the characters do in the continuation?", 
               options: focusTerm !== 'general' ? 
                 ["Another topic", focusTerm, "Nothing specific", "A different concept"] : 
@@ -277,25 +263,15 @@ export class StoryContinuation extends LitElement {
             }
           ];
           
-          // Add a more specific question about the focus term if not general
-          if (focusTerm !== 'general') {
-            this._quiz.push({
-              question: `Why is ${focusTerm} important according to the story?`,
-              options: [
-                "It's not actually important", 
-                "It's critical to understanding the subject matter", 
-                "It's only important to historians", 
-                "It's a minor concept"
-              ],
-              correct_answer: 1
-            });
-          }
-          
           this.requestUpdate();
         }, 1500);
       }
     } finally {
       this.isSubmitting = false;
+      
+      // Hide loading overlay
+      window.hideLoading?.();
+      
       this.requestUpdate();
     }
   }
@@ -315,12 +291,6 @@ export class StoryContinuation extends LitElement {
 
     // If we have continuation content, show the result
     if (this._continuationContent) {
-      // Get the original story metadata
-      const originalTitle = this.originalStory?.title || 'Story Continuation';
-      const originalSubject = this.originalStory?.subject || 'General';
-      const originalGradeLevel = this.originalStory?.grade_level || 'Not specified';
-      const wordCount = this._continuationContent.split(/\s+/).length || 0;
-      
       return html`
         <continuation-result 
           .continuationContent=${this._continuationContent}
@@ -328,11 +298,6 @@ export class StoryContinuation extends LitElement {
           .summary=${this._summary}
           .quiz=${this._quiz}
           .difficulty=${this._settings.difficulty}
-          .title=${originalTitle}
-          .subject=${originalSubject}
-          .gradeLevel=${originalGradeLevel}
-          .wordCount=${wordCount}
-          .focus=${this._settings.focus}
         ></continuation-result>
       `;
     }
