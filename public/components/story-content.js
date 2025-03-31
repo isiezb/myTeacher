@@ -49,6 +49,33 @@ export class StoryContent extends LitElement {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
     }
+    
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .restart-button {
+      display: block;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text, #212529);
+      background: var(--bg, #f8f9fa);
+      border: 2px solid var(--border, rgba(0, 0, 0, 0.1));
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .restart-button:hover {
+      background: var(--bg-hover, #e9ecef);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
   `;
 
   constructor() {
@@ -147,6 +174,25 @@ export class StoryContent extends LitElement {
     }));
   }
 
+  _handleRestartStory(e) {
+    console.log('Restart Story button clicked in story-content component');
+    
+    // Make sure we have the current story data
+    if (!this.story) {
+      console.error('No story data available in the component');
+      return;
+    }
+    
+    console.log('Dispatching restart-story event with story:', this.story);
+    
+    // Dispatch event to notify parent components that the user wants to restart the story
+    this.dispatchEvent(new CustomEvent('restart-story', { 
+      detail: { story: this.story },
+      bubbles: true, 
+      composed: true 
+    }));
+  }
+
   render() {
     if (!this.story) {
       return html`
@@ -183,12 +229,18 @@ export class StoryContent extends LitElement {
           ''
         }
         
-        ${shouldShowContinueButton ? 
-          html`<button class="continue-button" @click=${this._handleContinueStory}>
-            Continue Story
-          </button>` : 
-          ''
-        }
+        <div class="button-container">
+          ${shouldShowContinueButton ? 
+            html`<button class="continue-button" @click=${this._handleContinueStory}>
+              Continue Story
+            </button>` : 
+            ''
+          }
+          
+          <button class="restart-button" @click=${this._handleRestartStory}>
+            Create New Story
+          </button>
+        </div>
       </div>
     `;
   }

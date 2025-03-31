@@ -192,6 +192,36 @@ class FormInputGroup extends LitElement {
       `;
     }
   }
+
+  /**
+   * Resets the input to its default value
+   */
+  reset() {
+    console.log(`Resetting input ${this.name}`);
+    
+    if (this.type === 'checkbox') {
+      this.value = true; // Default is checked for checkboxes
+    } else if (this.type === 'select') {
+      this.value = '';
+    } else {
+      this.value = '';
+    }
+    
+    // Ensure the DOM is updated
+    this.requestUpdate();
+    
+    // If the input element exists in the shadow DOM, update its value directly
+    if (this.shadowRoot) {
+      const inputElement = this.shadowRoot.querySelector(`#${this.name}`);
+      if (inputElement) {
+        if (this.type === 'checkbox') {
+          inputElement.checked = this.value;
+        } else {
+          inputElement.value = this.value;
+        }
+      }
+    }
+  }
 }
 
 // Guard against duplicate registration

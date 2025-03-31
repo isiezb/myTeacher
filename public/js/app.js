@@ -187,6 +187,9 @@
     
     // Listen for continue-story event from continuation-result
     document.addEventListener('continue-story', handleContinueStory);
+    
+    // Listen for restart-story event
+    document.addEventListener('restart-story', handleRestartStory);
   }
 
   // Handle form submission
@@ -682,6 +685,59 @@
     }, 0); // Immediate execution to prevent visible delay
     
     window.showToast?.('Ready to continue your story further!', 'info');
+  }
+
+  // Handle restart story event
+  function handleRestartStory(event) {
+    console.log('Restart story event received');
+    
+    // Hide the story result container
+    const storyResult = document.getElementById('story-result');
+    if (storyResult) {
+      storyResult.classList.add('hidden');
+    }
+    
+    // Hide any continuation container if visible
+    const continuationContainer = document.querySelector('.continuation-container');
+    if (continuationContainer) {
+      continuationContainer.classList.add('hidden');
+    }
+    
+    // Find and reset the story form
+    const storyForm = document.querySelector('story-form') || 
+                      document.querySelector('[data-component="story-form"]');
+    if (storyForm && typeof storyForm.resetForm === 'function') {
+      console.log('Resetting story form');
+      storyForm.resetForm();
+    } else {
+      console.warn('Could not find story form or it does not have a resetForm method');
+    }
+    
+    // Scroll to the top of the page - to the generator tab
+    const generatorTab = document.getElementById('generator-tab');
+    if (generatorTab) {
+      // Calculate position with header clearance
+      const headerHeight = 80; // Adjust based on your header height
+      const elementPosition = generatorTab.getBoundingClientRect().top + window.pageYOffset;
+      const offsetPosition = elementPosition - headerHeight;
+      
+      // Smooth scroll to the form area
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+      
+      console.log('Scrolled to generator tab');
+    } else {
+      // Fallback to top of page
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+    
+    // Show success message
+    window.showToast?.('Ready to create a new story!', 'info');
   }
 
   // Make public methods available globally

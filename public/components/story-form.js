@@ -201,6 +201,43 @@ export class StoryForm extends LitElement {
     }
   }
 
+  /**
+   * Resets the form to default values
+   */
+  resetForm() {
+    console.log('Resetting form data to defaults');
+    
+    this._formData = {
+      academic_grade: '',
+      subject: '',
+      other_subject: '',
+      subject_specification: '',
+      setting: '',
+      main_character: '',
+      word_count: '300',
+      language: 'English',
+      generate_vocabulary: true,
+      generate_summary: true,
+      generate_quiz: true
+    };
+    
+    this._showOtherSubject = false;
+    this.isSubmitting = false;
+    this.requestUpdate();
+    
+    // Find and reset all form-input-group elements in the component
+    if (this.shadowRoot) {
+      const inputGroups = this.shadowRoot.querySelectorAll('form-input-group');
+      inputGroups.forEach(input => {
+        if (typeof input.reset === 'function') {
+          input.reset();
+        }
+      });
+    }
+    
+    console.log('Form reset complete');
+  }
+
   render() {
     return html`
       <div class="form-section">
