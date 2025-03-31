@@ -49,6 +49,47 @@ export class DifficultyDescription extends LitElement {
     .difficulty-description-content.harder {
       border-left-color: var(--warning, #d69e2e);
     }
+    
+    @media (max-width: 768px) {
+      .difficulty-description-content {
+        padding: 0.75rem;
+      }
+      
+      .difficulty-description-content h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.3rem;
+      }
+      
+      .difficulty-description-content p {
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .difficulty-description {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .difficulty-description-content {
+        padding: 0.5rem;
+      }
+      
+      .difficulty-description-content h4 {
+        font-size: 0.8rem;
+        margin-bottom: 0.2rem;
+      }
+      
+      .difficulty-description-content p {
+        font-size: 0.75rem;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }

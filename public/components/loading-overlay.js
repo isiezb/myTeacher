@@ -10,8 +10,9 @@ window.showLoading = function(message = 'Loading...') {
   document.dispatchEvent(event);
 };
 
-window.hideLoading = function() {
+window.hideLoading = function(callback) {
   const event = new CustomEvent('hide-loading', {
+    detail: { callback },
     bubbles: true,
     composed: true
   });
@@ -53,8 +54,15 @@ export class LoadingOverlay extends LitElement {
     this.visible = true;
   }
 
-  _handleHideLoading() {
+  _handleHideLoading(event) {
     this.visible = false;
+    
+    // Allow animation to complete before executing the callback
+    if (event && event.detail && typeof event.detail.callback === 'function') {
+      setTimeout(() => {
+        event.detail.callback();
+      }, 300); // Match the animation duration
+    }
   }
 
   static get styles() {

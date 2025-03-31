@@ -131,7 +131,12 @@ export class ContinuationResult extends LitElement {
 
   firstUpdated() {
     // After the component is first rendered, scroll to the first paragraph of the content
+    this._scrollToContent();
+  }
+
+  _scrollToContent() {
     setTimeout(() => {
+      console.log('Attempting to scroll to continuation content');
       const continuationContent = this.shadowRoot.querySelector('.continuation-content');
       if (continuationContent) {
         const firstParagraph = continuationContent.querySelector('p');
@@ -142,13 +147,15 @@ export class ContinuationResult extends LitElement {
           // Get the position of the element relative to the top of the document
           const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
           
-          // Subtract the header height to position it below the header
+          // Position the element exactly at the top of the viewport, with just header clearance
           const offsetPosition = elementPosition - headerHeight;
           
-          // Scroll to beginning of continuation content
+          console.log('Scrolling continuation content to position:', offsetPosition);
+          
+          // Scroll to beginning of continuation content - use auto for more reliability
           window.scrollTo({
             top: offsetPosition,
-            behavior: 'smooth'
+            behavior: 'auto'
           });
           
           // Highlight the first paragraph briefly
@@ -156,9 +163,23 @@ export class ContinuationResult extends LitElement {
           setTimeout(() => {
             firstParagraph.classList.remove('highlight-new-content');
           }, 2000);
+        } else {
+          console.warn('No paragraph found in continuation content');
+          
+          // Fallback - scroll to the continuation result container
+          const resultContainer = this.shadowRoot.querySelector('.continuation-result');
+          if (resultContainer) {
+            const position = resultContainer.getBoundingClientRect().top + window.pageYOffset - 80;
+            window.scrollTo({
+              top: position,
+              behavior: 'auto'
+            });
+          }
         }
+      } else {
+        console.warn('No continuation content container found');
       }
-    }, 100); // Short timeout to ensure DOM is ready
+    }, 50); // Short delay to ensure render is complete
   }
 
   _handleContinueStory() {

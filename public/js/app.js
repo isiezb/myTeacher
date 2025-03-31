@@ -246,36 +246,72 @@
         storyResult.classList.remove('hidden');
       }
 
-      // Scroll to the actual story text content
-      const storyText = document.querySelector('.story-content-container .story-text');
-      if (storyText) {
-        // Find the first paragraph to scroll to
-        const firstParagraph = storyText.querySelector('p');
-        if (firstParagraph) {
+      // Hide loading indicator before scrolling so the content is available
+      window.hideLoading?.(() => {
+        console.log('Loading overlay hidden, scrolling to content');
+        
+        // Scroll to the story content - try multiple possible selectors
+        const scrollElements = [
+          document.querySelector('.story-content-container .story-text p'),
+          document.querySelector('story-text p'),
+          document.querySelector('#storyDisplayContainer p'),
+          document.querySelector('#story-result p')
+        ];
+
+        // Find the first valid element to scroll to
+        let targetElement = null;
+        for (const element of scrollElements) {
+          if (element) {
+            targetElement = element;
+            break;
+          }
+        }
+
+        // If no direct element found, try accessing elements in shadow DOM
+        if (!targetElement) {
+          const storyTextElement = document.querySelector('story-text');
+          if (storyTextElement && storyTextElement.shadowRoot) {
+            targetElement = storyTextElement.shadowRoot.querySelector('.story-text p');
+          }
+        }
+
+        if (targetElement) {
+          console.log('Scrolling to story content element:', targetElement);
+          
           // Calculate the position to scroll to with proper header clearance
           const headerHeight = 80; // Adjust if needed based on your actual header height
           
           // Get the position of the element relative to the top of the document
-          const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
+          const elementPosition = targetElement.getBoundingClientRect().top + window.pageYOffset;
           
           // Subtract the header height to position it below the header
           const offsetPosition = elementPosition - headerHeight;
           
-          // Smooth scroll to the beginning of the story content
+          // Scroll to the beginning of the story content
           window.scrollTo({
             top: offsetPosition,
-            behavior: 'smooth'
+            behavior: 'auto' // Use 'auto' instead of 'smooth' for more reliable scrolling
           });
           
           // Add a temporary highlight effect
-          firstParagraph.classList.add('highlight-new-content');
+          targetElement.classList.add('highlight-new-content');
           setTimeout(() => {
-            firstParagraph.classList.remove('highlight-new-content');
+            targetElement.classList.remove('highlight-new-content');
           }, 2000);
+        } else {
+          console.warn('Could not find any valid story text element for scrolling');
+          
+          // Fallback: try to scroll to the story container
+          const fallbackContainer = document.getElementById('story-result') || document.getElementById('storyDisplayContainer');
+          if (fallbackContainer) {
+            const containerPosition = fallbackContainer.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo({
+              top: containerPosition - 80, // Apply the same header offset
+              behavior: 'auto'
+            });
+          }
         }
-      } else {
-        console.warn('Could not find story text element for scrolling');
-      }
+      });
 
       // Save the story to Supabase if storage is enabled
       if (window.ENV_ENABLE_STORAGE && typeof window.SupabaseService !== 'undefined') {
@@ -303,10 +339,10 @@
     } catch (error) {
       console.error('Error generating story:', error);
       window.showToast?.('Failed to generate story. Please try again.', 'error');
-    } finally {
-      // Hide loading indicator
+      
+      // Hide loading indicator on error
       window.hideLoading?.();
-
+    } finally {
       // Reset form submitting state
       if (formComponent) {
         formComponent.isSubmitting = false;
@@ -554,7 +590,7 @@
     
     // Scroll to the continuation container so it's visible at the top of the viewport
     setTimeout(() => {
-      // Calculate position that places the container at the top with some margin
+      // Calculate position that places the container at the top with header clearance
       const headerHeight = 80; // Estimate header height, adjust as needed
       const rect = continuationContainer.getBoundingClientRect();
       const offsetTop = rect.top + window.pageYOffset - headerHeight;
@@ -576,7 +612,7 @@
           }, 1500);
         }
       }, 300);
-    }, 100);
+    }, 0); // Immediate execution to prevent visible delay
     
     window.showToast?.('Ready to continue your story!', 'info');
   }
@@ -621,7 +657,7 @@
     
     // Scroll to the continuation container so it's visible at the top of the viewport
     setTimeout(() => {
-      // Calculate position that places the container at the top with some margin
+      // Calculate position that places the container at the top with header clearance
       const headerHeight = 80; // Estimate header height, adjust as needed
       const rect = continuationContainer.getBoundingClientRect();
       const offsetTop = rect.top + window.pageYOffset - headerHeight;
@@ -643,7 +679,7 @@
           }, 1500);
         }
       }, 300);
-    }, 100);
+    }, 0); // Immediate execution to prevent visible delay
     
     window.showToast?.('Ready to continue your story further!', 'info');
   }

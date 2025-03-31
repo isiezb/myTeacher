@@ -136,7 +136,7 @@ document.addEventListener('story-continued', (event) => {
             // Get the position of the element relative to the top of the document
             const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
             
-            // Subtract the header height to position it below the header
+            // Position the element exactly at the top of the viewport, with just header clearance
             const offsetPosition = elementPosition - headerHeight;
             
             // Smooth scroll to the beginning of the new content

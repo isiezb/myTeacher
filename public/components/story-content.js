@@ -61,10 +61,17 @@ export class StoryContent extends LitElement {
   }
 
   firstUpdated() {
-    // If there's a story and it's a newly loaded one, scroll to its first paragraph
+    // Initial scrolling when component is first rendered
+    this._scrollToStoryContent();
+  }
+
+  _scrollToStoryContent() {
+    // If there's a story, scroll to its first paragraph
     if (this.story) {
       setTimeout(() => {
+        console.log('Attempting to scroll to story content in component');
         const storyText = this.shadowRoot.querySelector('story-text');
+        
         if (storyText && storyText.shadowRoot) {
           const firstParagraph = storyText.shadowRoot.querySelector('.story-text p');
           if (firstParagraph) {
@@ -74,13 +81,15 @@ export class StoryContent extends LitElement {
             // Get the position of the element relative to the top of the document
             const elementPosition = firstParagraph.getBoundingClientRect().top + window.pageYOffset;
             
-            // Subtract the header height to position it below the header
+            // Position the element exactly at the top of the viewport, with just header clearance
             const offsetPosition = elementPosition - headerHeight;
+            
+            console.log('Scrolling to position:', offsetPosition);
             
             // Scroll to beginning of story content
             window.scrollTo({
               top: offsetPosition,
-              behavior: 'smooth'
+              behavior: 'auto'  // Use 'auto' instead of 'smooth' for more reliability
             });
             
             // Highlight the first paragraph briefly
@@ -88,16 +97,21 @@ export class StoryContent extends LitElement {
             setTimeout(() => {
               firstParagraph.classList.remove('highlight-new-content');
             }, 2000);
+          } else {
+            console.warn('No paragraph found in story-text');
           }
+        } else {
+          console.warn('No story-text component found in story-content');
         }
-      }, 100); // Short delay to ensure rendering is complete
+      }, 50); // Short delay to ensure render is complete
     }
   }
 
   updated(changedProperties) {
     if (changedProperties.has('story') && this.story) {
+      console.log('Story content updated, story:', this.story.id);
+      
       // Expose the story to the global window so it can be accessed by other components
-      // This maintains compatibility with the original implementation
       if (window) {
         window.currentStory = this.story;
       }
@@ -108,6 +122,9 @@ export class StoryContent extends LitElement {
         bubbles: true, 
         composed: true 
       }));
+      
+      // Scroll to the content when story is updated
+      this._scrollToStoryContent();
     }
   }
 

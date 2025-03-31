@@ -88,26 +88,43 @@ export class FocusSelector extends LitElement {
       }
       
       .focus-button {
-        width: 120px;
+        width: 110px;
         margin-bottom: 10px;
+      }
+      
+      .focus-icon {
+        font-size: 1.3rem;
+      }
+      
+      .focus-label {
+        font-size: 0.7rem;
       }
     }
 
     @media (max-width: 500px) {
+      .focus-options {
+        gap: 0.5rem;
+      }
+      
       .focus-buttons {
-        flex-direction: column;
-        align-items: center;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
       
       .focus-button {
-        width: 80%;
-        flex-direction: row;
-        justify-content: flex-start;
-        gap: 1rem;
+        width: calc(50% - 10px);
+        padding: 0.5rem;
+        margin-bottom: 5px;
       }
       
       .focus-icon {
-        margin-bottom: 0;
+        font-size: 1.2rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .focus-label {
+        font-size: 0.65rem;
       }
     }
   `;

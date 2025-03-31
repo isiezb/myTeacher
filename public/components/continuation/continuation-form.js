@@ -117,6 +117,48 @@ export class ContinuationForm extends LitElement {
       border-top-color: white;
       animation: spin 1s linear infinite;
     }
+    
+    .selector-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .continuation-form {
+        gap: 1rem;
+      }
+      
+      h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .selector-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      
+      .selector-container > * {
+        width: 100%;
+      }
+      
+      .separator {
+        display: none;
+      }
+      
+      .input-group {
+        margin-bottom: 0.5rem;
+      }
+      
+      .continuation-form {
+        gap: 0.75rem;
+      }
+    }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -227,20 +269,20 @@ export class ContinuationForm extends LitElement {
           </select>
         </div>
         
-        <difficulty-selector 
-          .difficulty=${this.settings.difficulty}
-          ?disabled=${this.isSubmitting}
-          @difficulty-change=${this._handleDifficultyChange}
-        ></difficulty-selector>
-        
-        <div class="separator"></div>
-        
-        <focus-selector
-          .focus=${this.settings.focus}
-          .vocabularyItems=${this.vocabularyItems}
-          ?disabled=${this.isSubmitting}
-          @focus-change=${this._handleFocusChange}
-        ></focus-selector>
+        <div class="selector-container">
+          <difficulty-selector 
+            .difficulty=${this.settings.difficulty}
+            ?disabled=${this.isSubmitting}
+            @difficulty-change=${this._handleDifficultyChange}
+          ></difficulty-selector>
+          
+          <focus-selector
+            .focus=${this.settings.focus}
+            .vocabularyItems=${this.vocabularyItems}
+            ?disabled=${this.isSubmitting}
+            @focus-change=${this._handleFocusChange}
+          ></focus-selector>
+        </div>
         
         <difficulty-description .difficulty=${this.settings.difficulty}></difficulty-description>
         
