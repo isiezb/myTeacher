@@ -16,7 +16,7 @@ import '/components/quiz-component.js';
 
 // Refactored components
 import '/components/story-form-refactored.js';
-import '/components/story-content-refactored.js';
+// import '/components/story-content-refactored.js'; // Removed - Loaded via index.html
 import '/components/story-continuation-refactored.js';
 
 // Form components
@@ -46,5 +46,4 @@ export * from './story-form.js';
 export * from './story-content.js';
 export * from './story-continuation.js';
 export * from './story-form-refactored.js';
-export * from './story-content-refactored.js';
 export * from './story-continuation-refactored.js'; 
