@@ -7,39 +7,74 @@
   // Add global event listeners
   document.addEventListener('DOMContentLoaded', onDocumentReady);
   window.addEventListener('error', handleGlobalError);
+  window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+  // Track component initialization
+  const componentStatus = {
+    'story-form': false,
+    'story-content': false,
+    'story-continuation': false,
+    'quiz-component': false,
+    'stories-grid': false,
+    'toast-container': false,
+    'loading-overlay': false
+  };
 
   // On DOM ready
-  function onDocumentReady() {
+  async function onDocumentReady() {
     console.log('DOM content loaded');
-    setupComponents();
-    setupEventListeners();
+    
+    try {
+      // Initialize error boundary for the app container
+      await initializeErrorBoundary();
+      
+      // Set up core components
+      await setupComponents();
+      
+      // Set up event listeners
+      setupEventListeners();
 
-    // Check if Lit components are ready
-    if (window.litComponentsReady) {
-      console.log('Lit components already initialized');
+      // Initialize Supabase
+      await initializeSupabase();
+
+      console.log('App initialized successfully');
+    } catch (error) {
+      console.error('Error during app initialization:', error);
+      window.showToast?.('Error initializing application', 'error');
     }
+  }
 
-    // Initialize Supabase if available
+  // Initialize error boundary
+  async function initializeErrorBoundary() {
+    const appContainer = document.getElementById('app');
+    if (appContainer && !appContainer.closest('error-boundary')) {
+      const errorBoundary = document.createElement('error-boundary');
+      appContainer.parentNode.insertBefore(errorBoundary, appContainer);
+      errorBoundary.appendChild(appContainer);
+    }
+  }
+
+  // Initialize Supabase
+  async function initializeSupabase() {
     try {
       if (window.initSupabase && typeof window.initSupabase === 'function') {
-        window.initSupabase()
-          .then(() => checkUserSession())
-          .catch(err => {
-            console.warn('Failed to initialize auth:', err);
-          });
+        await window.initSupabase();
+        await checkUserSession();
       } else {
         console.warn('Supabase not initialized, skipping user session check');
       }
     } catch (err) {
       console.error('Error during authentication setup:', err);
+      if (!window.ENV_MOCK_MODE) {
+        window.showToast?.('Error connecting to database', 'error');
+      }
     }
-
-    console.log('App initialized successfully');
   }
 
   // Check user session
-  function checkUserSession() {
-    if (window.supabase && window.supabase.auth) {
+  async function checkUserSession() {
+    if (window.supabase?.auth) {
+      // Set up auth state change listener
       window.supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
           console.log('User signed in:', session.user.email);
@@ -51,62 +86,76 @@
       });
 
       // Get initial session
-      window.supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          console.log('User is signed in:', session.user.email);
-          updateUIForAuthenticatedUser(session.user);
-        } else {
-          console.log('No active session, user is anonymous');
-          updateUIForAnonymousUser();
-        }
-      });
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (session) {
+        console.log('User is signed in:', session.user.email);
+        updateUIForAuthenticatedUser(session.user);
+      } else {
+        console.log('No active session, user is anonymous');
+        updateUIForAnonymousUser();
+      }
     }
   }
 
   // Set up components
-  function setupComponents() {
-    // Add toast container if it doesn't exist
+  async function setupComponents() {
+    // Ensure core UI components exist
+    ensureCoreComponents();
+    
+    // Set up story components
+    await setupStoryComponents();
+  }
+
+  // Ensure core UI components exist
+  function ensureCoreComponents() {
+    // Add toast container if needed
     if (!document.querySelector('toast-container')) {
       const toastContainer = document.createElement('toast-container');
+      toastContainer.setAttribute('position', 'top-right');
       document.body.appendChild(toastContainer);
+      componentStatus['toast-container'] = true;
     }
 
-    // Add loading overlay if it doesn't exist
+    // Add loading overlay if needed
     if (!document.querySelector('loading-overlay')) {
       const loadingOverlay = document.createElement('loading-overlay');
       document.body.appendChild(loadingOverlay);
+      componentStatus['loading-overlay'] = true;
     }
+  }
 
-    // Since story-form is directly in the HTML, make sure it exists or create it if not
+  // Set up story components
+  async function setupStoryComponents() {
+    // Set up story form
     const generatorTab = document.getElementById('generator-tab');
     if (generatorTab && !generatorTab.querySelector('story-form')) {
-      console.log('Story form not found in generator tab, creating one');
+      console.log('Setting up story form');
       const storyForm = document.createElement('story-form');
-      // Insert the form at the beginning of the generator tab
       generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+      componentStatus['story-form'] = true;
     }
 
-    // Show the story result area when a story is generated
+    // Set up story display
     const storyResult = document.getElementById('story-result');
     if (storyResult) {
-      // We look for the component *inside* the container now
       const storyContainer = storyResult.querySelector('#storyDisplayContainer');
       if (storyContainer) {
-         // Wait briefly for component-loader to potentially add the component
-         setTimeout(() => {
-             const storyComponentTag = window.components?.StoryContent || 'story-content';
-             const storyComponent = storyContainer.querySelector(storyComponentTag);
-             if (storyComponent) {
-                 storyComponent.addEventListener('story-updated', () => {
-                   storyResult.classList.remove('hidden');
-                 });
-                 console.log(`Added story-updated listener to <${storyComponentTag}> inside #storyDisplayContainer`);
-             } else {
-                 console.warn(`Could not find <${storyComponentTag}> in #storyDisplayContainer during setup`);
-             }
-         }, 100); // 100ms delay
-      } else {
-          console.warn('#storyDisplayContainer not found during setup');
+        // Create story content component if it doesn't exist
+        if (!storyContainer.querySelector('story-content')) {
+          console.log('Creating story content component');
+          const storyContent = document.createElement('story-content');
+          storyContainer.appendChild(storyContent);
+          componentStatus['story-content'] = true;
+        }
+
+        // Add story update listener
+        const storyComponent = storyContainer.querySelector('story-content');
+        if (storyComponent) {
+          storyComponent.addEventListener('story-updated', () => {
+            storyResult.classList.remove('hidden');
+          });
+          console.log('Added story-updated listener to story-content component');
+        }
       }
     }
   }
@@ -374,16 +423,18 @@
     });
   }
 
+  // Handle unhandled promise rejections
+  function handleUnhandledRejection(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    window.showToast?.('An unexpected error occurred', 'error');
+  }
+
   // Handle global errors
   function handleGlobalError(event) {
-    console.error('Global error:', event.error || event.message);
+    console.error('Global error:', event.error);
+    window.showToast?.('An unexpected error occurred', 'error');
     
-    // Only show toast for script errors, not network errors
-    if (event.error && !(event.error instanceof TypeError && event.error.toString().includes('NetworkError'))) {
-      window.showToast?.('An error occurred. Please try again.', 'error');
-    }
-    
-    // Prevent the error from showing in console again
+    // Prevent default browser error handling
     event.preventDefault();
   }
 
