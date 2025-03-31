@@ -134,8 +134,13 @@ This focus term is explicitly selected by the user as a learning priority, so ma
 
     output_schema = {
         "continuation_text": "string (The continuation of the story, with paragraphs separated by double line breaks '\\n\\n')",
-        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words used in the continuation)'
+        "vocabulary": '[{"term": "string", "definition": "string"}] (List of 4 vocabulary words used in the continuation)',
+        "quiz": '[{"question": "string", "options": ["string"], "correct_answer": int}] (List of 3-5 quiz questions with multiple-choice options and correct answer index)'
     }
+
+    # If summary was requested, include it in the output schema
+    if hasattr(request, 'generate_summary') and request.generate_summary:
+        output_schema["summary"] = "string (A concise 2-3 sentence summary of the continuation)"
 
     # Convert schema to a string description
     output_format_description = json.dumps(output_schema, indent=2)

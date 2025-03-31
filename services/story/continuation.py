@@ -49,7 +49,7 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
     validate_continuation_response(generated_data)
     
     # Extract content from the response
-    continuation_text, word_count, vocabulary_list = extract_continuation_content(generated_data)
+    continuation_text, word_count, vocabulary_list, summary, quiz = extract_continuation_content(generated_data)
     
     # Build the final response object
     return StoryContinuationResponse(
@@ -58,5 +58,7 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
         word_count=word_count,
         difficulty=request.difficulty,
         focus=request.focus or "general",
-        vocabulary=vocabulary_list
+        vocabulary=vocabulary_list,
+        summary=summary,
+        quiz=quiz
     ) 

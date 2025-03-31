@@ -9,25 +9,31 @@ import json
 from typing import Dict, Any, List, Optional, Tuple
 from models.story import VocabularyItem, QuizItem, StoryGenerationRequest
 
-def parse_json_response(json_string: str) -> Dict[str, Any]:
+def parse_json_response(json_str: str) -> Dict[str, Any]:
     """
-    Parse a JSON string into a Python dictionary.
+    Parse the JSON response from the LLM.
     
     Args:
-        json_string: JSON string from LLM
+        json_str: The JSON string response from the LLM
         
     Returns:
-        Parsed Python dictionary
+        The parsed JSON as a dictionary
         
     Raises:
-        ValueError: If JSON parsing fails
+        ValueError: If the JSON is invalid
     """
     try:
-        return json.loads(json_string)
+        # Fix common JSON issues
+        cleaned_json_str = json_str.strip()
+        # If the string is wrapped in code block markers, remove them
+        if cleaned_json_str.startswith("```json") and cleaned_json_str.endswith("```"):
+            cleaned_json_str = cleaned_json_str[7:-3].strip()
+        elif cleaned_json_str.startswith("```") and cleaned_json_str.endswith("```"):
+            cleaned_json_str = cleaned_json_str[3:-3].strip()
+        
+        return json.loads(cleaned_json_str)
     except json.JSONDecodeError as e:
-        print(f"Error decoding JSON response from LLM: {e}")
-        print(f"Received text: {json_string}")
-        raise ValueError("Could not parse the JSON response from the language model.") from e
+        raise ValueError(f"Invalid JSON response from LLM: {e}") from e
 
 def validate_story_response(data: Dict[str, Any]) -> None:
     """
@@ -44,16 +50,36 @@ def validate_story_response(data: Dict[str, Any]) -> None:
 
 def validate_continuation_response(data: Dict[str, Any]) -> None:
     """
-    Validate that the continuation response has the required fields.
+    Validate the parsed response from the LLM.
     
     Args:
-        data: Parsed response data
+        data: The parsed JSON data from the LLM
         
     Raises:
-        ValueError: If required fields are missing
+        ValueError: If the response is missing required fields or has invalid data
     """
+    if not isinstance(data, dict):
+        raise ValueError("Response must be a JSON object.")
+    
     if "continuation_text" not in data:
-        raise ValueError("LLM response missing required key 'continuation_text'.")
+        raise ValueError("Response missing 'continuation_text' field")
+    
+    if not isinstance(data["continuation_text"], str):
+        raise ValueError("'continuation_text' must be a string")
+    
+    if len(data["continuation_text"].strip()) == 0:
+        raise ValueError("'continuation_text' cannot be empty")
+    
+    # Check vocabulary if provided
+    if "vocabulary" in data and data["vocabulary"] is not None:
+        if not isinstance(data["vocabulary"], list):
+            raise ValueError("'vocabulary' must be a list of objects")
+        
+        for item in data["vocabulary"]:
+            if not isinstance(item, dict):
+                raise ValueError("Each vocabulary item must be an object")
+            if "term" not in item or "definition" not in item:
+                raise ValueError("Each vocabulary item must have a 'term' and 'definition'")
 
 def parse_vocabulary(vocab_data: Any) -> Optional[List[VocabularyItem]]:
     """
@@ -149,20 +175,33 @@ def extract_story_content(data: Dict[str, Any], request: StoryGenerationRequest)
             
     return story_content, word_count, vocabulary_list, quiz_list
 
-def extract_continuation_content(data: Dict[str, Any]) -> Tuple[str, int, Optional[List[VocabularyItem]]]:
+def extract_continuation_content(data: Dict[str, Any]) -> Tuple[str, int, List[Dict[str, str]], Optional[str], Optional[List[Dict[str, Any]]]]:
     """
-    Extract and validate all content from a story continuation response.
+    Extract the continuation text and other content from the LLM response.
     
     Args:
-        data: Parsed response data
+        data: The parsed and validated JSON data from the LLM
         
     Returns:
-        Tuple of (continuation_text, word_count, vocabulary_list)
+        Tuple of (continuation_text, word_count, vocabulary_list, summary, quiz)
     """
-    continuation_text = data.get("continuation_text", "")
-    word_count = calculate_word_count(continuation_text)
+    # Extract the continuation text
+    continuation_text = data["continuation_text"]
     
-    # Process vocabulary if present
-    vocabulary_list = parse_vocabulary(data.get("vocabulary"))
-            
-    return continuation_text, word_count, vocabulary_list 
+    # Calculate the word count
+    word_count = len(continuation_text.split())
+    
+    # Extract vocabulary if available
+    vocabulary_list = data.get("vocabulary", [])
+    if vocabulary_list is None:
+        vocabulary_list = []
+    
+    # Extract summary if available
+    summary = data.get("summary", None)
+    
+    # Extract quiz if available
+    quiz = data.get("quiz", [])
+    if quiz is None:
+        quiz = []
+    
+    return continuation_text, word_count, vocabulary_list, summary, quiz 
