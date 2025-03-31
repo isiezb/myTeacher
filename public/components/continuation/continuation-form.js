@@ -124,6 +124,10 @@ export class ContinuationForm extends LitElement {
       width: 100%;
       gap: 1.5rem;
     }
+    
+    .mobile-selector-header {
+      display: none;
+    }
 
     @media (max-width: 768px) {
       .continuation-form {
@@ -138,13 +142,26 @@ export class ContinuationForm extends LitElement {
     
     @media (max-width: 500px) {
       .selector-container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        width: 100%;
       }
       
-      .selector-container > * {
+      .mobile-selector-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      
+      .mobile-selector-header h4 {
+        font-family: var(--font-heading, 'Inter', sans-serif);
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-secondary, #6c757d);
+        text-align: center;
+        margin: 0;
       }
       
       .separator {
@@ -267,6 +284,11 @@ export class ContinuationForm extends LitElement {
             <option value="300" ?selected=${this.settings.length === '300'}>Medium (300 words)</option>
             <option value="500" ?selected=${this.settings.length === '500'}>Long (500 words)</option>
           </select>
+        </div>
+        
+        <div class="mobile-selector-header">
+          <h4>Difficulty Level</h4>
+          <h4>Story Focus</h4>
         </div>
         
         <div class="selector-container">

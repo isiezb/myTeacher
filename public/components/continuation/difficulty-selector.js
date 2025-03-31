@@ -96,25 +96,35 @@ export class DifficultySelector extends LitElement {
         gap: 0.5rem;
       }
       
+      .difficulty-options label {
+        display: none;
+      }
+      
       .difficulty-buttons {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.3rem;
+        width: 100%;
       }
       
       .difficulty-button {
-        width: calc(33% - 10px);
-        padding: 0.5rem;
-        margin-bottom: 5px;
+        width: auto;
+        padding: 0.5rem 0.25rem;
+        margin: 0;
+        border-radius: 8px;
       }
       
       .difficulty-emoji {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         margin-bottom: 0.25rem;
       }
       
       .difficulty-label {
         font-size: 0.65rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
       }
     }
   `;
