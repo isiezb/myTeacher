@@ -66,7 +66,7 @@ console.log('Component system initialized. Available components:', Object.keys(w
 const COMPONENT_LOAD_ORDER = {
   'loading-overlay': { path: './loading-overlay.js', loaded: false },
   'toast-container': { path: './toast-container.js', loaded: false },
-  'story-form': { path: './story-form.js', loaded: false },
+  'story-form': { path: './story-form.js', loaded: false, priority: 'high' },
   'story-content': { path: './story-content.js', loaded: false },
   'story-display': { path: './story-display.js', loaded: false },
   'story-continuation': { path: './story-continuation.js', loaded: false },
@@ -94,6 +94,23 @@ async function loadComponent(name) {
     const elements = [...Array.from(dataAttrElements), ...Array.from(directTagElements)];
     
     console.log(`Found ${elements.length} ${name} components (${dataAttrElements.length} with data-attribute, ${directTagElements.length} with direct tag)`);
+    
+    // For story-form, ensure it exists - create if not
+    if (name === 'story-form' && elements.length === 0) {
+      console.log(`No ${name} found, creating one in generator tab`);
+      const generatorTab = document.getElementById('generator-tab');
+      if (generatorTab) {
+        const storyForm = document.createElement('story-form');
+        generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+        
+        // Wrap with error boundary
+        if (!storyForm.closest('error-boundary')) {
+          const errorBoundary = document.createElement('error-boundary');
+          storyForm.parentNode.insertBefore(errorBoundary, storyForm);
+          errorBoundary.appendChild(storyForm);
+        }
+      }
+    }
     
     // Wrap each component with error boundary
     elements.forEach(element => {
@@ -128,10 +145,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       rootErrorBoundary.appendChild(appContainer);
     }
 
-    // Load components in order
+    // First, ensure high priority components are loaded
     for (const [name, config] of Object.entries(COMPONENT_LOAD_ORDER)) {
-      await loadComponent(name);
+      if (config.priority === 'high') {
+        await loadComponent(name);
+      }
     }
+
+    // Then load the rest of the components
+    for (const [name, config] of Object.entries(COMPONENT_LOAD_ORDER)) {
+      if (config.priority !== 'high') {
+        await loadComponent(name);
+      }
+    }
+
+    // Force a check after a short delay to ensure components are there
+    setTimeout(() => {
+      // Extra check for story-form
+      if (!document.querySelector('story-form')) {
+        console.warn('story-form still not found after initialization, forcing creation');
+        const generatorTab = document.getElementById('generator-tab');
+        if (generatorTab) {
+          const storyForm = document.createElement('story-form');
+          generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+        }
+      }
+    }, 500);
 
     // Initialize error reporting
     if (window.ENV_ERROR_REPORTING?.ENABLED) {
@@ -164,6 +203,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.log('continuation-form registered:', !!customElements.get('continuation-form'));
       console.log('difficulty-selector registered:', !!customElements.get('difficulty-selector'));
       console.log('difficulty-description registered:', !!customElements.get('difficulty-description'));
+      console.log('story-form registered:', !!customElements.get('story-form'));
+      
+      // Check if component is in DOM
+      const storyForm = document.querySelector('story-form');
+      console.log('story-form in DOM:', !!storyForm);
+      if (storyForm) {
+        console.log('story-form rendered:', storyForm.shadowRoot?.querySelector('.form-section') !== null);
+      }
       
       // Check if continuation container exists
       const contContainer = document.getElementById('continuation-container');

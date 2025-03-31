@@ -30,6 +30,14 @@
   <!-- Component system -->
   <script type="module" src="components/index.js"></script>
   
+  <!-- Ensure critical form components are loaded directly -->
+  <script type="module" src="components/form/form-settings-card.js"></script>
+  <script type="module" src="components/form/form-input-group.js"></script>
+  <script type="module" src="components/form/form-grid.js"></script>
+  <script type="module" src="components/form/form-checkbox-options.js"></script>
+  <script type="module" src="components/form/submit-button.js"></script>
+  <script type="module" src="components/story-form.js"></script>
+  
   <!-- App Initialization -->
   <script type="module" src="js/app.js"></script>
 </head>
@@ -68,7 +76,7 @@
     </div>
 
     <div class="tab-content active" id="generator-tab">
-      <story-form></story-form>
+      <story-form id="mainStoryForm"></story-form>
       <div id="story-result" class="story-result hidden">
         <story-content id="storyDisplayContainer"></story-content>
         <div class="story-actions">

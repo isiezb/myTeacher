@@ -126,21 +126,47 @@
 
   // Set up story components
   async function setupStoryComponents() {
-    // Set up story form
+    // Set up story form with retry mechanism
     const generatorTab = document.getElementById('generator-tab');
     if (generatorTab) {
-      // Look for direct tag first, then data-component
-      let storyForm = generatorTab.querySelector('story-form');
-      if (!storyForm) {
-        storyForm = generatorTab.querySelector('[data-component="story-form"]');
-      }
+      // Create a function to set up the story form with retry
+      const setupStoryForm = () => {
+        // Look for direct tag first, then data-component
+        let storyForm = generatorTab.querySelector('story-form');
+        if (!storyForm) {
+          storyForm = generatorTab.querySelector('[data-component="story-form"]');
+        }
+        
+        // If not found, create it
+        if (!storyForm) {
+          console.log('Setting up story form');
+          storyForm = document.createElement('story-form');
+          generatorTab.insertBefore(storyForm, generatorTab.firstChild);
+          componentStatus['story-form'] = true;
+          
+          // Add event listener for form submission
+          storyForm.addEventListener('story-form-submit', handleStoryFormSubmit);
+          
+          return true; // Successfully created
+        } else {
+          console.log('Story form already exists');
+          return true; // Already exists
+        }
+      };
       
-      // If not found, create it
-      if (!storyForm) {
-        console.log('Setting up story form');
-        storyForm = document.createElement('story-form');
-        generatorTab.insertBefore(storyForm, generatorTab.firstChild);
-        componentStatus['story-form'] = true;
+      // Try to set up the story form
+      let success = setupStoryForm();
+      
+      // If not successful initially, retry after a delay
+      if (!success) {
+        console.log('Initial story form setup failed, retrying in 500ms');
+        setTimeout(() => {
+          success = setupStoryForm();
+          if (!success) {
+            console.error('Failed to set up story form component after retry');
+            window.showToast?.('Error setting up story form', 'error');
+          }
+        }, 500);
       }
     }
 

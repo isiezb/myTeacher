@@ -58,6 +58,7 @@ export class StoryForm extends LitElement {
 
   constructor() {
     super();
+    console.log('StoryForm constructor called');
     this.isSubmitting = false;
     
     this.subjects = [
@@ -117,6 +118,32 @@ export class StoryForm extends LitElement {
     };
 
     this._showOtherSubject = false;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    console.log('StoryForm connected to DOM');
+    
+    // Check if form is in shadow DOM
+    setTimeout(() => {
+      const formSection = this.shadowRoot?.querySelector('.form-section');
+      console.log('StoryForm shadow DOM rendered:', !!formSection);
+      
+      // Register with window for debugging
+      if (!window._storyFormElements) {
+        window._storyFormElements = [];
+      }
+      window._storyFormElements.push(this);
+      
+      // Add global access to the form for debugging
+      window.mainStoryForm = this;
+      
+      // Dispatch event to notify that the form is ready
+      this.dispatchEvent(new CustomEvent('story-form-ready', {
+        bubbles: true,
+        composed: true
+      }));
+    }, 100);
   }
 
   _handleInputChange(e) {
