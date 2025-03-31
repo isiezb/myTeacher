@@ -5,7 +5,7 @@ import '/components/grid/grid-empty-state.js';
 import '/components/grid/story-item.js';
 import '/components/grid/refresh-button.js';
 
-export class StoriesGridRefactored extends LitElement {
+export class StoriesGrid extends LitElement {
   static get properties() {
     return {
       stories: { type: Array },
@@ -171,6 +171,6 @@ export class StoriesGridRefactored extends LitElement {
 }
 
 // Guard against duplicate registration
-if (!customElements.get('stories-grid-refactored')) {
-  customElements.define('stories-grid-refactored', StoriesGridRefactored);
+if (!customElements.get('stories-grid')) {
+  customElements.define('stories-grid', StoriesGrid);
 } 

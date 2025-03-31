@@ -3,7 +3,7 @@ import './card/card-header.js';
 import './card/card-content.js';
 import './card/card-actions.js';
 
-export class StoryCardRefactored extends LitElement {
+export class StoryCard extends LitElement {
   static get properties() {
     return {
       story: { type: Object },
@@ -92,6 +92,6 @@ export class StoryCardRefactored extends LitElement {
 }
 
 // Guard against duplicate registration
-if (!customElements.get('story-card-refactored')) {
-  customElements.define('story-card-refactored', StoryCardRefactored);
+if (!customElements.get('story-card')) {
+  customElements.define('story-card', StoryCard);
 } 

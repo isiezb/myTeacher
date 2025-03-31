@@ -3,7 +3,10 @@
  */
 
 // Initialize debugging
-(function() {
+(function initDebugPanel() {
+  // Make initialization function globally available
+  window.initDebugPanel = initDebugPanel;
+  
   // Record original console methods
   const originalLog = console.log;
   const originalError = console.error;
@@ -61,112 +64,129 @@
       error: event.reason ? (event.reason.stack || event.reason.toString()) : 'Unknown reason'
     });
   });
+
+  // Make showDebugPanel function globally available
+  window.showDebugPanel = showDebugPanel;
+})();
+
+// Create debug panel to display logs
+function showDebugPanel() {
+  // Check if panel already exists
+  const existingPanel = document.getElementById('debug-panel');
+  if (existingPanel) {
+    existingPanel.remove();
+    return;
+  }
   
-  // Add keyboard shortcut to show debug logs (Ctrl+Shift+D)
-  document.addEventListener('keydown', function(event) {
-    if (event.ctrlKey && event.shiftKey && event.key === 'D') {
-      showDebugPanel();
+  const panel = document.createElement('div');
+  panel.id = 'debug-panel';
+  panel.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 80%;
+    background: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    z-index: 10000;
+    overflow: auto;
+    padding: 20px;
+    box-sizing: border-box;
+  `;
+  
+  // Create tabs for different log types
+  const tabs = document.createElement('div');
+  tabs.style.cssText = `
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+  `;
+  
+  const createTab = (label, active = false) => {
+    const tab = document.createElement('div');
+    tab.textContent = label;
+    tab.style.cssText = `
+      padding: 10px 15px;
+      cursor: pointer;
+      background: ${active ? '#007bff' : '#f8f9fa'};
+      color: ${active ? '#fff' : '#000'};
+      border: 1px solid #dee2e6;
+      border-bottom: none;
+      margin-right: 5px;
+      border-radius: 4px 4px 0 0;
+    `;
+    tab.dataset.tab = label.toLowerCase();
+    return tab;
+  };
+  
+  const errorsTab = createTab('Errors', true);
+  const warningsTab = createTab('Warnings');
+  const logsTab = createTab('Logs');
+  const componentsTab = createTab('Components');
+  const envTab = createTab('Environment');
+  
+  tabs.appendChild(errorsTab);
+  tabs.appendChild(warningsTab);
+  tabs.appendChild(logsTab);
+  tabs.appendChild(componentsTab);
+  tabs.appendChild(envTab);
+  
+  panel.appendChild(tabs);
+  
+  // Create content area
+  const content = document.createElement('div');
+  content.style.cssText = `
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    height: calc(100% - 60px);
+    overflow: auto;
+    background: #f8f9fa;
+  `;
+  panel.appendChild(content);
+  
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = `
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+  `;
+  closeBtn.addEventListener('click', () => panel.remove());
+  panel.appendChild(closeBtn);
+  
+  // Show errors content initially
+  showTabContent('errors');
+  
+  // Tab click events
+  tabs.addEventListener('click', (e) => {
+    if (e.target.dataset.tab) {
+      // Update active tab styling
+      Array.from(tabs.children).forEach(tab => {
+        tab.style.background = '#f8f9fa';
+        tab.style.color = '#000';
+      });
+      e.target.style.background = '#007bff';
+      e.target.style.color = '#fff';
+      
+      showTabContent(e.target.dataset.tab);
     }
   });
   
-  // Create debug panel to display logs
-  function showDebugPanel() {
-    // Check if panel already exists
-    if (document.getElementById('debug-panel')) {
-      document.getElementById('debug-panel').remove();
-      return;
-    }
+  function showTabContent(tabName) {
+    let html = '';
     
-    const panel = document.createElement('div');
-    panel.id = 'debug-panel';
-    panel.style.position = 'fixed';
-    panel.style.top = '0';
-    panel.style.left = '0';
-    panel.style.width = '100%';
-    panel.style.height = '80%';
-    panel.style.background = '#fff';
-    panel.style.border = '1px solid #ccc';
-    panel.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-    panel.style.zIndex = '10000';
-    panel.style.overflow = 'auto';
-    panel.style.padding = '20px';
-    panel.style.boxSizing = 'border-box';
-    
-    // Create tabs for different log types
-    const tabs = document.createElement('div');
-    tabs.style.display = 'flex';
-    tabs.style.marginBottom = '10px';
-    
-    const createTab = (label, active = false) => {
-      const tab = document.createElement('div');
-      tab.textContent = label;
-      tab.style.padding = '10px 15px';
-      tab.style.cursor = 'pointer';
-      tab.style.background = active ? '#007bff' : '#f8f9fa';
-      tab.style.color = active ? '#fff' : '#000';
-      tab.style.border = '1px solid #dee2e6';
-      tab.style.marginRight = '5px';
-      tab.dataset.tab = label.toLowerCase();
-      return tab;
-    };
-    
-    const errorsTab = createTab('Errors', true);
-    const warningsTab = createTab('Warnings');
-    const logsTab = createTab('Logs');
-    const componentsTab = createTab('Components');
-    
-    tabs.appendChild(errorsTab);
-    tabs.appendChild(warningsTab);
-    tabs.appendChild(logsTab);
-    tabs.appendChild(componentsTab);
-    
-    panel.appendChild(tabs);
-    
-    // Create content area
-    const content = document.createElement('div');
-    content.style.padding = '10px';
-    content.style.border = '1px solid #dee2e6';
-    content.style.height = 'calc(100% - 60px)';
-    content.style.overflow = 'auto';
-    panel.appendChild(content);
-    
-    // Add close button
-    const closeBtn = document.createElement('button');
-    closeBtn.textContent = 'Close';
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.top = '10px';
-    closeBtn.style.right = '10px';
-    closeBtn.style.padding = '5px 10px';
-    closeBtn.style.background = '#dc3545';
-    closeBtn.style.color = '#fff';
-    closeBtn.style.border = 'none';
-    closeBtn.style.borderRadius = '3px';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.addEventListener('click', () => panel.remove());
-    panel.appendChild(closeBtn);
-    
-    // Show errors content initially
-    showTabContent('errors');
-    
-    // Tab click events
-    tabs.addEventListener('click', (e) => {
-      if (e.target.dataset.tab) {
-        // Update active tab styling
-        Array.from(tabs.children).forEach(tab => {
-          tab.style.background = '#f8f9fa';
-          tab.style.color = '#000';
-        });
-        e.target.style.background = '#007bff';
-        e.target.style.color = '#fff';
-        
-        showTabContent(e.target.dataset.tab);
-      }
-    });
-    
-    function showTabContent(tabName) {
-      let html = '';
-      
-      if (tabName === 'errors') {
+    switch(tabName) {
+      case 'errors':
         html = '<h3>Errors</h3>';
         if (window.debugLogs.errors.length === 0) {
           html += '<p>No errors recorded</p>';
@@ -180,7 +200,9 @@
           });
           html += '</pre>';
         }
-      } else if (tabName === 'warnings') {
+        break;
+        
+      case 'warnings':
         html = '<h3>Warnings</h3>';
         if (window.debugLogs.warnings.length === 0) {
           html += '<p>No warnings recorded</p>';
@@ -191,7 +213,9 @@
           });
           html += '</pre>';
         }
-      } else if (tabName === 'logs') {
+        break;
+        
+      case 'logs':
         html = '<h3>Logs</h3>';
         if (window.debugLogs.messages.length === 0) {
           html += '<p>No logs recorded</p>';
@@ -202,180 +226,46 @@
           });
           html += '</pre>';
         }
-      } else if (tabName === 'components') {
-        html = '<h3>Web Components</h3>';
-        html += '<h4>Defined Components:</h4>';
-        html += '<ul>';
-        [
-          'toast-container', 
-          'loading-overlay', 
-          'story-form', 
-          'story-display', 
-          'story-content', 
-          'stories-grid', 
-          'story-card', 
-          'quiz-component', 
-          'story-continuation'
-        ].forEach(name => {
-          const isDefined = customElements.get(name) !== undefined;
-          html += `<li style="color: ${isDefined ? 'green' : 'red'}">${name}: ${isDefined ? 'Defined' : 'Not Defined'}</li>`;
-        });
-        html += '</ul>';
+        break;
         
-        // Add API test button
-        html += '<h4>API Test:</h4>';
-        html += '<button id="test-api-btn" style="padding: 8px 16px; background: #0275d8; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px; margin-right: 10px;">Test API Connection</button>';
-        html += '<button id="test-proxy-btn" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 15px;">Test via CORS Proxy</button>';
-        html += '<div id="api-test-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>';
+      case 'components':
+        html = '<h3>Registered Components</h3>';
+        const components = Array.from(document.querySelectorAll('*'))
+          .filter(el => el.tagName.includes('-'))
+          .map(el => el.tagName.toLowerCase())
+          .filter((value, index, self) => self.indexOf(value) === index);
         
-        // Add direct URL check after API test buttons are rendered
-        setTimeout(() => {
-          addDirectUrlCheck();
-          addEndpointStructureCheck();
-          addStoryGenerationTest();
-          addServerConfigCheck();
-          addResponseAnalyzer();
-        }, 200);
-        
-        // Show element tree of #generator-tab
-        const generatorTab = document.getElementById('generator-tab');
-        if (generatorTab) {
-          html += '<h4>Generator Tab Content:</h4>';
-          html += '<pre>';
-          html += escapeHtml(generatorTab.outerHTML);
-          html += '</pre>';
+        if (components.length === 0) {
+          html += '<p>No custom elements found</p>';
+        } else {
+          html += '<ul>';
+          components.forEach(component => {
+            html += `<li>${component}</li>`;
+          });
+          html += '</ul>';
         }
-      }
-      
-      content.innerHTML = html;
+        break;
+        
+      case 'environment':
+        html = '<h3>Environment Variables</h3>';
+        const envVars = Object.keys(window)
+          .filter(key => key.startsWith('ENV_'))
+          .reduce((acc, key) => {
+            acc[key] = key.includes('KEY') ? '[HIDDEN]' : window[key];
+            return acc;
+          }, {});
+        
+        html += '<pre>';
+        html += JSON.stringify(envVars, null, 2);
+        html += '</pre>';
+        break;
     }
     
-    function escapeHtml(html) {
-      return html
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-    
-    document.body.appendChild(panel);
-    
-    // Add event listeners to buttons
-    setTimeout(() => {
-      const testApiBtn = document.getElementById('test-api-btn');
-      if (testApiBtn) {
-        testApiBtn.addEventListener('click', async () => {
-          const resultDiv = document.getElementById('api-test-results');
-          resultDiv.innerHTML = '<p>Testing API connection...</p>';
-          
-          try {
-            // Test base connection
-            const basicTest = await window.apiService.testConnection();
-            let html = `<p><strong>Basic connection:</strong> ${basicTest.ok ? '✅ Success' : '❌ Failed'}</p>`;
-            
-            // Try to fetch API status
-            try {
-              const status = await window.apiService.getStatus();
-              html += `<p><strong>API Status:</strong> ${status ? '✅ Success' : '❌ Failed'}</p>`;
-              html += `<pre>${JSON.stringify(status, null, 2)}</pre>`;
-            } catch (error) {
-              html += `<p><strong>API Status:</strong> ❌ Error</p>`;
-              html += `<pre style="color: red">${error.message}</pre>`;
-            }
-            
-            // Test story generation with minimal data
-            try {
-              html += `<p><strong>Testing Story Generation:</strong> Sending request...</p>`;
-              const testData = {
-                academic_grade: '5',
-                subject: 'science',
-                word_count: 300,
-                language: 'English'
-              };
-              
-              resultDiv.innerHTML = html + '<p>Waiting for API response...</p>';
-              
-              const story = await window.apiService.generateStory(testData);
-              html += `<p><strong>Story Generation:</strong> ${story ? '✅ Success' : '❌ Failed'}</p>`;
-              if (story) {
-                html += `<p>Title: ${story.title || 'No title'}</p>`;
-                html += `<p>Content: ${story.content ? (story.content.substring(0, 100) + '...') : 'No content'}</p>`;
-              }
-            } catch (error) {
-              html += `<p><strong>Story Generation:</strong> ❌ Error</p>`;
-              html += `<pre style="color: red">${error.message}</pre>`;
-            }
-            
-            resultDiv.innerHTML = html;
-          } catch (error) {
-            resultDiv.innerHTML = `<p>Error testing API: ${error.message}</p>`;
-          }
-        });
-      }
-      
-      // Add proxy test button handler
-      const testProxyBtn = document.getElementById('test-proxy-btn');
-      if (testProxyBtn) {
-        testProxyBtn.addEventListener('click', async () => {
-          const resultDiv = document.getElementById('api-test-results');
-          
-          if (!window.proxyService) {
-            resultDiv.innerHTML = '<p style="color: red">❌ Error: Proxy service not available</p>';
-            return;
-          }
-          
-          resultDiv.innerHTML = '<p>Testing API via proxy...</p>';
-          
-          try {
-            const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-            
-            // Test basic URL fetch
-            try {
-              const proxyTest = await window.proxyService.fetchViaProxy(baseUrl);
-              let html = `<p><strong>Proxy basic connection:</strong> ✅ Success</p>`;
-              if (typeof proxyTest === 'string') {
-                html += `<p>Received HTML response (${proxyTest.length} chars)</p>`;
-              } else {
-                html += `<pre>${JSON.stringify(proxyTest).substring(0, 300)}...</pre>`;
-              }
-              
-              // Try generating a story via proxy
-              html += `<p><strong>Testing Story Generation via Proxy:</strong> Sending request...</p>`;
-              resultDiv.innerHTML = html + '<p>Waiting for proxy response...</p>';
-              
-              const testData = {
-                academic_grade: '5',
-                subject: 'science',
-                word_count: 300,
-                language: 'English'
-              };
-              
-              const story = await window.proxyService.generateStory(baseUrl, testData);
-              html += `<p><strong>Proxy Story Generation:</strong> ${story ? '✅ Success' : '❌ Failed'}</p>`;
-              if (story) {
-                html += `<p>Title: ${story.title || 'No title'}</p>`;
-                html += `<p>Content: ${story.content ? (story.content.substring(0, 100) + '...') : 'No content'}</p>`;
-              }
-              
-              resultDiv.innerHTML = html;
-            } catch (error) {
-              resultDiv.innerHTML = `<p><strong>Proxy Test:</strong> ❌ Error</p>
-                                    <pre style="color: red">${error.toString()}</pre>`;
-            }
-          } catch (error) {
-            resultDiv.innerHTML = `<p>Error testing proxy: ${error.message}</p>`;
-          }
-        });
-      }
-    }, 100);
+    content.innerHTML = html;
   }
   
-  // Add global access to debug panel
-  window.showDebugPanel = showDebugPanel;
-  
-  console.log('Debug helpers initialized - Press Ctrl+Shift+D to show debug panel');
-})();
+  document.body.appendChild(panel);
+}
 
 // Add a direct URL check function to the debug panel
 function addDirectUrlCheck() {

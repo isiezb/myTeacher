@@ -109,8 +109,8 @@
   </script>
 
   <script>
-    // Add visible debug button for Safari users
-    window.addEventListener('DOMContentLoaded', () => {
+    // Initialize debug tool
+    document.addEventListener('DOMContentLoaded', () => {
       // Create the debug button
       const debugButton = document.createElement('button');
       debugButton.id = 'debug-panel-trigger';
@@ -132,13 +132,30 @@
       
       // Add click handler
       debugButton.addEventListener('click', () => {
-        if (window.showDebugPanel) {
+        if (typeof window.showDebugPanel === 'function') {
           window.showDebugPanel();
+        } else {
+          console.warn('Debug panel not initialized yet');
+          // Try to initialize it
+          if (typeof initDebugPanel === 'function') {
+            initDebugPanel();
+            setTimeout(() => window.showDebugPanel(), 100);
+          }
         }
       });
       
       // Add to body
       document.body.appendChild(debugButton);
+
+      // Add keyboard shortcut (Ctrl+Shift+D)
+      document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'd') {
+          event.preventDefault();
+          if (typeof window.showDebugPanel === 'function') {
+            window.showDebugPanel();
+          }
+        }
+      });
     });
   </script>
 

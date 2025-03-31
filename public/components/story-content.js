@@ -5,7 +5,7 @@ import './story/story-summary.js';
 import './story/story-vocabulary.js';
 import './story/story-quiz.js';
 
-export class StoryContentRefactored extends LitElement {
+export class StoryContent extends LitElement {
   static properties = {
     story: { type: Object },
     showHeader: { type: Boolean },
@@ -104,6 +104,6 @@ export class StoryContentRefactored extends LitElement {
 }
 
 // Guard against duplicate registration
-if (!customElements.get('story-content-refactored')) {
-  customElements.define('story-content-refactored', StoryContentRefactored);
+if (!customElements.get('story-content')) {
+  customElements.define('story-content', StoryContent);
 } 

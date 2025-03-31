@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
+import { LitElement, html, css } from "https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js";
 
 // Global toast functions
 window.showToast = function(message, type = 'info', duration = 4000) {
@@ -10,177 +10,149 @@ window.showToast = function(message, type = 'info', duration = 4000) {
   document.dispatchEvent(event);
 };
 
-export class ToastContainer extends LitElement {
-  static get properties() {
-    return {
-      toasts: { type: Array },
-      position: { type: String }
-    };
-  }
-
-  constructor() {
-    super();
-    this.toasts = [];
-    this.position = 'top-right';
-    
-    // Bind methods
-    this._handleShowToast = this._handleShowToast.bind(this);
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    document.addEventListener('show-toast', this._handleShowToast);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    document.removeEventListener('show-toast', this._handleShowToast);
-  }
-
-  _handleShowToast(event) {
-    const { message, type, duration } = event.detail;
-    const id = Date.now();
-    
-    // Add toast to list
-    this.toasts = [...this.toasts, { id, message, type, duration }];
-    
-    // Set timeout to remove toast
-    setTimeout(() => {
-      this.toasts = this.toasts.filter(toast => toast.id !== id);
-    }, duration);
-  }
-
-  _getToastIcon(type) {
-    switch (type) {
-      case 'success':
-        return html`<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>`;
-      case 'error':
-        return html`<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
-      case 'warning':
-        return html`<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`;
-      case 'info':
-      default:
-        return html`<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+class ToastContainer extends LitElement {
+    static get properties() {
+        return {
+            toasts: { type: Array },
+            isVisible: { type: Boolean }
+        };
     }
-  }
 
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-        position: fixed;
-        z-index: 9999;
-      }
+    static get styles() {
+        return css`
+            :host {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 10000;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                pointer-events: none;
+            }
 
-      :host([position="top-right"]) {
-        top: 16px;
-        right: 16px;
-      }
+            .toast {
+                background: white;
+                border-radius: 4px;
+                padding: 12px 24px;
+                min-width: 250px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                pointer-events: auto;
+                animation: slideIn 0.3s ease-out;
+            }
 
-      :host([position="top-left"]) {
-        top: 16px;
-        left: 16px;
-      }
+            .toast.success {
+                border-left: 4px solid #4caf50;
+            }
 
-      :host([position="bottom-right"]) {
-        bottom: 16px;
-        right: 16px;
-      }
+            .toast.error {
+                border-left: 4px solid #f44336;
+            }
 
-      :host([position="bottom-left"]) {
-        bottom: 16px;
-        left: 16px;
-      }
+            .toast.warning {
+                border-left: 4px solid #ff9800;
+            }
 
-      .toast-wrapper {
-        width: 320px;
-        max-width: calc(100vw - 32px);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
+            .toast.info {
+                border-left: 4px solid #2196f3;
+            }
 
-      .toast {
-        background: var(--toast-background, white);
-        color: var(--toast-color, #333);
-        border-radius: 8px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        animation: slideIn 0.3s ease forwards;
-        position: relative;
-        border-left: 4px solid var(--toast-accent, #ccc);
-      }
+            .toast-icon {
+                font-size: 20px;
+            }
 
-      .toast.info {
-        --toast-accent: var(--primary, #5e7ce6);
-      }
+            .toast-message {
+                flex-grow: 1;
+                font-size: 14px;
+                line-height: 1.4;
+            }
 
-      .toast.success {
-        --toast-accent: var(--success, #2ecc71);
-      }
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
 
-      .toast.warning {
-        --toast-accent: var(--warning, #f39c12);
-      }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+    }
 
-      .toast.error {
-        --toast-accent: var(--error, #e74c3c);
-      }
+    constructor() {
+        super();
+        this.toasts = [];
+        this._handleShowToast = this._handleShowToast.bind(this);
+        window.addEventListener("show-toast", this._handleShowToast);
+    }
 
-      .toast-icon {
-        margin-right: 12px;
-        color: var(--toast-accent);
-        flex-shrink: 0;
-      }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener("show-toast", this._handleShowToast);
+    }
 
-      .toast-message {
-        flex-grow: 1;
-        font-size: 14px;
-        font-family: var(--font-body, 'Source Serif Pro', serif);
-      }
+    _handleShowToast(event) {
+        const { type = "info", message, duration = 3000 } = event.detail;
+        const toast = { type, message, id: Date.now() };
+        
+        this.toasts = [...this.toasts, toast];
+        this.requestUpdate();
 
-      @keyframes slideIn {
-        from {
-          transform: translateX(100%);
-          opacity: 0;
+        setTimeout(() => {
+            const toastElement = this.shadowRoot.querySelector(`[data-toast-id="${toast.id}"]`);
+            if (toastElement) {
+                toastElement.style.animation = "slideOut 0.3s ease-out forwards";
+                setTimeout(() => {
+                    this.toasts = this.toasts.filter(t => t.id !== toast.id);
+                    this.requestUpdate();
+                }, 300);
+            }
+        }, duration);
+    }
+
+    _getToastIcon(type) {
+        switch (type) {
+            case "success": return "✓";
+            case "error": return "✕";
+            case "warning": return "⚠";
+            case "info": return "ℹ";
+            default: return "ℹ";
         }
-        to {
-          transform: translateX(0);
-          opacity: 1;
-        }
-      }
+    }
 
-      @media (prefers-reduced-motion: reduce) {
-        .toast {
-          animation: none;
-        }
-      }
-    `;
-  }
-
-  render() {
-    return html`
-      <div class="toast-wrapper">
-        ${this.toasts.map(toast => html`
-          <div class="toast ${toast.type}">
-            <div class="toast-icon">${this._getToastIcon(toast.type)}</div>
-            <div class="toast-message">${toast.message}</div>
-          </div>
-        `)}
-      </div>
-    `;
-  }
+    render() {
+        return html`
+            ${this.toasts.map(toast => html`
+                <div class="toast ${toast.type}" data-toast-id="${toast.id}">
+                    <div class="toast-icon">${this._getToastIcon(toast.type)}</div>
+                    <div class="toast-message">${toast.message}</div>
+                </div>
+            `)}
+        `;
+    }
 }
 
+// Register the custom element
+customElements.define("toast-container", ToastContainer);
 
-// Guard against duplicate registration
-if (!customElements.get('toast-container')) {
-  customElements.define('toast-container'
-}
-
-export function showToast(message, type = 'info', duration = 4000) {
-  window.showToast(message, type, duration);
+// Export the showToast function for use in other modules
+export function showToast(message, type = "info", duration = 3000) {
+    window.dispatchEvent(new CustomEvent("show-toast", {
+        detail: { message, type, duration }
+    }));
 } 

@@ -9,7 +9,7 @@ import '/components/continuation/continuation-form.js';
 import '/components/continuation/continuation-result.js';
 import '/components/continuation/error-message.js';
 
-export class StoryContinuationRefactored extends LitElement {
+export class StoryContinuation extends LitElement {
   static properties = {
     originalStory: { type: Object },
     isSubmitting: { type: Boolean }
@@ -191,8 +191,7 @@ export class StoryContinuationRefactored extends LitElement {
   }
 }
 
-
 // Guard against duplicate registration
-if (!customElements.get('story-continuation-refactored')) {
-  customElements.define('story-continuation-refactored'
+if (!customElements.get('story-continuation')) {
+  customElements.define('story-continuation', StoryContinuation);
 } 
