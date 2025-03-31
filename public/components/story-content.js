@@ -4,6 +4,7 @@ import './story/story-text.js';
 import './story/story-summary.js';
 import './story/story-vocabulary.js';
 import './story/story-quiz.js';
+import './story/story-utilities.js';
 
 export class StoryContent extends LitElement {
   static properties = {
@@ -145,6 +146,8 @@ export class StoryContent extends LitElement {
           html`<story-quiz .quiz=${this.story.quiz}></story-quiz>` : 
           ''
         }
+        
+        <story-utilities .story=${this.story}></story-utilities>
         
         ${shouldShowContinueButton ? 
           html`<button class="continue-button" @click=${this._handleContinueStory}>

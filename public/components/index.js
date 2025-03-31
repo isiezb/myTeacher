@@ -9,15 +9,58 @@
 import { LitElement } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
 
 // Import components
+import './toast-container.js';
+import './loading-overlay.js';
 import './error-boundary.js';
 import './story-form.js';
 import './story-content.js';
-import './story-display.js';
 import './story-continuation.js';
 import './stories-grid.js';
-import './quiz-component.js';
-import './loading-overlay.js';
-import './toast-container.js';
+import './theme-toggle.js';
+
+// Components for the form
+import './form/form-settings-card.js';
+import './form/form-input-group.js';
+import './form/form-grid.js';
+import './form/form-checkbox-options.js';
+import './form/submit-button.js';
+
+// Components for the story
+import './story/story-header.js';
+import './story/story-text.js';
+import './story/story-summary.js';
+import './story/story-vocabulary.js';
+import './story/story-quiz.js';
+import './story/story-result.js';
+import './story/story-utilities.js';
+
+// Components for the continuation
+import './continuation/continuation-form.js';
+import './continuation/continuation-result.js';
+import './continuation/difficulty-selector.js';
+import './continuation/difficulty-description.js';
+import './continuation/vocabulary-display.js';
+import './continuation/error-message.js';
+import './continuation/focus-selector.js';
+
+// Re-export components to make them globally available
+export { StoryForm } from './story-form.js';
+export { StoryContent } from './story-content.js';
+export { StoryContinuation } from './story-continuation.js';
+export { StoriesGrid } from './stories-grid.js';
+export { ThemeToggle } from './theme-toggle.js';
+export { StoryUtilities } from './story/story-utilities.js';
+
+// Register global components map for dynamic component instantiation
+window.components = {
+  StoryForm: 'story-form',
+  StoryContent: 'story-content',
+  StoryContinuation: 'story-continuation',
+  StoriesGrid: 'stories-grid',
+  ThemeToggle: 'theme-toggle',
+};
+
+console.log('Component system initialized. Available components:', Object.keys(window.components));
 
 // Component loading order configuration
 const COMPONENT_LOAD_ORDER = {

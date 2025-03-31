@@ -176,6 +176,14 @@ export class ContinuationResult extends LitElement {
       .replace(/\n\n/g, '</p><p>')
       .replace(/\n/g, '<br>');
       
+    // Create a story object to pass to the story-utilities component
+    const storyData = {
+      content: this.continuationContent,
+      summary: this.summary,
+      vocabulary: this.vocabularyItems,
+      quiz: this.quiz
+    };
+      
     return html`
       <div class="continuation-result">
         <h3>Story Continuation</h3>
@@ -210,6 +218,8 @@ export class ContinuationResult extends LitElement {
             <story-quiz .quiz=${this.quiz}></story-quiz>
           </div>
         ` : ''}
+        
+        <story-utilities .story=${storyData}></story-utilities>
         
         <button class="continue-button" @click=${this._handleContinueStory}>
           Continue Story
