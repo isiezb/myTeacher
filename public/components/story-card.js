@@ -236,4 +236,8 @@ export class StoryCard extends LitElement {
   }
 }
 
-customElements.define('story-card', StoryCard); 
+
+// Guard against duplicate registration
+if (!customElements.get('story-card')) {
+  customElements.define('story-card', StoryCard);
+} 

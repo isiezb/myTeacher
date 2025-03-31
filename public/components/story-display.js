@@ -264,4 +264,8 @@ export class StoryDisplay extends LitElement {
   }
 }
 
-customElements.define('story-display', StoryDisplay); 
+
+// Guard against duplicate registration
+if (!customElements.get('story-display')) {
+  customElements.define('story-display', StoryDisplay);
+} 
