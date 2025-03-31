@@ -2,12 +2,12 @@ import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/co
 import { showToast } from './toast-container.js';
 
 // Import subcomponents
-import '/components/continuation/difficulty-selector.js';
-import '/components/continuation/difficulty-description.js';
-import '/components/continuation/vocabulary-display.js';
-import '/components/continuation/continuation-form.js';
-import '/components/continuation/continuation-result.js';
-import '/components/continuation/error-message.js';
+import './continuation/difficulty-selector.js';
+import './continuation/difficulty-description.js';
+import './continuation/vocabulary-display.js';
+import './continuation/continuation-form.js';
+import './continuation/continuation-result.js';
+import './continuation/error-message.js';
 
 export class StoryContinuation extends LitElement {
   static properties = {
@@ -37,6 +37,17 @@ export class StoryContinuation extends LitElement {
       difficulty: 'same_level'
     };
     this._vocabularyItems = [];
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('originalStory') && this.originalStory) {
+      console.log('StoryContinuation: originalStory set:', this.originalStory.id);
+      console.log('Content length:', this.originalStory.content?.length || 0);
+      // Reset any previous continuation content when a new story is set
+      this._continuationContent = '';
+      this._errorMessage = '';
+      this.requestUpdate();
+    }
   }
 
   _handleSettingsChange(e) {

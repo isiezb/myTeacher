@@ -170,7 +170,10 @@
       // Initialize the continuation container with display: none
       const continuationContainer = document.getElementById('continuation-container');
       if (continuationContainer) {
+        console.log('Found continuation-container, setting initial display to none');
         continuationContainer.style.display = 'none';
+      } else {
+        console.error('Could not find continuation-container element!');
       }
       
       // Function to handle story continuation
@@ -185,6 +188,7 @@
         }
         
         // Show the continuation container 
+        console.log('Setting continuation-container display to flex');
         continuationContainer.style.display = 'flex';
         
         // Hide the quiz container if it exists
