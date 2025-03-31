@@ -5,129 +5,65 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('🔧 Running component registration fix...');
+  console.log('🔧 Running component registration check...');
   
   // Add a slight delay to allow regular registration to occur first
   setTimeout(() => {
     // Check components that we know should be defined
+    const componentsToCheck = [
+      'story-display',
+      'story-card',
+      'story-form',
+      'story-content',
+      'stories-grid',
+      'quiz-component',
+      'story-continuation',
+      // Also check refactored versions if relevant
+      'story-display-refactored',
+      'story-card-refactored',
+      'story-form-refactored',
+      'story-content-refactored',
+      'stories-grid-refactored',
+      'quiz-component-refactored',
+      'story-continuation-refactored'
+    ];
+    
+    console.log('--- Component Registration Check Results ---');
+    componentsToCheck.forEach(componentName => {
+      if (!customElements.get(componentName)) {
+        console.warn(`⚠️ Component ${componentName} was not defined after delay.`);
+      } else {
+        // Optional: Log success for clarity during debugging
+        // console.log(`✅ Component ${componentName} is defined.`);
+      }
+    });
+    console.log('--- End Component Registration Check ---');
+
+    // REMOVED: Fallback definition logic
+    /* 
     const missingComponents = [
       {
         name: 'story-display',
         path: 'components/story-display.js',
-        fallback: true
+        fallback: true // Keep configuration for potential future use
       }
     ];
     
     missingComponents.forEach(async (component) => {
-      if (!customElements.get(component.name)) {
-        console.warn(`⚠️ Component ${component.name} not defined, attempting to fix...`);
-        
-        try {
-          // Option 1: Try re-importing the script (REMOVED - This seems to cause double definition errors)
-          /* 
-          console.log(`Attempting re-import of ${component.path}`);
-          const script = document.createElement('script');
-          script.type = 'module';
-          script.src = component.path;
-          script.onload = () => console.log(`✅ Reimported ${component.path}`) 
-          script.onerror = (e) => console.error(`❌ Failed to reimport ${component.path}`, e);
-          document.head.appendChild(script);
-          */
-          
-          // Option 2: If we have a fallback, forcibly define the component
-          if (component.fallback) {
-            console.log(`Attempting fallback definition for ${component.name}`);
-            try {
-              const { LitElement, html, css } = await import('https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js');
-              
-              // Create a minimal fallback component for story-display
-              class StoryDisplayFallback extends LitElement {
-                static get properties() {
-                  return {
-                    story: { type: Object },
-                    error: { type: String },
-                  };
-                }
-                
-                constructor() {
-                  super();
-                  this.story = null;
-                  this.error = null;
-                  console.log('🔄 StoryDisplayFallback constructed as emergency fallback');
-                }
-                
-                render() {
-                  console.log('🔄 StoryDisplayFallback rendering', this.story);
-                  
-                  if (this.error) {
-                    return html`<div style="color: red; padding: 20px;">Error: ${this.error}</div>`;
-                  }
-                  
-                  if (!this.story) {
-                    return html`<div style="text-align: center; padding: 20px;">No story available</div>`;
-                  }
-                  
-                  return html`
-                    <div style="padding: 20px; border: 1px solid #ccc; border-radius: 8px;">
-                      <h2>${this.story.title || 'Untitled'}</h2>
-                      <div style="white-space: pre-wrap;">${this.story.content}</div>
-                    </div>
-                  `;
-                }
-              }
-              
-              if (!customElements.get('story-display')) {
-                customElements.define('story-display', StoryDisplayFallback);
-                console.log('✅ Defined emergency fallback for story-display');
-              }
-            } catch (err) {
-              console.error('❌ Failed to define fallback component', err);
-            }
-          }
-        } catch (err) {
-          console.error(`❌ Failed to fix ${component.name}:`, err);
-        }
+      if (!customElements.get(component.name)) { 
+        // ... fallback logic was here ...
       }
     });
+    */
     
-    // Check all components with data-component attribute
+    // REMOVED: Manual creation in empty containers logic
+    /*
     const componentContainers = document.querySelectorAll('[data-component]');
     console.log(`Found ${componentContainers.length} component containers`);
-    
     componentContainers.forEach(container => {
-      const componentName = container.getAttribute('data-component');
-      console.log(`🔍 Checking container for ${componentName}`);
-      
-      if (!componentName) return;
-      
-      // If the component should have children but doesn't, the component may not be created
-      if (container.children.length === 0) {
-        console.warn(`⚠️ Container for ${componentName} is empty`);
-        
-        // Forcibly create the component
-        if (componentName === 'story-display') {
-          try {
-            const displayEl = document.createElement('story-display');
-            container.appendChild(displayEl);
-            console.log(`✅ Manually created ${componentName} in container`);
-            
-            // Add fake story for testing
-            setTimeout(() => {
-              try {
-                displayEl.story = {
-                  title: "Emergency Test Story",
-                  content: "This story was generated by the emergency registration fix script."
-                };
-                console.log('✅ Set test story on emergency component');
-              } catch (err) {
-                console.error('❌ Failed to set story on emergency component', err);
-              }
-            }, 500);
-          } catch (err) {
-            console.error(`❌ Failed to manually create ${componentName}:`, err);
-          }
-        }
-      }
+      // ... manual creation logic was here ...
     });
-  }, 2000); // Wait 2 seconds to allow normal registration
+    */
+
+  }, 2500); // Increased delay slightly to 2.5 seconds
 }); 
