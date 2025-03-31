@@ -44,8 +44,8 @@ To ensure a smooth transition, we're employing a phased approach:
 | story-form.js | 704 | 345 | 5 | ✅ Completed |
 | stories-grid.js | 337 | 187 | 5 | ✅ Completed |
 | quiz-component.js | 379 | 182 | 3 | ✅ Completed |
-| story-display.js | 270 | - | - | 🔄 In Progress |
-| story-card.js | 242 | - | - | 🔄 In Progress |
+| story-display.js | 270 | 105 | 4 | ✅ Completed |
+| story-card.js | 242 | 89 | 3 | ✅ Completed |
 
 ## Key Files
 
@@ -60,6 +60,8 @@ To ensure a smooth transition, we're employing a phased approach:
 3. `story-continuation-refactored.js` - Refactored story continuation component
 4. `stories-grid-refactored.js` - Refactored stories grid component
 5. `quiz-component-refactored.js` - Refactored quiz component
+6. `story-display-refactored.js` - Refactored story display component
+7. `story-card-refactored.js` - Refactored story card component
 
 ### Sub-Components
 
@@ -99,19 +101,26 @@ Each refactored component has been broken down into smaller, focused sub-compone
 - `quiz-question.js` - Individual quiz question
 - `quiz-results.js` - Quiz results summary
 
+#### Display Components
+- `display-content.js` - Story content display
+- `display-empty.js` - Empty state for story display
+- `display-error.js` - Error state for story display
+- `display-controls.js` - Action controls (copy, print, save, listen)
+
+#### Card Components
+- `card-header.js` - Card header with title and metadata
+- `card-content.js` - Card content with excerpt
+- `card-actions.js` - Card action buttons
+
 ## Remaining Tasks
 
-1. **Complete Component Refactoring**
-   - Refactor `story-display.js`
-   - Refactor `story-card.js`
-
-2. **Cross-Component Integration**
+1. **Cross-Component Integration**
    - Ensure all refactored components work together
 
-3. **Performance Testing**
+2. **Performance Testing**
    - Compare performance of original vs. refactored components
 
-4. **Code Quality Cleanup**
+3. **Code Quality Cleanup**
    - Review code for consistency
    - Add JSDoc comments
 

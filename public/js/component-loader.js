@@ -29,6 +29,8 @@ export function initializeComponents() {
   const storyContinuationContainers = document.querySelectorAll('[data-component="story-continuation"]');
   const storiesGridContainers = document.querySelectorAll('[data-component="stories-grid"]');
   const quizContainers = document.querySelectorAll('[data-component="quiz"]');
+  const storyDisplayContainers = document.querySelectorAll('[data-component="story-display"]');
+  const storyCardContainers = document.querySelectorAll('[data-component="story-card"]');
   
   if (USE_REFACTORED_COMPONENTS) {
     // Replace with refactored components
@@ -37,6 +39,8 @@ export function initializeComponents() {
     const continuationTag = 'story-continuation-refactored';
     const gridTag = 'stories-grid-refactored';
     const quizTag = 'quiz-component-refactored';
+    const displayTag = 'story-display-refactored';
+    const cardTag = 'story-card-refactored';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -67,6 +71,18 @@ export function initializeComponents() {
       quizContainers.forEach(container => initializeComponent(container, quizTag));
     } else {
       console.warn(`⚠️ Component ${quizTag} is not defined`);
+    }
+    
+    if (isElementDefined(displayTag)) {
+      storyDisplayContainers.forEach(container => initializeComponent(container, displayTag));
+    } else {
+      console.warn(`⚠️ Component ${displayTag} is not defined`);
+    }
+    
+    if (isElementDefined(cardTag)) {
+      storyCardContainers.forEach(container => initializeComponent(container, cardTag));
+    } else {
+      console.warn(`⚠️ Component ${cardTag} is not defined`);
     }
   } else {
     // Use original components
@@ -75,6 +91,8 @@ export function initializeComponents() {
     const continuationTag = 'story-continuation';
     const gridTag = 'stories-grid';
     const quizTag = 'quiz-component';
+    const displayTag = 'story-display';
+    const cardTag = 'story-card';
     
     // Only create components if they're defined
     if (isElementDefined(formTag)) {
@@ -105,6 +123,18 @@ export function initializeComponents() {
       quizContainers.forEach(container => initializeComponent(container, quizTag));
     } else {
       console.warn(`⚠️ Component ${quizTag} is not defined`);
+    }
+    
+    if (isElementDefined(displayTag)) {
+      storyDisplayContainers.forEach(container => initializeComponent(container, displayTag));
+    } else {
+      console.warn(`⚠️ Component ${displayTag} is not defined`);
+    }
+    
+    if (isElementDefined(cardTag)) {
+      storyCardContainers.forEach(container => initializeComponent(container, cardTag));
+    } else {
+      console.warn(`⚠️ Component ${cardTag} is not defined`);
     }
   }
   
@@ -142,5 +172,7 @@ export const components = {
   StoryContent: USE_REFACTORED_COMPONENTS ? 'story-content-refactored' : 'story-content',
   StoryContinuation: USE_REFACTORED_COMPONENTS ? 'story-continuation-refactored' : 'story-continuation',
   StoriesGrid: USE_REFACTORED_COMPONENTS ? 'stories-grid-refactored' : 'stories-grid',
-  QuizComponent: USE_REFACTORED_COMPONENTS ? 'quiz-component-refactored' : 'quiz-component'
+  QuizComponent: USE_REFACTORED_COMPONENTS ? 'quiz-component-refactored' : 'quiz-component',
+  StoryDisplay: USE_REFACTORED_COMPONENTS ? 'story-display-refactored' : 'story-display',
+  StoryCard: USE_REFACTORED_COMPONENTS ? 'story-card-refactored' : 'story-card'
 };

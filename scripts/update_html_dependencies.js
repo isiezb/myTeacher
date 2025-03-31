@@ -61,12 +61,25 @@ const config = {
     '<script type="module" src="components/quiz/quiz-question.js"></script>',
     '<script type="module" src="components/quiz/quiz-results.js"></script>',
     
+    // Display components
+    '<script type="module" src="components/display/display-content.js"></script>',
+    '<script type="module" src="components/display/display-empty.js"></script>',
+    '<script type="module" src="components/display/display-error.js"></script>',
+    '<script type="module" src="components/display/display-controls.js"></script>',
+    
+    // Card components
+    '<script type="module" src="components/card/card-header.js"></script>',
+    '<script type="module" src="components/card/card-content.js"></script>',
+    '<script type="module" src="components/card/card-actions.js"></script>',
+    
     // Main refactored components
     '<script type="module" src="components/story-form-refactored.js"></script>',
     '<script type="module" src="components/story-content-refactored.js"></script>',
     '<script type="module" src="components/story-continuation-refactored.js"></script>',
     '<script type="module" src="components/stories-grid-refactored.js"></script>',
-    '<script type="module" src="components/quiz-component-refactored.js"></script>'
+    '<script type="module" src="components/quiz-component-refactored.js"></script>',
+    '<script type="module" src="components/story-display-refactored.js"></script>',
+    '<script type="module" src="components/story-card-refactored.js"></script>'
   ],
   APP_INIT_SCRIPTS: [
     '<script type="module" src="js/app.js"></script>'
