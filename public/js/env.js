@@ -20,12 +20,11 @@ const ENV = {
 };
 
 // Make environment variables available globally and validate configuration
-(function loadEnv() {
+(function() {
   // Required variables and their descriptions
   const requiredVars = {
     SUPABASE_URL: 'Supabase project URL',
     SUPABASE_KEY: 'Supabase anonymous key',
-    OPENROUTER_URL: 'OpenRouter API URL',
     OPENROUTER_KEY: 'OpenRouter API key'
   };
   

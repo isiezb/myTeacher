@@ -136,7 +136,7 @@ export class LoadingOverlay extends LitElement {
 
 // Guard against duplicate registration
 if (!customElements.get('loading-overlay')) {
-  customElements.define('loading-overlay'
+  customElements.define('loading-overlay', LoadingOverlay);
 }
 
 export function showLoading(message = 'Loading...') {
