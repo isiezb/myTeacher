@@ -20,9 +20,15 @@ def build_story_generation_prompt(request: StoryGenerationRequest) -> Tuple[str,
     """
     subject_display = request.other_subject if request.subject == 'other' and request.other_subject else request.subject
 
+    # Handle university grade level specially
+    if request.academic_grade.lower() == 'university':
+        audience_line = "Target Audience: University students."
+    else:
+        audience_line = f"Target Audience: Grade {request.academic_grade} students."
+
     prompt_lines = [
         f"Generate an educational story in {request.language}.",
-        f"Target Audience: Grade {request.academic_grade} students.",
+        audience_line,
         f"Subject: {subject_display}.",
     ]
     

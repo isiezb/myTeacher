@@ -85,7 +85,8 @@ export class StoryForm extends LitElement {
       { value: '9', label: 'Grade 9' },
       { value: '10', label: 'Grade 10' },
       { value: '11', label: 'Grade 11' },
-      { value: '12', label: 'Grade 12' }
+      { value: '12', label: 'Grade 12' },
+      { value: 'university', label: 'University' }
     ];
 
     this.wordCounts = [
