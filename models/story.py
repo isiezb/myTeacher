@@ -43,12 +43,17 @@ class StoryContinuationRequest(BaseModel):
         default="same_level", 
         description="Desired difficulty level relative to the original story"
     )
+    focus: Optional[str] = Field(
+        default="general",
+        description="Specific topic to focus on in the continuation (e.g., vocabulary term or 'general')"
+    )
     
     class Config:
         schema_extra = {
             "example": {
                 "length": 300,
-                "difficulty": "slightly_harder"
+                "difficulty": "slightly_harder",
+                "focus": "general"
             }
         }
 
@@ -57,6 +62,7 @@ class StoryContinuationResponse(BaseModel):
     continuation_text: str = Field(..., description="The generated continuation text")
     word_count: int = Field(..., description="Actual word count of the continuation")
     difficulty: str = Field(..., description="The difficulty level that was applied")
+    focus: str = Field(default="general", description="The topic focus that was applied")
     vocabulary: Optional[List[VocabularyItem]] = Field(None, description="Additional vocabulary items for the continuation")
     summary: Optional[str] = Field(None, description="Summary of the continuation")
     quiz: Optional[List[QuizItem]] = Field(None, description="Quiz questions for the continuation") 

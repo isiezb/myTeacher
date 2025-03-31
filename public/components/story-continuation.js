@@ -291,6 +291,12 @@ export class StoryContinuation extends LitElement {
 
     // If we have continuation content, show the result
     if (this._continuationContent) {
+      // Get the original story metadata
+      const originalTitle = this.originalStory?.title || 'Story Continuation';
+      const originalSubject = this.originalStory?.subject || 'General';
+      const originalGradeLevel = this.originalStory?.grade_level || 'Not specified';
+      const wordCount = this._continuationContent.split(/\s+/).length || 0;
+      
       return html`
         <continuation-result 
           .continuationContent=${this._continuationContent}
@@ -298,6 +304,11 @@ export class StoryContinuation extends LitElement {
           .summary=${this._summary}
           .quiz=${this._quiz}
           .difficulty=${this._settings.difficulty}
+          .title=${originalTitle}
+          .subject=${originalSubject}
+          .gradeLevel=${originalGradeLevel}
+          .wordCount=${wordCount}
+          .focus=${this._settings.focus}
         ></continuation-result>
       `;
     }
