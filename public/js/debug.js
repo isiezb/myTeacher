@@ -1,1431 +1,361 @@
 /**
- * Debug helper for troubleshooting component loading issues
+ * Simplified Debug Panel for EasyStory
+ * A lightweight tool for troubleshooting runtime issues
  */
 
-// Initialize debugging
-(function initDebugPanel() {
-  // Make initialization function globally available
-  window.initDebugPanel = initDebugPanel;
-  
-  // Record original console methods
-  const originalLog = console.log;
-  const originalError = console.error;
-  const originalWarn = console.warn;
-  
-  // Store logs for debug display
-  window.debugLogs = {
+(function() {
+  // Store the original console methods
+  const originalConsole = {
+    log: console.log,
+    warn: console.warn,
+    error: console.error
+  };
+
+  // Storage for logs
+  const logs = {
     messages: [],
-    errors: [],
-    warnings: []
+    warnings: [],
+    errors: []
   };
-  
-  // Override console methods
-  console.log = function() {
-    const args = Array.from(arguments);
-    window.debugLogs.messages.push({
-      timestamp: new Date().toISOString(),
-      message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ')
-    });
-    originalLog.apply(console, arguments);
-  };
-  
-  console.error = function() {
-    const args = Array.from(arguments);
-    window.debugLogs.errors.push({
-      timestamp: new Date().toISOString(),
-      message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ')
-    });
-    originalError.apply(console, arguments);
-  };
-  
-  console.warn = function() {
-    const args = Array.from(arguments);
-    window.debugLogs.warnings.push({
-      timestamp: new Date().toISOString(),
-      message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : arg).join(' ')
-    });
-    originalWarn.apply(console, arguments);
-  };
-  
-  // Add error event listener
-  window.addEventListener('error', function(event) {
-    window.debugLogs.errors.push({
-      timestamp: new Date().toISOString(),
-      message: `ERROR: ${event.message} at ${event.filename}:${event.lineno}:${event.colno}`,
-      error: event.error ? event.error.stack : 'No stack trace available'
-    });
-  });
-  
-  // Add unhandled promise rejection listener
-  window.addEventListener('unhandledrejection', function(event) {
-    window.debugLogs.errors.push({
-      timestamp: new Date().toISOString(),
-      message: 'Unhandled Promise Rejection',
-      error: event.reason ? (event.reason.stack || event.reason.toString()) : 'Unknown reason'
-    });
-  });
 
-  // Make showDebugPanel function globally available
-  window.showDebugPanel = showDebugPanel;
-})();
+  // Maximum number of logs to keep
+  const MAX_LOGS = 100;
 
-// Create debug panel to display logs
-function showDebugPanel() {
-  // Check if panel already exists
-  const existingPanel = document.getElementById('debug-panel');
-  if (existingPanel) {
-    existingPanel.remove();
-    return;
+  // Initialize debug panel
+  function initDebugPanel() {
+    // Override console methods to capture logs
+    overrideConsoleMethods();
+    
+    // Add error listeners
+    addErrorListeners();
+    
+    // Make functions available globally
+    window.showDebugPanel = showDebugPanel;
+    window.initDebugPanel = initDebugPanel;
+    window.clearDebugLogs = clearLogs;
+    
+    console.log("Debug panel initialized");
   }
-  
-  const panel = document.createElement('div');
-  panel.id = 'debug-panel';
-  panel.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 80%;
-    background: #fff;
-    border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    z-index: 10000;
-    overflow: auto;
-    padding: 20px;
-    box-sizing: border-box;
-  `;
-  
-  // Create tabs for different log types
-  const tabs = document.createElement('div');
-  tabs.style.cssText = `
-    display: flex;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #dee2e6;
-  `;
-  
-  const createTab = (label, active = false) => {
-    const tab = document.createElement('div');
-    tab.textContent = label;
-    tab.style.cssText = `
-      padding: 10px 15px;
-      cursor: pointer;
-      background: ${active ? '#007bff' : '#f8f9fa'};
-      color: ${active ? '#fff' : '#000'};
-      border: 1px solid #dee2e6;
-      border-bottom: none;
-      margin-right: 5px;
-      border-radius: 4px 4px 0 0;
-    `;
-    tab.dataset.tab = label.toLowerCase();
-    return tab;
-  };
-  
-  const errorsTab = createTab('Errors', true);
-  const warningsTab = createTab('Warnings');
-  const logsTab = createTab('Logs');
-  const componentsTab = createTab('Components');
-  const envTab = createTab('Environment');
-  
-  tabs.appendChild(errorsTab);
-  tabs.appendChild(warningsTab);
-  tabs.appendChild(logsTab);
-  tabs.appendChild(componentsTab);
-  tabs.appendChild(envTab);
-  
-  panel.appendChild(tabs);
-  
-  // Create content area
-  const content = document.createElement('div');
-  content.style.cssText = `
-    padding: 10px;
-    border: 1px solid #dee2e6;
-    height: calc(100% - 60px);
-    overflow: auto;
-    background: #f8f9fa;
-  `;
-  panel.appendChild(content);
-  
-  // Add close button
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '✕';
-  closeBtn.style.cssText = `
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    padding: 5px 10px;
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-  `;
-  closeBtn.addEventListener('click', () => panel.remove());
-  panel.appendChild(closeBtn);
-  
-  // Show errors content initially
-  showTabContent('errors');
-  
-  // Tab click events
-  tabs.addEventListener('click', (e) => {
-    if (e.target.dataset.tab) {
-      // Update active tab styling
-      Array.from(tabs.children).forEach(tab => {
-        tab.style.background = '#f8f9fa';
-        tab.style.color = '#000';
+
+  // Override console methods to capture logs
+  function overrideConsoleMethods() {
+    console.log = function() {
+      const args = Array.from(arguments);
+      logs.messages.push({
+        time: new Date().toISOString(),
+        content: formatLogContent(args)
       });
-      e.target.style.background = '#007bff';
-      e.target.style.color = '#fff';
       
-      showTabContent(e.target.dataset.tab);
-    }
-  });
-  
-  function showTabContent(tabName) {
-    let html = '';
-    
-    switch(tabName) {
-      case 'errors':
-        html = '<h3>Errors</h3>';
-        if (window.debugLogs.errors.length === 0) {
-          html += '<p>No errors recorded</p>';
-        } else {
-          html += '<pre style="color: #dc3545">';
-          window.debugLogs.errors.forEach(error => {
-            html += `[${error.timestamp}] ${error.message}\n`;
-            if (error.error) {
-              html += `${error.error}\n\n`;
-            }
-          });
-          html += '</pre>';
-        }
-        break;
-        
-      case 'warnings':
-        html = '<h3>Warnings</h3>';
-        if (window.debugLogs.warnings.length === 0) {
-          html += '<p>No warnings recorded</p>';
-        } else {
-          html += '<pre style="color: #ffc107">';
-          window.debugLogs.warnings.forEach(warning => {
-            html += `[${warning.timestamp}] ${warning.message}\n`;
-          });
-          html += '</pre>';
-        }
-        break;
-        
-      case 'logs':
-        html = '<h3>Logs</h3>';
-        if (window.debugLogs.messages.length === 0) {
-          html += '<p>No logs recorded</p>';
-        } else {
-          html += '<pre>';
-          window.debugLogs.messages.forEach(log => {
-            html += `[${log.timestamp}] ${log.message}\n`;
-          });
-          html += '</pre>';
-        }
-        break;
-        
-      case 'components':
-        html = '<h3>Registered Components</h3>';
-        const components = Array.from(document.querySelectorAll('*'))
-          .filter(el => el.tagName.includes('-'))
-          .map(el => el.tagName.toLowerCase())
-          .filter((value, index, self) => self.indexOf(value) === index);
-        
-        if (components.length === 0) {
-          html += '<p>No custom elements found</p>';
-        } else {
-          html += '<ul>';
-          components.forEach(component => {
-            html += `<li>${component}</li>`;
-          });
-          html += '</ul>';
-        }
-        break;
-        
-      case 'environment':
-        html = '<h3>Environment Variables</h3>';
-        const envVars = Object.keys(window)
-          .filter(key => key.startsWith('ENV_'))
-          .reduce((acc, key) => {
-            acc[key] = key.includes('KEY') ? '[HIDDEN]' : window[key];
-            return acc;
-          }, {});
-        
-        html += '<pre>';
-        html += JSON.stringify(envVars, null, 2);
-        html += '</pre>';
-        break;
-    }
-    
-    content.innerHTML = html;
-  }
-  
-  document.body.appendChild(panel);
-}
-
-// Add a direct URL check function to the debug panel
-function addDirectUrlCheck() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">Direct URL Check:</h4>
-    <input id="direct-url-input" type="text" value="https://easystory.onrender.com/status" 
-           style="width: 80%; padding: 8px; margin-right: 5px;">
-    <button id="check-url-btn" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Check URL</button>
-    <div id="url-check-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
-  `;
-  
-  setTimeout(() => {
-    const checkUrlBtn = document.getElementById('check-url-btn');
-    const urlInput = document.getElementById('direct-url-input');
-    const urlCheckResults = document.getElementById('url-check-results');
-    
-    if (checkUrlBtn && urlInput && urlCheckResults) {
-      checkUrlBtn.addEventListener('click', async () => {
-        const url = urlInput.value.trim();
-        if (!url) {
-          urlCheckResults.innerHTML = '<p style="color: red">Please enter a URL</p>';
-          return;
-        }
-        
-        urlCheckResults.innerHTML = '<p>Checking URL...</p>';
-        
-        try {
-          // Try three different fetch methods
-          const results = [];
-          
-          // Method 1: Basic fetch with no CORS mode
-          try {
-            const basicResponse = await fetch(url, {
-              method: 'GET', 
-              cache: 'no-cache',
-              headers: {'Content-Type': 'application/json'}
-            }).catch(e => ({ ok: false, error: e }));
-            
-            results.push({
-              method: 'Basic fetch (no CORS mode)',
-              ok: basicResponse.ok !== false,
-              status: basicResponse.status || 'Error',
-              statusText: basicResponse.statusText || (basicResponse.error ? basicResponse.error.message : 'Unknown error')
-            });
-          } catch (error) {
-            results.push({
-              method: 'Basic fetch (no CORS mode)',
-              ok: false,
-              status: 'Error',
-              statusText: error.message
-            });
-          }
-          
-          // Method 2: CORS mode
-          try {
-            const corsResponse = await fetch(url, {
-              method: 'GET',
-              mode: 'cors',
-              cache: 'no-cache',
-              headers: {'Content-Type': 'application/json'}
-            }).catch(e => ({ ok: false, error: e }));
-            
-            results.push({
-              method: 'CORS mode fetch',
-              ok: corsResponse.ok !== false,
-              status: corsResponse.status || 'Error',
-              statusText: corsResponse.statusText || (corsResponse.error ? corsResponse.error.message : 'Unknown error')
-            });
-          } catch (error) {
-            results.push({
-              method: 'CORS mode fetch',
-              ok: false,
-              status: 'Error',
-              statusText: error.message
-            });
-          }
-          
-          // Method 3: Via proxy
-          if (window.proxyService) {
-            try {
-              await window.proxyService.fetchViaProxy(url);
-              results.push({
-                method: 'Proxy fetch',
-                ok: true,
-                status: 'Success',
-                statusText: 'Connected via proxy'
-              });
-            } catch (error) {
-              results.push({
-                method: 'Proxy fetch',
-                ok: false,
-                status: 'Error',
-                statusText: error.message
-              });
-            }
-          }
-          
-          // Display results
-          let resultHtml = '<h4>Connection Test Results:</h4><ul>';
-          results.forEach(result => {
-            resultHtml += `<li><strong>${result.method}:</strong> ${result.ok ? '✅' : '❌'} ${result.status} ${result.statusText}</li>`;
-          });
-          resultHtml += '</ul>';
-          
-          // If any method succeeded, try to show response
-          const successMethod = results.find(r => r.ok);
-          if (successMethod) {
-            resultHtml += '<h4>Response Content:</h4>';
-            try {
-              let response;
-              if (successMethod.method === 'Proxy fetch') {
-                response = await window.proxyService.fetchViaProxy(url);
-              } else {
-                const fetchResponse = await fetch(url, {
-                  method: 'GET',
-                  mode: successMethod.method.includes('CORS') ? 'cors' : undefined,
-                  cache: 'no-cache'
-                });
-                
-                const contentType = fetchResponse.headers.get('Content-Type') || '';
-                if (contentType.includes('application/json')) {
-                  response = await fetchResponse.json();
-                } else {
-                  response = await fetchResponse.text();
-                }
-              }
-              
-              if (typeof response === 'string') {
-                resultHtml += `<pre style="max-height: 200px; overflow: auto;">${response.substring(0, 500)}${response.length > 500 ? '...' : ''}</pre>`;
-              } else {
-                resultHtml += `<pre style="max-height: 200px; overflow: auto;">${JSON.stringify(response, null, 2)}</pre>`;
-              }
-            } catch (error) {
-              resultHtml += `<p>Error getting response content: ${error.message}</p>`;
-            }
-          } else {
-            resultHtml += '<p>❌ All connection methods failed. The endpoint might be:</p>';
-            resultHtml += '<ul>';
-            resultHtml += '<li>Unavailable or down</li>';
-            resultHtml += '<li>Blocking cross-origin requests (CORS issues)</li>';
-            resultHtml += '<li>Rejecting your IP address</li>';
-            resultHtml += '<li>Requiring authentication</li>';
-            resultHtml += '</ul>';
-            resultHtml += '<p>Try accessing the URL directly in a new browser tab to see if it\'s available.</p>';
-          }
-          
-          urlCheckResults.innerHTML = resultHtml;
-        } catch (error) {
-          urlCheckResults.innerHTML = `<p>Error testing URL: ${error.message}</p>`;
-        }
-      });
-    }
-  }, 100);
-}
-
-// Function to check API endpoints structure
-function addEndpointStructureCheck() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-  
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">API Endpoints Structure Check:</h4>
-    <button id="check-endpoints-btn" style="padding: 8px 16px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">Check API Endpoints</button>
-    <div id="endpoints-check-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
-  `;
-  
-  setTimeout(() => {
-    const checkEndpointsBtn = document.getElementById('check-endpoints-btn');
-    const endpointsCheckResults = document.getElementById('endpoints-check-results');
-    
-    if (checkEndpointsBtn && endpointsCheckResults) {
-      checkEndpointsBtn.addEventListener('click', async () => {
-        endpointsCheckResults.innerHTML = '<p>Checking API endpoints structure...</p>';
-        
-        const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-        
-        // Define endpoints to check
-        const endpoints = [
-          { path: '/', method: 'GET', name: 'Root endpoint' },
-          { path: '/status', method: 'GET', name: 'Status endpoint' },
-          { path: '/stories', method: 'GET', name: 'Stories list endpoint' },
-          { path: '/stories/generate', method: 'POST', name: 'Story generation endpoint' },
-        ];
-        
-        // Check each endpoint
-        const results = [];
-        
-        for (const endpoint of endpoints) {
-          try {
-            // Try direct access first
-            let response = await fetch(`${baseUrl}${endpoint.path}`, {
-              method: endpoint.method,
-              mode: 'cors',
-              headers: { 'Content-Type': 'application/json' }
-            }).catch(() => null);
-            
-            // If direct access fails, try via proxy
-            if (!response && window.proxyService) {
-              try {
-                await window.proxyService.fetchViaProxy(`${baseUrl}${endpoint.path}`);
-                results.push({
-                  endpoint: endpoint.name,
-                  path: endpoint.path,
-                  exists: true,
-                  status: 'Unknown (via proxy)',
-                  method: 'Proxy'
-                });
-                continue;
-              } catch {
-                // Proxy also failed
-              }
-            }
-            
-            if (response) {
-              results.push({
-                endpoint: endpoint.name,
-                path: endpoint.path,
-                exists: true,
-                status: response.status,
-                method: 'Direct'
-              });
-            } else {
-              results.push({
-                endpoint: endpoint.name,
-                path: endpoint.path,
-                exists: false,
-                status: 'Failed',
-                method: 'All methods'
-              });
-            }
-          } catch (error) {
-            results.push({
-              endpoint: endpoint.name,
-              path: endpoint.path,
-              exists: false,
-              status: 'Error',
-              error: error.message
-            });
-          }
-        }
-        
-        // Display results
-        let resultHtml = '<h4>API Endpoints Results:</h4>';
-        resultHtml += '<table style="width: 100%; border-collapse: collapse;">';
-        resultHtml += '<tr><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Endpoint</th><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Path</th><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Status</th></tr>';
-        
-        results.forEach(result => {
-          resultHtml += `<tr>
-            <td style="padding: 8px; border: 1px solid #ddd;">${result.endpoint}</td>
-            <td style="padding: 8px; border: 1px solid #ddd;">${result.path}</td>
-            <td style="padding: 8px; border: 1px solid #ddd; color: ${result.exists ? 'green' : 'red'}">
-              ${result.exists ? '✅' : '❌'} ${result.status} (${result.method})
-            </td>
-          </tr>`;
-        });
-        
-        resultHtml += '</table>';
-        
-        // Add recommendations based on results
-        resultHtml += '<h4>Recommendations:</h4>';
-        
-        if (results.every(r => !r.exists)) {
-          resultHtml += `<p>❌ None of the API endpoints could be reached. This suggests:</p>
-          <ul>
-            <li>The API server at <strong>${baseUrl}</strong> might be down</li>
-            <li>The server might be in sleep mode (common with free Render.com instances)</li>
-            <li>The base URL might be incorrect</li>
-            <li>Strong CORS restrictions might be preventing all access</li>
-          </ul>
-          <p>Try opening <a href="${baseUrl}" target="_blank">${baseUrl}</a> directly in your browser to see if the server responds at all.</p>`;
-        } else if (results.find(r => r.path === '/stories/generate' && !r.exists)) {
-          resultHtml += `<p>⚠️ The story generation endpoint doesn't seem to be available. This suggests:</p>
-          <ul>
-            <li>The API might use a different endpoint structure than expected</li>
-            <li>The endpoint might require authentication</li>
-            <li>The endpoint might only accept specific request formats</li>
-          </ul>
-          <p>Check the API documentation to confirm the correct endpoint for story generation.</p>`;
-        } else if (results.find(r => r.method === 'Proxy' && r.exists)) {
-          resultHtml += `<p>⚠️ Some endpoints are only accessible via proxy. This confirms a CORS issue with the API.</p>
-          <p>The application should continue working via the proxy service, but for better performance, the API server should be configured to allow CORS requests from your domain.</p>`;
-        }
-        
-        endpointsCheckResults.innerHTML = resultHtml;
-      });
-    }
-  }, 100);
-}
-
-// Function to test story generation endpoint
-function addStoryGenerationTest() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-  
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">Story Generation Test:</h4>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-      <div style="flex: 1; min-width: 200px;">
-        <label style="display: block; margin-bottom: 5px;">Academic Grade:</label>
-        <select id="test-grade" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
-          <option value="5">Grade 5</option>
-          <option value="8">Grade 8</option>
-          <option value="12">Grade 12</option>
-        </select>
-      </div>
-      <div style="flex: 1; min-width: 200px;">
-        <label style="display: block; margin-bottom: 5px;">Subject:</label>
-        <select id="test-subject" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ced4da;">
-          <option value="science">Science</option>
-          <option value="history">History</option>
-          <option value="literature">Literature</option>
-          <option value="mathematics">Mathematics</option>
-        </select>
-      </div>
-    </div>
-    <button id="test-story-gen-btn" style="padding: 8px 16px; background: #fd7e14; color: white; border: none; border-radius: 4px; cursor: pointer;">Test Story Generation</button>
-    <div id="story-gen-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
-  `;
-  
-  setTimeout(() => {
-    const testBtn = document.getElementById('test-story-gen-btn');
-    const resultsDiv = document.getElementById('story-gen-results');
-    const gradeSelect = document.getElementById('test-grade');
-    const subjectSelect = document.getElementById('test-subject');
-    
-    if (testBtn && resultsDiv) {
-      testBtn.addEventListener('click', async () => {
-        resultsDiv.innerHTML = '<p>Testing story generation...</p>';
-        
-        const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-        const endpoint = `${baseUrl}/stories/generate`;
-        
-        // Prepare test data
-        const testData = {
-          academic_grade: gradeSelect?.value || '5',
-          subject: subjectSelect?.value || 'science',
-          word_count: 300,
-          language: 'English'
-        };
-        
-        // Log the test attempt
-        console.log('Debug: Testing story generation with data:', testData);
-        
-        // Results storage
-        const results = {
-          directPost: null,
-          directGet: null,
-          proxyPost: null,
-          proxyGet: null
-        };
-        
-        // Helper function to format duration
-        const formatDuration = (start) => {
-          const duration = Date.now() - start;
-          return duration < 1000 ? `${duration}ms` : `${(duration / 1000).toFixed(2)}s`;
-        };
-        
-        try {
-          // 1. Try direct POST
-          const postStart = Date.now();
-          try {
-            const postResponse = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              mode: 'cors',
-              body: JSON.stringify(testData)
-            }).catch(e => ({ ok: false, error: e }));
-            
-            if (postResponse.ok) {
-              results.directPost = {
-                success: true,
-                data: await postResponse.json(),
-                duration: formatDuration(postStart)
-              };
-            } else {
-              results.directPost = {
-                success: false,
-                status: postResponse.status,
-                statusText: postResponse.statusText || (postResponse.error ? postResponse.error.message : 'Unknown error'),
-                duration: formatDuration(postStart)
-              };
-            }
-          } catch (error) {
-            results.directPost = {
-              success: false,
-              error: error.message,
-              duration: formatDuration(postStart)
-            };
-          }
-          
-          // 2. Try direct GET with params (if POST failed)
-          if (!results.directPost?.success) {
-            const getStart = Date.now();
-            try {
-              const params = new URLSearchParams();
-              Object.entries(testData).forEach(([key, value]) => {
-                params.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
-              });
-              
-              const getUrl = `${endpoint}?${params.toString()}`;
-              const getResponse = await fetch(getUrl, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                mode: 'cors'
-              }).catch(e => ({ ok: false, error: e }));
-              
-              if (getResponse.ok) {
-                results.directGet = {
-                  success: true,
-                  data: await getResponse.json(),
-                  duration: formatDuration(getStart)
-                };
-              } else {
-                results.directGet = {
-                  success: false,
-                  status: getResponse.status,
-                  statusText: getResponse.statusText || (getResponse.error ? getResponse.error.message : 'Unknown error'),
-                  duration: formatDuration(getStart)
-                };
-              }
-            } catch (error) {
-              results.directGet = {
-                success: false,
-                error: error.message,
-                duration: formatDuration(getStart)
-              };
-            }
-          }
-          
-          // 3. Try proxy POST (if both direct methods failed)
-          if ((!results.directPost?.success && !results.directGet?.success) && window.proxyService) {
-            const proxyPostStart = Date.now();
-            try {
-              const story = await window.proxyService.generateStory(baseUrl, testData);
-              results.proxyPost = {
-                success: true,
-                data: story,
-                duration: formatDuration(proxyPostStart)
-              };
-            } catch (error) {
-              results.proxyPost = {
-                success: false,
-                error: error.message,
-                duration: formatDuration(proxyPostStart)
-              };
-            }
-          }
-          
-          // Display results
-          let resultHtml = '<h4>Story Generation Results:</h4>';
-          
-          // Create a table of results
-          resultHtml += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">';
-          resultHtml += '<tr><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Method</th><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Result</th><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Time</th></tr>';
-          
-          if (results.directPost) {
-            resultHtml += `<tr>
-              <td style="padding: 8px; border: 1px solid #ddd;">Direct POST</td>
-              <td style="padding: 8px; border: 1px solid #ddd; color: ${results.directPost.success ? 'green' : 'red'}">
-                ${results.directPost.success ? '✅ Success' : '❌ Failed'} ${results.directPost.status || ''} ${results.directPost.error || ''}
-              </td>
-              <td style="padding: 8px; border: 1px solid #ddd;">${results.directPost.duration}</td>
-            </tr>`;
-          }
-          
-          if (results.directGet) {
-            resultHtml += `<tr>
-              <td style="padding: 8px; border: 1px solid #ddd;">Direct GET</td>
-              <td style="padding: 8px; border: 1px solid #ddd; color: ${results.directGet.success ? 'green' : 'red'}">
-                ${results.directGet.success ? '✅ Success' : '❌ Failed'} ${results.directGet.status || ''} ${results.directGet.error || ''}
-              </td>
-              <td style="padding: 8px; border: 1px solid #ddd;">${results.directGet.duration}</td>
-            </tr>`;
-          }
-          
-          if (results.proxyPost) {
-            resultHtml += `<tr>
-              <td style="padding: 8px; border: 1px solid #ddd;">Proxy</td>
-              <td style="padding: 8px; border: 1px solid #ddd; color: ${results.proxyPost.success ? 'green' : 'red'}">
-                ${results.proxyPost.success ? '✅ Success' : '❌ Failed'} ${results.proxyPost.error || ''}
-              </td>
-              <td style="padding: 8px; border: 1px solid #ddd;">${results.proxyPost.duration}</td>
-            </tr>`;
-          }
-          
-          resultHtml += '</table>';
-          
-          // Display request data
-          resultHtml += '<h4>Request Data:</h4>';
-          resultHtml += `<pre style="max-height: 100px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${JSON.stringify(testData, null, 2)}</pre>`;
-          
-          // If any method was successful, show the response
-          const successResult = results.directPost?.success ? results.directPost :
-                              results.directGet?.success ? results.directGet :
-                              results.proxyPost?.success ? results.proxyPost : null;
-          
-          if (successResult) {
-            resultHtml += '<h4>Response Data:</h4>';
-            resultHtml += `<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${JSON.stringify(successResult.data, null, 2)}</pre>`;
-            
-            // Show some diagnostics about the story
-            if (successResult.data) {
-              const story = successResult.data;
-              resultHtml += '<h4>Story Diagnostics:</h4>';
-              resultHtml += '<ul>';
-              
-              if (story.title) resultHtml += `<li><strong>Title:</strong> ${story.title}</li>`;
-              if (story.content) {
-                const contentLength = story.content.length;
-                const wordCount = story.content.split(/\s+/).length;
-                resultHtml += `<li><strong>Content Length:</strong> ${contentLength} characters, ~${wordCount} words</li>`;
-              }
-              if (story.created_at) resultHtml += `<li><strong>Created At:</strong> ${story.created_at}</li>`;
-              
-              resultHtml += '</ul>';
-            }
-          } else {
-            resultHtml += '<p>❌ All story generation methods failed. Possible reasons:</p>';
-            resultHtml += '<ul>';
-            resultHtml += '<li>The API server may be down or unreachable</li>';
-            resultHtml += '<li>The story generation endpoint URL might be incorrect</li>';
-            resultHtml += '<li>The API might require authentication</li>';
-            resultHtml += '<li>The request format might be incorrect</li>';
-            resultHtml += '</ul>';
-            
-            resultHtml += '<p>Try checking the API documentation or contacting the API provider.</p>';
-          }
-          
-          resultsDiv.innerHTML = resultHtml;
-        } catch (error) {
-          resultsDiv.innerHTML = `<p>Error testing story generation: ${error.message}</p>`;
-        }
-      });
-    }
-  }, 100);
-}
-
-// Function to check server configuration
-function addServerConfigCheck() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-  
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">Server Configuration Check:</h4>
-    <button id="check-server-btn" style="padding: 8px 16px; background: #6610f2; color: white; border: none; border-radius: 4px; cursor: pointer;">Check Server Configuration</button>
-    <div id="server-config-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
-  `;
-  
-  setTimeout(() => {
-    const checkBtn = document.getElementById('check-server-btn');
-    const configResults = document.getElementById('server-config-results');
-    
-    if (checkBtn && configResults) {
-      checkBtn.addEventListener('click', async () => {
-        configResults.innerHTML = '<p>Checking server configuration...</p>';
-        
-        const baseUrl = window.ENV_API_URL || "https://easystory.onrender.com";
-        
-        try {
-          // Check common issues with server configuration
-          const checks = [
-            { 
-              name: 'Server existence', 
-              description: 'Checks if the server exists and responds to requests',
-              test: async () => {
-                try {
-                  const response = await fetch(baseUrl, { 
-                    method: 'GET',
-                    mode: 'no-cors' // This will succeed even if CORS is misconfigured
-                  });
-                  
-                  // Even with no-cors, we should get some kind of response
-                  return { 
-                    status: 'success',
-                    message: 'Server exists and responds to requests' 
-                  };
-                } catch (error) {
-                  return { 
-                    status: 'failed',
-                    message: `Server does not respond: ${error.message}` 
-                  };
-                }
-              }
-            },
-            {
-              name: 'CORS Headers',
-              description: 'Checks if the server is configured with proper CORS headers',
-              test: async () => {
-                try {
-                  const response = await fetch(baseUrl, {
-                    method: 'OPTIONS',
-                    headers: {
-                      'Access-Control-Request-Method': 'POST',
-                      'Access-Control-Request-Headers': 'Content-Type',
-                      'Origin': window.location.origin
-                    }
-                  });
-                  
-                  const corsHeaders = {
-                    'access-control-allow-origin': response.headers.get('access-control-allow-origin'),
-                    'access-control-allow-methods': response.headers.get('access-control-allow-methods'),
-                    'access-control-allow-headers': response.headers.get('access-control-allow-headers')
-                  };
-                  
-                  const hasCorsHeaders = corsHeaders['access-control-allow-origin'] !== null;
-                  
-                  return {
-                    status: hasCorsHeaders ? 'success' : 'warning',
-                    message: hasCorsHeaders ? 'Server has CORS headers configured' : 'Server is missing CORS headers',
-                    details: corsHeaders
-                  };
-                } catch (error) {
-                  return {
-                    status: 'warning',
-                    message: `Could not check CORS headers: ${error.message}`
-                  };
-                }
-              }
-            },
-            {
-              name: 'API Validity',
-              description: 'Checks if the server appears to be a valid API',
-              test: async () => {
-                try {
-                  // Try to access common API endpoints
-                  const endpoints = ['/status', '/health', '/api', '/api/v1', '/stories'];
-                  
-                  for (const endpoint of endpoints) {
-                    try {
-                      const response = await fetch(`${baseUrl}${endpoint}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                        mode: 'cors'
-                      });
-                      
-                      if (response.ok) {
-                        return {
-                          status: 'success',
-                          message: `Found valid API endpoint: ${endpoint}`,
-                          details: { endpoint }
-                        };
-                      }
-                    } catch (e) {
-                      // Continue checking other endpoints
-                    }
-                  }
-                  
-                  return {
-                    status: 'warning',
-                    message: 'Could not find any standard API endpoints'
-                  };
-                } catch (error) {
-                  return {
-                    status: 'warning',
-                    message: `Could not check API validity: ${error.message}`
-                  };
-                }
-              }
-            },
-            {
-              name: 'Content check',
-              description: 'Checks what type of content the server returns',
-              test: async () => {
-                try {
-                  const response = await fetch(baseUrl, {
-                    method: 'GET',
-                    mode: 'no-cors'
-                  });
-                  
-                  // In no-cors mode, we can't access the content directly
-                  // But we can check the type
-                  const contentType = response.headers.get('Content-Type') || '';
-                  
-                  if (contentType.includes('text/html')) {
-                    return {
-                      status: 'warning',
-                      message: 'Server appears to be returning HTML, not a JSON API',
-                      details: { contentType }
-                    };
-                  } else if (contentType.includes('application/json')) {
-                    return {
-                      status: 'success',
-                      message: 'Server is correctly returning JSON content',
-                      details: { contentType }
-                    };
-                  } else {
-                    return {
-                      status: 'info',
-                      message: `Server is returning content of type: ${contentType}`,
-                      details: { contentType }
-                    };
-                  }
-                } catch (error) {
-                  // If we can't do a no-cors fetch, try via proxy
-                  if (window.proxyService) {
-                    try {
-                      const content = await window.proxyService.fetchViaProxy(baseUrl);
-                      const isHtml = typeof content === 'string' && content.trim().startsWith('<!DOCTYPE html');
-                      const seemsLikeJson = typeof content === 'object';
-                      
-                      if (isHtml) {
-                        return {
-                          status: 'warning',
-                          message: 'Server appears to be a website, not a JSON API',
-                          details: { firstChars: typeof content === 'string' ? content.substring(0, 50) : 'N/A' }
-                        };
-                      } else if (seemsLikeJson) {
-                        return {
-                          status: 'success',
-                          message: 'Server appears to be a JSON API',
-                          details: { content: JSON.stringify(content).substring(0, 50) + '...' }
-                        };
-                      }
-                    } catch (e) {
-                      // Proxy also failed
-                    }
-                  }
-                  
-                  return {
-                    status: 'warning',
-                    message: `Could not check content type: ${error.message}`
-                  };
-                }
-              }
-            }
-          ];
-          
-          // Run all checks
-          const results = [];
-          for (const check of checks) {
-            try {
-              results.push({
-                name: check.name,
-                description: check.description,
-                result: await check.test()
-              });
-            } catch (error) {
-              results.push({
-                name: check.name,
-                description: check.description,
-                result: {
-                  status: 'error',
-                  message: `Check failed: ${error.message}`
-                }
-              });
-            }
-          }
-          
-          // Display results
-          let resultHtml = '<h4>Configuration Check Results:</h4>';
-          resultHtml += '<table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">';
-          resultHtml += '<tr><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Check</th><th style="text-align: left; padding: 8px; border: 1px solid #ddd;">Result</th></tr>';
-          
-          results.forEach(result => {
-            const statusColor = result.result.status === 'success' ? 'green' : 
-                              result.result.status === 'warning' ? 'orange' :
-                              result.result.status === 'info' ? 'blue' : 'red';
-            
-            const statusIcon = result.result.status === 'success' ? '✅' :
-                             result.result.status === 'warning' ? '⚠️' :
-                             result.result.status === 'info' ? 'ℹ️' : '❌';
-            
-            resultHtml += `<tr>
-              <td style="padding: 8px; border: 1px solid #ddd;">
-                <strong>${result.name}</strong><br>
-                <small>${result.description}</small>
-              </td>
-              <td style="padding: 8px; border: 1px solid #ddd; color: ${statusColor}">
-                ${statusIcon} ${result.result.message}
-                ${result.result.details ? `<br><small>${JSON.stringify(result.result.details)}</small>` : ''}
-              </td>
-            </tr>`;
-          });
-          
-          resultHtml += '</table>';
-          
-          // Add conclusion and recommendations
-          resultHtml += '<h4>Conclusion:</h4>';
-          
-          // Check if server exists but may be misconfigured
-          const serverExists = results.find(r => r.name === 'Server existence')?.result.status === 'success';
-          const corsIssue = results.find(r => r.name === 'CORS Headers')?.result.status !== 'success';
-          const invalidApi = results.find(r => r.name === 'API Validity')?.result.status !== 'success';
-          const contentTypeIssue = results.find(r => r.name === 'Content check')?.result.status === 'warning';
-          
-          if (serverExists && (corsIssue || invalidApi || contentTypeIssue)) {
-            resultHtml += `<p>⚠️ <strong>The server at ${baseUrl} exists but appears to be misconfigured.</strong></p>`;
-            
-            if (corsIssue) {
-              resultHtml += `<p>The server is not properly configured for CORS, which is preventing browser access.</p>`;
-              resultHtml += `<p>Possible solutions:</p>
-              <ul>
-                <li>Configure the server to add the following headers to responses:
-                  <pre>Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: GET, POST, OPTIONS
-Access-Control-Allow-Headers: Content-Type</pre>
-                </li>
-                <li>Continue using the proxy service in your application as a workaround</li>
-              </ul>`;
-            }
-            
-            if (contentTypeIssue) {
-              resultHtml += `<p>The server appears to be returning HTML instead of JSON. This suggests it might be:</p>
-              <ul>
-                <li>A website instead of an API</li>
-                <li>An API that's returning error pages</li>
-                <li>A server that's redirecting to a login page</li>
-              </ul>`;
-            }
-            
-            if (invalidApi) {
-              resultHtml += `<p>The server doesn't appear to have common API endpoints. It might be:</p>
-              <ul>
-                <li>A different type of service than expected</li>
-                <li>An API with non-standard endpoint structure</li>
-                <li>An API that requires authentication for all endpoints</li>
-              </ul>`;
-            }
-          } else if (!serverExists) {
-            resultHtml += `<p>❌ <strong>The server at ${baseUrl} does not appear to exist or is completely unreachable.</strong></p>`;
-            resultHtml += `<p>Possible issues:</p>
-            <ul>
-              <li>The URL is incorrect</li>
-              <li>The server is down or not running</li>
-              <li>There's a network issue preventing all connections</li>
-            </ul>`;
-          } else {
-            resultHtml += `<p>✅ <strong>The server at ${baseUrl} appears to be properly configured.</strong></p>`;
-            resultHtml += `<p>If you're still experiencing issues, check:</p>
-            <ul>
-              <li>Authentication requirements</li>
-              <li>Specific endpoint paths</li>
-              <li>Request payload format</li>
-            </ul>`;
-          }
-          
-          configResults.innerHTML = resultHtml;
-        } catch (error) {
-          configResults.innerHTML = `<p>Error checking server configuration: ${error.message}</p>`;
-        }
-      });
-    }
-  }, 100);
-}
-
-// Function to analyze API response formats
-function addResponseAnalyzer() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-  
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">API Response Format Analyzer:</h4>
-    <button id="analyze-response-btn" style="padding: 8px 16px; background: #e83e8c; color: white; border: none; border-radius: 4px; cursor: pointer;">Analyze Latest Response</button>
-    <div id="response-analyzer-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
-      <p>Click the button to analyze the latest API response format.</p>
-    </div>
-  `;
-  
-  // Initialize storage for response captures if it doesn't exist
-  if (!window.debugCaptures) {
-    window.debugCaptures = {
-      apiResponses: []
-    };
-    
-    // Setup capture points for API responses
-    const originalFetch = window.fetch;
-    window.fetch = async function(url, options) {
-      const startTime = Date.now();
-      
-      try {
-        const response = await originalFetch.apply(this, arguments);
-        
-        // Only capture API calls to our backend
-        if (typeof url === 'string' && url.includes('easystory.onrender.com')) {
-          // Clone the response so we don't consume it
-          const clonedResponse = response.clone();
-          
-          try {
-            // Try to read response data
-            let responseData;
-            const contentType = clonedResponse.headers.get('content-type') || '';
-            
-            if (contentType.includes('application/json')) {
-              responseData = await clonedResponse.json().catch(() => '[Invalid JSON]');
-            } else {
-              responseData = await clonedResponse.text().catch(() => '[Failed to read response]');
-              
-              // Only capture part of large text responses
-              if (typeof responseData === 'string' && responseData.length > 500) {
-                responseData = responseData.substring(0, 500) + '...';
-              }
-            }
-            
-            window.debugCaptures.apiResponses.unshift({
-              url: url.toString(),
-              method: options?.method || 'GET',
-              timestamp: new Date().toISOString(),
-              duration: Date.now() - startTime,
-              status: response.status,
-              contentType,
-              data: responseData
-            });
-            
-            // Keep only last 10 responses
-            if (window.debugCaptures.apiResponses.length > 10) {
-              window.debugCaptures.apiResponses.pop();
-            }
-          } catch (e) {
-            console.log('Error capturing API response:', e);
-          }
-        }
-        
-        return response;
-      } catch (error) {
-        // Also capture failed requests
-        if (typeof url === 'string' && url.includes('easystory.onrender.com')) {
-          window.debugCaptures.apiResponses.unshift({
-            url: url.toString(),
-            method: options?.method || 'GET',
-            timestamp: new Date().toISOString(),
-            duration: Date.now() - startTime,
-            status: 'Error',
-            error: error.message
-          });
-        }
-        throw error;
+      // Trim logs if they exceed the maximum
+      if (logs.messages.length > MAX_LOGS) {
+        logs.messages.shift();
       }
+      
+      // Call the original method
+      originalConsole.log.apply(console, arguments);
+    };
+
+    console.warn = function() {
+      const args = Array.from(arguments);
+      logs.warnings.push({
+        time: new Date().toISOString(),
+        content: formatLogContent(args)
+      });
+      
+      if (logs.warnings.length > MAX_LOGS) {
+        logs.warnings.shift();
+      }
+      
+      originalConsole.warn.apply(console, arguments);
+    };
+
+    console.error = function() {
+      const args = Array.from(arguments);
+      logs.errors.push({
+        time: new Date().toISOString(),
+        content: formatLogContent(args)
+      });
+      
+      if (logs.errors.length > MAX_LOGS) {
+        logs.errors.shift();
+      }
+      
+      originalConsole.error.apply(console, arguments);
     };
   }
-  
-  setTimeout(() => {
-    const analyzeBtn = document.getElementById('analyze-response-btn');
-    const analyzerResults = document.getElementById('response-analyzer-results');
-    
-    if (analyzeBtn && analyzerResults) {
-      analyzeBtn.addEventListener('click', () => {
-        if (!window.debugCaptures || !window.debugCaptures.apiResponses.length) {
-          analyzerResults.innerHTML = '<p>No API responses have been captured yet. Try generating a story first.</p>';
-          return;
-        }
-        
-        const latestResponse = window.debugCaptures.apiResponses[0];
-        
-        // Create detailed analysis of the response
-        let analysisHtml = `<h4>Analysis of Response to ${latestResponse.method} ${latestResponse.url.split('/').pop()}</h4>`;
-        
-        // Basic info
-        analysisHtml += `<p><strong>Time:</strong> ${latestResponse.timestamp} (${latestResponse.duration}ms)</p>`;
-        analysisHtml += `<p><strong>Status:</strong> ${latestResponse.status}</p>`;
-        
-        if (latestResponse.error) {
-          analysisHtml += `<p style="color: red;"><strong>Error:</strong> ${latestResponse.error}</p>`;
-        } else {
-          // Content type analysis
-          const contentType = latestResponse.contentType || 'unknown';
-          analysisHtml += `<p><strong>Content-Type:</strong> ${contentType}</p>`;
-          
-          // Data format analysis
-          if (latestResponse.data) {
-            if (contentType.includes('application/json')) {
-              if (latestResponse.data === '[Invalid JSON]') {
-                analysisHtml += `<p style="color: red;"><strong>JSON Parse Error:</strong> The response claimed to be JSON but could not be parsed.</p>`;
-              } else {
-                analysisHtml += `<p style="color: green;"><strong>Valid JSON Response:</strong> Response was successfully parsed as JSON.</p>`;
-              }
-            } else if (typeof latestResponse.data === 'string') {
-              // Check for common non-JSON formats
-              if (latestResponse.data.includes('<!DOCTYPE html>') || latestResponse.data.includes('<html')) {
-                analysisHtml += `<p style="color: orange;"><strong>HTML Response:</strong> The server returned HTML instead of the expected data format.</p>`;
-              } else if (latestResponse.data.includes('<?xml')) {
-                analysisHtml += `<p style="color: orange;"><strong>XML Response:</strong> The server returned XML instead of the expected data format.</p>`;
-              } else if (latestResponse.data.trim().startsWith('{') || latestResponse.data.trim().startsWith('[')) {
-                analysisHtml += `<p style="color: orange;"><strong>JSON-like Response:</strong> The response appears to be JSON but was not properly identified as such by the server.</p>`;
-              }
-            }
-            
-            // Response preview
-            analysisHtml += `<h4>Response Preview:</h4>`;
-            if (typeof latestResponse.data === 'string') {
-              analysisHtml += `<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${latestResponse.data}</pre>`;
-            } else {
-              analysisHtml += `<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">${JSON.stringify(latestResponse.data, null, 2)}</pre>`;
-            }
-          }
-          
-          // Formatting issues detection
-          if (typeof latestResponse.data === 'string' && latestResponse.data !== '[Invalid JSON]') {
-            analysisHtml += `<h4>Potential Formatting Issues:</h4>`;
-            let issuesFound = false;
-            
-            const data = latestResponse.data;
-            
-            // Check for unquoted property names (a common JSON error)
-            if (data.match(/\{[^{}]*?[a-zA-Z0-9_]+\s*:/)) {
-              analysisHtml += `<p style="color: red;"><strong>Unquoted Property Names:</strong> The response appears to contain unquoted property names, which is invalid in JSON.</p>`;
-              issuesFound = true;
-            }
-            
-            // Check for single quotes instead of double quotes
-            if (data.match(/\'[^\']*?\'/)) {
-              analysisHtml += `<p style="color: red;"><strong>Single Quotes:</strong> The response appears to use single quotes instead of double quotes, which is invalid in JSON.</p>`;
-              issuesFound = true;
-            }
-            
-            // Check for trailing commas
-            if (data.match(/,\s*[\]}]/)) {
-              analysisHtml += `<p style="color: red;"><strong>Trailing Commas:</strong> The response contains trailing commas, which is invalid in JSON.</p>`;
-              issuesFound = true;
-            }
-            
-            // Check for JavaScript-specific values
-            if (data.includes('undefined') || data.includes('NaN') || data.includes('Infinity')) {
-              analysisHtml += `<p style="color: red;"><strong>Non-JSON Values:</strong> The response contains JavaScript-specific values like undefined, NaN, or Infinity that are not valid in JSON.</p>`;
-              issuesFound = true;
-            }
-            
-            if (!issuesFound) {
-              analysisHtml += `<p style="color: green;">No common formatting issues detected.</p>`;
-            }
-          }
-        }
-        
-        // API Endpoint Suggestions
-        analysisHtml += `<h4>API Endpoint Suggestions:</h4>`;
-        
-        const url = new URL(latestResponse.url);
-        const path = url.pathname;
-        
-        if (path.includes('/stories/generate') && latestResponse.status === 404) {
-          analysisHtml += `<p>The API returned a 404 for the story generation endpoint. Possible alternatives:</p>`;
-          analysisHtml += `<ul>`;
-          analysisHtml += `<li>Try <code>/api/stories/generate</code></li>`;
-          analysisHtml += `<li>Try <code>/generate-story</code></li>`;
-          analysisHtml += `<li>Try <code>/api/v1/stories/generate</code></li>`;
-          analysisHtml += `</ul>`;
-        }
-        
-        // Fix recommendations
-        analysisHtml += `<h4>Recommendations:</h4>`;
-        if (latestResponse.error || latestResponse.status >= 400) {
-          analysisHtml += `<p>Based on this analysis, consider:</p>`;
-          analysisHtml += `<ul>`;
-          analysisHtml += `<li>Checking the API documentation for the correct endpoint URL</li>`;
-          analysisHtml += `<li>Verifying if the server requires authentication</li>`;
-          analysisHtml += `<li>Using the proxy service as a workaround for CORS issues</li>`;
-          analysisHtml += `<li>Checking the format of your request payload</li>`;
-          analysisHtml += `</ul>`;
-        } else if (latestResponse.data === '[Invalid JSON]') {
-          analysisHtml += `<p>To fix the JSON parsing issues:</p>`;
-          analysisHtml += `<ul>`;
-          analysisHtml += `<li>Contact the API provider to fix the response format</li>`;
-          analysisHtml += `<li>Implement a middleware to sanitize the response</li>`;
-          analysisHtml += `<li>Consider using the fallback mock content for development</li>`;
-          analysisHtml += `</ul>`;
-        } else {
-          analysisHtml += `<p style="color: green;">The response looks good! If you're still having issues, check:</p>`;
-          analysisHtml += `<ul>`;
-          analysisHtml += `<li>That the returned data structure matches what your application expects</li>`;
-          analysisHtml += `<li>Any transformations needed on the returned data</li>`;
-          analysisHtml += `</ul>`;
-        }
-        
-        analyzerResults.innerHTML = analysisHtml;
-      });
-    }
-  }, 100);
-}
 
-// Function to check the proxy service methods
-function addProxyServiceCheck() {
-  const apiTestResults = document.getElementById('api-test-results');
-  if (!apiTestResults) return;
-  
-  const html = apiTestResults.innerHTML || '';
-  
-  apiTestResults.innerHTML = html + `
-    <h4 style="margin-top: 15px;">Proxy Service Check:</h4>
-    <button id="check-proxy-service-btn" style="padding: 8px 16px; background: #20c997; color: white; border: none; border-radius: 4px; cursor: pointer;">Check Proxy Service</button>
-    <div id="proxy-service-results" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;"></div>
-  `;
-  
-  setTimeout(() => {
-    const checkBtn = document.getElementById('check-proxy-service-btn');
-    const resultsDiv = document.getElementById('proxy-service-results');
-    
-    if (checkBtn && resultsDiv) {
-      checkBtn.addEventListener('click', () => {
-        if (!window.proxyService) {
-          resultsDiv.innerHTML = '<p style="color: red;">❌ Error: Proxy service is not available</p>';
-          return;
-        }
-        
-        // Check methods
-        const methods = {
-          'fetchViaProxy': typeof window.proxyService.fetchViaProxy === 'function',
-          'generateStory': typeof window.proxyService.generateStory === 'function'
-        };
-        
-        // Generate HTML
-        let resultHtml = '<h4>Proxy Service Methods:</h4>';
-        resultHtml += '<ul>';
-        
-        for (const [method, exists] of Object.entries(methods)) {
-          resultHtml += `<li style="color: ${exists ? 'green' : 'red'}">${method}: ${exists ? '✅ Available' : '❌ Missing'}</li>`;
-        }
-        
-        resultHtml += '</ul>';
-        
-        // Add configuration
-        resultHtml += '<h4>Proxy Service Configuration:</h4>';
-        resultHtml += '<pre style="max-height: 200px; overflow: auto; background: #f5f5f5; padding: 8px; border-radius: 4px;">';
-        
-        // Clean up the config for display (remove circular references and functions)
-        const config = {...window.proxyService};
-        delete config.fetchViaProxy;
-        delete config.generateStory;
-        
-        resultHtml += JSON.stringify(config, null, 2);
-        resultHtml += '</pre>';
-        
-        // Recommendations
-        resultHtml += '<h4>Recommendations:</h4>';
-        
-        if (!methods.generateStory) {
-          resultHtml += `<p style="color: red;">The 'generateStory' method is missing from the proxy service. This will cause errors when the app tries to fall back to the proxy service.</p>`;
-          resultHtml += `<p>To fix this issue:</p>`;
-          resultHtml += `<ol>`;
-          resultHtml += `<li>Check the proxy-service.js file to ensure the generateStory function is being exported correctly</li>`;
-          resultHtml += `<li>Make sure the init() function is returning all required methods</li>`;
-          resultHtml += `<li>Try reloading the page after making changes</li>`;
-          resultHtml += `</ol>`;
-        } else {
-          resultHtml += `<p style="color: green;">✅ The proxy service appears to be correctly configured with all required methods.</p>`;
-        }
-        
-        resultsDiv.innerHTML = resultHtml;
+  // Add listeners for runtime errors
+  function addErrorListeners() {
+    // Global error handler
+    window.addEventListener('error', function(event) {
+      logs.errors.push({
+        time: new Date().toISOString(),
+        content: `${event.message} at ${event.filename}:${event.lineno}`,
+        stack: event.error ? event.error.stack : undefined
       });
-    }
-  }, 100);
-}
+    });
 
-// Use existing add* functions from the Components tab
-setTimeout(() => {
-  addDirectUrlCheck();
-  addEndpointStructureCheck();
-  addStoryGenerationTest();
-  addServerConfigCheck();
-  addResponseAnalyzer();
-  addProxyServiceCheck();
-}, 200); 
+    // Unhandled promise rejection handler
+    window.addEventListener('unhandledrejection', function(event) {
+      logs.errors.push({
+        time: new Date().toISOString(),
+        content: 'Unhandled Promise Rejection',
+        stack: event.reason ? (event.reason.stack || event.reason.toString()) : 'Unknown reason'
+      });
+    });
+  }
+
+  // Format log content for display
+  function formatLogContent(args) {
+    return args.map(arg => {
+      if (arg === null) return 'null';
+      if (arg === undefined) return 'undefined';
+      if (typeof arg === 'object') {
+        try {
+          return JSON.stringify(arg, null, 2);
+        } catch (e) {
+          return Object.prototype.toString.call(arg);
+        }
+      }
+      return String(arg);
+    }).join(' ');
+  }
+
+  // Clear all logs
+  function clearLogs() {
+    logs.messages = [];
+    logs.warnings = [];
+    logs.errors = [];
+    console.log("Debug logs cleared");
+  }
+
+  // Show the debug panel
+  function showDebugPanel() {
+    // Remove existing panel if it exists
+    const existingPanel = document.getElementById('debug-panel');
+    if (existingPanel) {
+      existingPanel.remove();
+      return;
+    }
+
+    // Create panel container
+    const panel = document.createElement('div');
+    panel.id = 'debug-panel';
+    panel.style.cssText = `
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: monospace;
+      font-size: 13px;
+    `;
+
+    // Create header
+    const header = document.createElement('div');
+    header.style.cssText = `
+      padding: 10px 15px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    `;
+    
+    const title = document.createElement('h3');
+    title.textContent = 'Debug Panel';
+    title.style.margin = '0';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.cssText = `
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+    `;
+    closeBtn.onclick = () => panel.remove();
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+    panel.appendChild(header);
+
+    // Create tabs
+    const tabs = document.createElement('div');
+    tabs.style.cssText = `
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    `;
+    
+    const tabNames = ['Errors', 'Warnings', 'Logs', 'Environment'];
+    let activeTab = 'Errors';
+    
+    tabNames.forEach(name => {
+      const tab = document.createElement('div');
+      tab.className = 'debug-tab';
+      tab.textContent = name;
+      tab.dataset.tab = name.toLowerCase();
+      tab.style.cssText = `
+        padding: 10px 15px;
+        cursor: pointer;
+        ${name === activeTab ? 'background: #007bff; color: white;' : ''}
+      `;
+      
+      tab.onclick = () => {
+        document.querySelectorAll('.debug-tab').forEach(t => {
+          t.style.background = '';
+          t.style.color = '';
+        });
+        tab.style.background = '#007bff';
+        tab.style.color = 'white';
+        showTabContent(name.toLowerCase());
+      };
+      
+      tabs.appendChild(tab);
+    });
+    
+    panel.appendChild(tabs);
+
+    // Create content area
+    const content = document.createElement('div');
+    content.id = 'debug-content';
+    content.style.cssText = `
+      flex: 1;
+      overflow: auto;
+      padding: 10px;
+      background: #f8f9fa;
+      white-space: pre-wrap;
+    `;
+    panel.appendChild(content);
+
+    // Create footer with actions
+    const footer = document.createElement('div');
+    footer.style.cssText = `
+      padding: 10px;
+      border-top: 1px solid #dee2e6;
+      background: #f8f9fa;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    `;
+    
+    const clearBtn = document.createElement('button');
+    clearBtn.textContent = 'Clear Logs';
+    clearBtn.style.cssText = `
+      padding: 5px 10px;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    `;
+    clearBtn.onclick = () => {
+      clearLogs();
+      showTabContent(activeTab.toLowerCase());
+    };
+    
+    footer.appendChild(clearBtn);
+    panel.appendChild(footer);
+
+    // Add panel to document
+    document.body.appendChild(panel);
+
+    // Function to display content for selected tab
+    function showTabContent(tabName) {
+      activeTab = tabName;
+      let html = '';
+      
+      switch(tabName) {
+        case 'errors':
+          if (logs.errors.length === 0) {
+            html = '<p>No errors recorded</p>';
+          } else {
+            logs.errors.forEach(log => {
+              html += `<div style="margin-bottom: 10px; color: #dc3545;">
+                <strong>[${log.time}]</strong> ${log.content}
+                ${log.stack ? `<div style="margin-top: 5px; margin-left: 20px; color: #666;">${log.stack}</div>` : ''}
+              </div>`;
+            });
+          }
+          break;
+          
+        case 'warnings':
+          if (logs.warnings.length === 0) {
+            html = '<p>No warnings recorded</p>';
+          } else {
+            logs.warnings.forEach(log => {
+              html += `<div style="margin-bottom: 10px; color: #fd7e14;">
+                <strong>[${log.time}]</strong> ${log.content}
+              </div>`;
+            });
+          }
+          break;
+          
+        case 'logs':
+          if (logs.messages.length === 0) {
+            html = '<p>No logs recorded</p>';
+          } else {
+            logs.messages.forEach(log => {
+              html += `<div style="margin-bottom: 10px;">
+                <strong>[${log.time}]</strong> ${log.content}
+              </div>`;
+            });
+          }
+          break;
+          
+        case 'environment':
+          html = '<h4>Environment Variables</h4><div style="margin-left: 20px;">';
+          
+          // Extract environment variables from window object
+          Object.keys(window)
+            .filter(key => key.startsWith('ENV_'))
+            .forEach(key => {
+              const value = typeof window[key] === 'object' 
+                ? JSON.stringify(window[key], null, 2)
+                : window[key];
+                
+              html += `<div style="margin-bottom: 5px;">
+                <strong>${key}:</strong> ${value}
+              </div>`;
+            });
+            
+          html += '</div>';
+          
+          html += '<h4>Browser Information</h4><div style="margin-left: 20px;">';
+          html += `<div><strong>User Agent:</strong> ${navigator.userAgent}</div>`;
+          html += `<div><strong>Platform:</strong> ${navigator.platform}</div>`;
+          html += `<div><strong>Language:</strong> ${navigator.language}</div>`;
+          html += '</div>';
+          
+          break;
+      }
+      
+      content.innerHTML = html;
+      content.scrollTop = content.scrollHeight;
+    }
+
+    // Show initial content
+    showTabContent(activeTab);
+  }
+
+  // Initialize on load if not already initialized
+  if (typeof window.showDebugPanel !== 'function') {
+    initDebugPanel();
+  }
+})(); 
