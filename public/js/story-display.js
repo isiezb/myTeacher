@@ -125,13 +125,25 @@ document.addEventListener('story-continued', (event) => {
         }
         
         // First scroll to the continuation divider
-        divider.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        divider.scrollIntoView({ behavior: 'smooth' });
         
         // Then after a short delay, scroll to show the first paragraph of the continued story
         setTimeout(() => {
             const firstParagraph = continuationDiv.querySelector('p');
             if (firstParagraph) {
+                // Use scrollIntoView with block: 'start' to position at the top of the viewport
                 firstParagraph.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                
+                // Calculate the position to scroll to
+                const headerHeight = 80; // Estimate header height, adjust as needed
+                const rect = firstParagraph.getBoundingClientRect();
+                const offsetTop = rect.top + window.pageYOffset - headerHeight;
+                
+                // Smoothly scroll to position the first paragraph at the top with header clearance
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
                 
                 // Add a temporary highlight effect to help identify where the continuation begins
                 firstParagraph.classList.add('highlight-new-content');

@@ -254,7 +254,16 @@
             }
             
             // Scroll to the continuation section
-            continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Calculate position that places the container at the top with some margin
+            const headerHeight = 80; // Estimate header height, adjust as needed
+            const rect = continuationContainer.getBoundingClientRect();
+            const offsetTop = rect.top + window.pageYOffset - headerHeight;
+            
+            // Smoothly scroll to position the container at the top
+            window.scrollTo({
+              top: offsetTop,
+              behavior: 'smooth'
+            });
           } else {
             console.error('Continuation component not found!');
             console.log('Available components in continuation container:', 

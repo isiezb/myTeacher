@@ -248,20 +248,33 @@
 
       // Scroll to story display
       if (storyResult) {
-        storyResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // First scroll to make the story container is visible
+        storyResult.scrollIntoView({ behavior: 'smooth' });
         
-        // After a short delay, scroll to the actual story content to ensure the user sees the beginning
+        // After a short delay, scroll to the actual story text content to ensure the user sees the beginning
         setTimeout(() => {
           // More specific selector to find the actual story text content
           const storyText = document.querySelector('.story-content-container .story-text');
           
           if (storyText) {
             console.log('Scrolling to story text content');
+            // Use scrollIntoView with block: 'start' to position at the top of the viewport
             storyText.scrollIntoView({ behavior: 'smooth', block: 'start' });
             
             // Find the first paragraph and highlight it briefly to draw attention
             const firstParagraph = storyText.querySelector('p');
             if (firstParagraph) {
+              // Calculate the position to scroll to
+              const headerHeight = 80; // Estimate header height, adjust as needed
+              const rect = firstParagraph.getBoundingClientRect();
+              const offsetTop = rect.top + window.pageYOffset - headerHeight;
+              
+              // Smoothly scroll to position the first paragraph at the top with header clearance
+              window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+              });
+              
               firstParagraph.classList.add('highlight-new-content');
               setTimeout(() => {
                 firstParagraph.classList.remove('highlight-new-content');
@@ -548,22 +561,31 @@
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
     
-    // Scroll to the continuation container with focus on the form
-    continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
-    // After a short delay, focus on the difficulty selector to draw attention
+    // Scroll to the continuation container so it's visible at the top of the viewport
     setTimeout(() => {
-      const difficultySelector = continuationContainer.querySelector('difficulty-selector');
-      if (difficultySelector) {
-        difficultySelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Add a temporary highlight effect to the difficulty selector
-        difficultySelector.classList.add('highlight-element');
-        setTimeout(() => {
-          difficultySelector.classList.remove('highlight-element');
-        }, 1500);
-      }
-    }, 300);
+      // Calculate position that places the container at the top with some margin
+      const headerHeight = 80; // Estimate header height, adjust as needed
+      const rect = continuationContainer.getBoundingClientRect();
+      const offsetTop = rect.top + window.pageYOffset - headerHeight;
+      
+      // Smoothly scroll to position the container at the top
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
+      
+      // After a short delay, focus on the difficulty selector to draw attention
+      setTimeout(() => {
+        const difficultySelector = continuationContainer.querySelector('difficulty-selector');
+        if (difficultySelector) {
+          // Highlight the difficulty selector to draw attention
+          difficultySelector.classList.add('highlight-element');
+          setTimeout(() => {
+            difficultySelector.classList.remove('highlight-element');
+          }, 1500);
+        }
+      }, 300);
+    }, 100);
     
     window.showToast?.('Ready to continue your story!', 'info');
   }
@@ -606,22 +628,31 @@
     // Show the continuation container
     continuationContainer.classList.remove('hidden');
     
-    // Scroll to the continuation container with focus on the form
-    continuationContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
-    // After a short delay, focus on the difficulty selector to draw attention
+    // Scroll to the continuation container so it's visible at the top of the viewport
     setTimeout(() => {
-      const difficultySelector = continuationContainer.querySelector('difficulty-selector');
-      if (difficultySelector) {
-        difficultySelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Add a temporary highlight effect to the difficulty selector
-        difficultySelector.classList.add('highlight-element');
-        setTimeout(() => {
-          difficultySelector.classList.remove('highlight-element');
-        }, 1500);
-      }
-    }, 300);
+      // Calculate position that places the container at the top with some margin
+      const headerHeight = 80; // Estimate header height, adjust as needed
+      const rect = continuationContainer.getBoundingClientRect();
+      const offsetTop = rect.top + window.pageYOffset - headerHeight;
+      
+      // Smoothly scroll to position the container at the top
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
+      
+      // After a short delay, focus on the difficulty selector to draw attention
+      setTimeout(() => {
+        const difficultySelector = continuationContainer.querySelector('difficulty-selector');
+        if (difficultySelector) {
+          // Highlight the difficulty selector to draw attention
+          difficultySelector.classList.add('highlight-element');
+          setTimeout(() => {
+            difficultySelector.classList.remove('highlight-element');
+          }, 1500);
+        }
+      }, 300);
+    }, 100);
     
     window.showToast?.('Ready to continue your story further!', 'info');
   }
