@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
-import '/components/card/card-header.js';
-import '/components/card/card-content.js';
-import '/components/card/card-actions.js';
+import './card/card-header.js';
+import './card/card-content.js';
+import './card/card-actions.js';
 
 export class StoryCardRefactored extends LitElement {
   static get properties() {

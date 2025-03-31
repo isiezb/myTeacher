@@ -1,9 +1,9 @@
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
 import { showToast } from './toast-container.js';
-import '/components/display/display-content.js';
-import '/components/display/display-empty.js';
-import '/components/display/display-error.js';
-import '/components/display/display-controls.js';
+import './display/display-content.js';
+import './display/display-empty.js';
+import './display/display-error.js';
+import './display/display-controls.js';
 
 export class StoryDisplayRefactored extends LitElement {
   static get properties() {
