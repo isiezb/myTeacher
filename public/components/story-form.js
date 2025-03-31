@@ -8,49 +8,53 @@ import '/components/form/form-grid.js';
 import '/components/form/form-checkbox-options.js';
 import '/components/form/submit-button.js';
 
-export class StoryFormRefactored extends LitElement {
-  static properties = {
-    isSubmitting: { type: Boolean },
-    subjects: { type: Array },
-    gradeLevels: { type: Array },
-    wordCounts: { type: Array },
-    languages: { type: Array }
-  };
+export class StoryForm extends LitElement {
+  static get properties() {
+    return {
+      isSubmitting: { type: Boolean },
+      subjects: { type: Array },
+      gradeLevels: { type: Array },
+      wordCounts: { type: Array },
+      languages: { type: Array }
+    };
+  }
 
-  static styles = css`
-    :host {
-      display: block;
-      font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
-    }
-
-    .form-section {
-      background: var(--card-bg, white);
-      border-radius: 32px;
-      padding: 3rem;
-      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
-      margin-bottom: 3rem;
-      border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
-      transition: var(--transition-normal, all 0.3s ease);
-    }
-
-    .form-section:hover {
-      box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.1));
-      transform: translateY(-2px);
-    }
-
-    .form-container {
-      display: flex;
-      flex-direction: column;
-      gap: 2.5rem;
-    }
-
-    @media (max-width: 768px) {
-      .form-section {
-        padding: 1.5rem;
-        border-radius: 24px;
+  static get styles() {
+    return css`
+      :host {
+        display: block;
+        font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
       }
-    }
-  `;
+
+      .form-section {
+        background: var(--card-bg, white);
+        border-radius: 32px;
+        padding: 3rem;
+        box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+        margin-bottom: 3rem;
+        border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+        transition: var(--transition-normal, all 0.3s ease);
+      }
+
+      .form-section:hover {
+        box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.1));
+        transform: translateY(-2px);
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .form-section {
+          padding: 1.5rem;
+          border-radius: 24px;
+        }
+      }
+    `;
+  }
 
   constructor() {
     super();
@@ -339,8 +343,7 @@ export class StoryFormRefactored extends LitElement {
   }
 }
 
-
 // Guard against duplicate registration
-if (!customElements.get('story-form-refactored')) {
-  customElements.define('story-form-refactored'
+if (!customElements.get('story-form')) {
+  customElements.define('story-form', StoryForm);
 } 
