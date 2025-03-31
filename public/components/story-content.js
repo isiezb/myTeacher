@@ -77,7 +77,17 @@ export class StoryContent extends LitElement {
     }
   }
 
-  _handleContinueStory() {
+  _handleContinueStory(e) {
+    console.log('Continue Story button clicked in story-content component');
+    
+    // Make sure we have the current story data
+    if (!this.story) {
+      console.error('No story data available in the component');
+      return;
+    }
+    
+    console.log('Dispatching continue-story event with story:', this.story);
+    
     // Dispatch event to notify parent components that the user wants to continue the story
     this.dispatchEvent(new CustomEvent('continue-story', { 
       detail: { story: this.story },

@@ -247,6 +247,8 @@ class StoryQuiz extends LitElement {
   }
   
   _handleContinueStory() {
+    console.log('Continue Story button clicked in quiz component');
+    
     // Dispatch a continue-story event
     this.dispatchEvent(new CustomEvent('continue-story', {
       bubbles: true,
@@ -343,7 +345,7 @@ class StoryQuiz extends LitElement {
         <div class="quiz-results-message">${message}</div>
         <div class="btn-container">
           <button class="btn btn-secondary" @click="${this._handleRestartQuiz}">Restart Quiz</button>
-          <button class="btn btn-primary quiz-continue-button" @click="${this._handleContinueStory}">Continue Story</button>
+          <button class="btn btn-primary quiz-continue-button continue-button" @click="${this._handleContinueStory}">Continue Story</button>
         </div>
       </div>
     `;

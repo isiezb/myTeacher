@@ -240,8 +240,10 @@
       
       // Add event delegation for any "Continue Story" button
       document.addEventListener('click', (event) => {
-        // Check if the clicked element is a continuation button
-        if (event.target && event.target.classList.contains('quiz-continue-button')) {
+        // Check if the clicked element is a continuation button or has an ancestor with the class
+        const button = event.target.closest('.quiz-continue-button, .continue-button');
+        if (button) {
+          console.log('Continue story button clicked');
           handleContinueStory();
         }
       });
@@ -249,6 +251,8 @@
       // Listen for the custom event
       document.addEventListener('continue-story', (event) => {
         console.log('Continue story event received:', event);
+        console.log('Event target:', event.target);
+        console.log('Detail story:', event.detail?.story);
         handleContinueStory(event.detail?.story);
       });
 
