@@ -142,7 +142,7 @@ export class FocusSelector extends LitElement {
       }
       
       /* Make the general focus button stand out */
-      .focus-button:first-child {
+      .focus-button:nth-child(3) {
         background-color: var(--primary-50, #eef2ff);
         border-color: var(--primary-200, #c5d1ff);
       }
@@ -221,7 +221,7 @@ export class FocusSelector extends LitElement {
       });
     }
     
-    // Always add the general button, prominently
+    // Create the general button
     const generalButton = html`
       <button 
         class="focus-button ${this.focus === 'general' ? 'active' : ''}" 
@@ -233,15 +233,49 @@ export class FocusSelector extends LitElement {
       </button>
     `;
     
-    // Create the final array of buttons with general button first
-    let allButtons = [generalButton];
+    // Create the final array of buttons with general button in the third position
+    let allButtons = [];
     
-    // Add vocabulary buttons if we have any
-    if (vocabButtons.length > 0) {
-      allButtons = allButtons.concat(vocabButtons);
+    if (vocabButtons.length >= 2) {
+      // If we have at least 2 vocabulary items, put them before the general button
+      allButtons.push(vocabButtons[0]);
+      allButtons.push(vocabButtons[1]);
+      allButtons.push(generalButton); // General button at position 3
+      
+      // Add any remaining vocab buttons
+      for (let i = 2; i < vocabButtons.length; i++) {
+        allButtons.push(vocabButtons[i]);
+      }
+    } else if (vocabButtons.length === 1) {
+      // If we have only 1 vocabulary item, add placeholder buttons
+      allButtons.push(vocabButtons[0]);
+      
+      // Add empty placeholder button
+      allButtons.push(html`
+        <button class="focus-button" disabled style="opacity: 0.5; cursor: not-allowed;">
+          <span class="focus-icon">📚</span>
+          <span class="focus-label">No more terms</span>
+        </button>
+      `);
+      
+      allButtons.push(generalButton); // General button at position 3
     } else {
-      // If no vocab buttons, add a placeholder message
-      console.log('No vocabulary items available for focus selector');
+      // If no vocab buttons, general button still at position 3 with placeholders
+      allButtons.push(html`
+        <button class="focus-button" disabled style="opacity: 0.5; cursor: not-allowed;">
+          <span class="focus-icon">📚</span>
+          <span class="focus-label">Generate story first</span>
+        </button>
+      `);
+      
+      allButtons.push(html`
+        <button class="focus-button" disabled style="opacity: 0.5; cursor: not-allowed;">
+          <span class="focus-icon">📚</span>
+          <span class="focus-label">No terms yet</span>
+        </button>
+      `);
+      
+      allButtons.push(generalButton); // General button at position 3
     }
 
     return html`
