@@ -45,8 +45,10 @@ export class FocusSelector extends LitElement {
       background-color: white;
       cursor: pointer;
       transition: all 0.2s ease;
-      width: 130px;
+      width: 190px;
+      height: 90px;
       margin: 0 5px;
+      justify-content: center;
     }
     
     .focus-button:hover {
@@ -70,8 +72,21 @@ export class FocusSelector extends LitElement {
       font-weight: 500;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
       width: 100%;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      line-height: 1.2;
+      height: 2.4em;
+    }
+    
+    /* Text size adjustments for label length */
+    .focus-label.long-text {
+      font-size: 0.75rem;
+    }
+    
+    .focus-label.very-long-text {
+      font-size: 0.65rem;
     }
     
     .general-focus {
@@ -88,7 +103,8 @@ export class FocusSelector extends LitElement {
       }
       
       .focus-button {
-        width: 110px;
+        width: 160px;
+        height: 80px;
         margin-bottom: 10px;
       }
       
@@ -98,6 +114,14 @@ export class FocusSelector extends LitElement {
       
       .focus-label {
         font-size: 0.7rem;
+      }
+      
+      .focus-label.long-text {
+        font-size: 0.65rem;
+      }
+      
+      .focus-label.very-long-text {
+        font-size: 0.6rem;
       }
     }
 
@@ -120,6 +144,7 @@ export class FocusSelector extends LitElement {
       
       .focus-button {
         width: 100%;
+        height: 36px;
         padding: 0.5rem 0.25rem;
         margin: 0;
         border-radius: 8px;
@@ -127,7 +152,6 @@ export class FocusSelector extends LitElement {
         justify-content: flex-start;
         align-items: center;
         gap: 0.5rem;
-        height: 36px;
       }
       
       .focus-icon {
@@ -139,6 +163,17 @@ export class FocusSelector extends LitElement {
       .focus-label {
         font-size: 0.7rem;
         text-align: left;
+        white-space: nowrap;
+        -webkit-line-clamp: 1;
+        height: auto;
+      }
+      
+      .focus-label.long-text {
+        font-size: 0.65rem;
+      }
+      
+      .focus-label.very-long-text {
+        font-size: 0.55rem;
       }
       
       /* Make the general focus button stand out */
@@ -203,19 +238,28 @@ export class FocusSelector extends LitElement {
     // Check if we have vocabulary items
     const hasVocabItems = this.vocabularyItems && this.vocabularyItems.length > 0;
     
+    // Helper function to determine text length class
+    const getTextLengthClass = (text) => {
+      if (!text) return '';
+      if (text.length > 30) return 'very-long-text';
+      if (text.length > 20) return 'long-text';
+      return '';
+    };
+    
     // Create buttons for top vocabulary items if available
     let vocabButtons = [];
     if (hasVocabItems) {
       vocabButtons = this.topVocabularyItems.map(item => {
+        const textLengthClass = getTextLengthClass(item.term);
         return html`
           <button 
             class="focus-button ${this.focus === item.term ? 'active' : ''}" 
             @click="${() => this._handleFocusChange(item.term)}"
             ?disabled="${this.disabled}"
-            title="${item.definition}"
+            title="${item.definition || item.term}"
           >
             <span class="focus-icon">📚</span>
-            <span class="focus-label">${item.term}</span>
+            <span class="focus-label ${textLengthClass}">${item.term}</span>
           </button>
         `;
       });
