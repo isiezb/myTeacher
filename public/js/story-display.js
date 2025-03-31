@@ -95,18 +95,29 @@ document.addEventListener('story-continued', (event) => {
         const continueBtn = continueButtonDiv.querySelector('#continue-story-btn');
         if (continueBtn) {
             continueBtn.addEventListener('click', () => {
+                // Get the current story data from the window object
+                const currentStory = window.currentStory || {};
+                
                 // Dispatch an event to show the continuation form
                 const continueEvent = new CustomEvent('show-continuation-form', {
                     detail: {
                         originalStory: {
                             id: `continued-${Date.now()}`,
                             content: storyContent.textContent.trim(),
-                            difficulty: difficulty
+                            difficulty: difficulty,
+                            // Include vocabulary, summary and quiz from the original story if available
+                            vocabulary: vocabulary || currentStory.vocabulary || [],
+                            summary: summary || currentStory.summary || '',
+                            quiz: quiz || currentStory.quiz || []
                         }
                     },
                     bubbles: true
                 });
                 document.dispatchEvent(continueEvent);
+                
+                // Log the details being passed
+                console.log('Sending continuation form request with vocabulary items:', 
+                    vocabulary || currentStory.vocabulary || []);
                 
                 // Hide the continue button after clicking
                 continueButtonDiv.style.display = 'none';

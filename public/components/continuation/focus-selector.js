@@ -128,11 +128,24 @@ export class FocusSelector extends LitElement {
 
   updated(changedProperties) {
     if (changedProperties.has('vocabularyItems') && this.vocabularyItems) {
+      console.log('FocusSelector updated() called with vocabulary items:', 
+        JSON.stringify(this.vocabularyItems.map(v => ({
+          term: v.term,
+          importance: v.importance
+        }))));
+      
       // Get top 4 vocabulary items by importance
       this.topVocabularyItems = [...this.vocabularyItems]
         .sort((a, b) => (b.importance || 0) - (a.importance || 0))
         .slice(0, 4);
-      console.log('Top vocabulary items updated:', this.topVocabularyItems);
+      
+      console.log('Top vocabulary items updated:', 
+        JSON.stringify(this.topVocabularyItems.map(v => ({
+          term: v.term, 
+          importance: v.importance
+        }))));
+      
+      this.requestUpdate();
     }
   }
 

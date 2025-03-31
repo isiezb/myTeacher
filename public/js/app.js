@@ -501,6 +501,30 @@
       return;
     }
     
+    // Check if we have vocabulary from the current story
+    if (window.currentStory && window.currentStory.vocabulary && 
+        (!originalStory.vocabulary || originalStory.vocabulary.length === 0)) {
+      
+      console.log('No vocabulary found in originalStory. Adding vocabulary from window.currentStory:', 
+        window.currentStory.vocabulary);
+      
+      // Add vocabulary from current story if missing in the originalStory
+      originalStory.vocabulary = window.currentStory.vocabulary;
+      
+      // Make sure vocabulary items have importance property
+      if (originalStory.vocabulary) {
+        originalStory.vocabulary = originalStory.vocabulary.map(item => {
+          if (typeof item.importance === 'undefined') {
+            return { ...item, importance: 5 };
+          }
+          return item;
+        });
+      }
+    }
+    
+    // Log what vocabulary we have
+    console.log('Original story vocabulary:', originalStory.vocabulary);
+    
     // Find the continuation container
     const continuationContainer = document.querySelector('.continuation-container');
     if (!continuationContainer) {
