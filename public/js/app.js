@@ -181,6 +181,12 @@
   function setupEventListeners() {
     // Listen for story form submission
     document.addEventListener('story-form-submit', handleStoryFormSubmit);
+    
+    // Listen for continuation form request
+    document.addEventListener('show-continuation-form', handleShowContinuationForm);
+    
+    // Listen for continue-story event from continuation-result
+    document.addEventListener('continue-story', handleContinueStory);
   }
 
   // Handle form submission
@@ -458,6 +464,92 @@
     
     // Prevent default browser error handling
     event.preventDefault();
+  }
+
+  // Handle continuation form request
+  function handleShowContinuationForm(event) {
+    console.log('Show continuation form requested:', event.detail);
+    
+    // Get the original story from the event
+    const { originalStory } = event.detail;
+    
+    if (!originalStory || !originalStory.content) {
+      console.error('Missing story details for continuation');
+      window.showToast?.('Cannot continue story: missing details', 'error');
+      return;
+    }
+    
+    // Find the continuation container
+    const continuationContainer = document.querySelector('.continuation-container');
+    if (!continuationContainer) {
+      console.error('Continuation container not found');
+      window.showToast?.('Cannot find continuation area', 'error');
+      return;
+    }
+    
+    // Find or create the story-continuation component
+    let storyContinuation = continuationContainer.querySelector('story-continuation');
+    if (!storyContinuation) {
+      console.log('Creating story-continuation component');
+      storyContinuation = document.createElement('story-continuation');
+      continuationContainer.appendChild(storyContinuation);
+      componentStatus['story-continuation'] = true;
+    }
+    
+    // Set the original story on the component
+    storyContinuation.originalStory = originalStory;
+    
+    // Show the continuation container
+    continuationContainer.classList.remove('hidden');
+    
+    // Scroll to the continuation container
+    continuationContainer.scrollIntoView({ behavior: 'smooth' });
+    
+    window.showToast?.('Ready to continue your story!', 'info');
+  }
+
+  // Handle continue-story event from continuation-result
+  function handleContinueStory(event) {
+    console.log('Continue story event received:', event.detail);
+    
+    const { story } = event.detail;
+    
+    if (!story || !story.content) {
+      console.error('Missing story details for further continuation');
+      window.showToast?.('Cannot continue: missing story details', 'error');
+      return;
+    }
+    
+    // Update the current story to the continued story
+    window.currentStory = story;
+    
+    // Find the continuation container
+    const continuationContainer = document.querySelector('.continuation-container');
+    if (!continuationContainer) {
+      console.error('Continuation container not found');
+      window.showToast?.('Cannot find continuation area', 'error');
+      return;
+    }
+    
+    // Find or create the story-continuation component
+    let storyContinuation = continuationContainer.querySelector('story-continuation');
+    if (!storyContinuation) {
+      console.log('Creating story-continuation component');
+      storyContinuation = document.createElement('story-continuation');
+      continuationContainer.appendChild(storyContinuation);
+      componentStatus['story-continuation'] = true;
+    }
+    
+    // Set the original story on the component
+    storyContinuation.originalStory = story;
+    
+    // Show the continuation container
+    continuationContainer.classList.remove('hidden');
+    
+    // Scroll to the continuation container
+    continuationContainer.scrollIntoView({ behavior: 'smooth' });
+    
+    window.showToast?.('Ready to continue your story further!', 'info');
   }
 
   // Make public methods available globally

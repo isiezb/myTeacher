@@ -87,11 +87,13 @@ const apiService = (function() {
         'Accept': 'application/json'
       };
       
-      // Make sure to include the original story content in the request
+      // Make sure to include the original story content and optional flags in the request
       const requestBody = {
         length: options.length || 300,
         difficulty: options.difficulty || 'same',
-        original_story_content: options.original_story_content || ''
+        original_story_content: options.original_story_content || '',
+        generate_summary: options.generate_summary || false,
+        generate_quiz: options.generate_quiz || false
       };
       
       // Log request details but limit content length in logs for readability
@@ -126,6 +128,16 @@ const apiService = (function() {
         try {
           const data = await postResponse.json();
           console.log('Story continued successfully via POST');
+          
+          // Log if summary and quiz were included in the response
+          if (data.summary) {
+            console.log('Response includes summary');
+          }
+          
+          if (data.quiz && Array.isArray(data.quiz)) {
+            console.log('Response includes quiz with', data.quiz.length, 'questions');
+          }
+          
           return data;
         } catch (parseError) {
           console.error('Error parsing JSON response:', parseError);

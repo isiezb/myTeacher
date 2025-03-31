@@ -8,6 +8,7 @@ import './continuation/vocabulary-display.js';
 import './continuation/continuation-form.js';
 import './continuation/continuation-result.js';
 import './continuation/error-message.js';
+import './story/story-quiz.js';
 
 export class StoryContinuation extends LitElement {
   static properties = {
@@ -45,6 +46,8 @@ export class StoryContinuation extends LitElement {
       difficulty: 'same_level'
     };
     this._vocabularyItems = [];
+    this._summary = '';
+    this._quiz = [];
   }
 
   updated(changedProperties) {
@@ -83,6 +86,8 @@ export class StoryContinuation extends LitElement {
     this.isSubmitting = true;
     this._continuationContent = '';
     this._errorMessage = '';
+    this._summary = '';
+    this._quiz = [];
     this.requestUpdate();
     
     // Ensure we have a valid story object
@@ -111,7 +116,9 @@ export class StoryContinuation extends LitElement {
     const options = {
       length: parseInt(this._settings.length, 10),
       difficulty: difficultyMap[this._settings.difficulty] || 'same_level',
-      original_story_content: originalContent
+      original_story_content: originalContent,
+      generate_summary: true,
+      generate_quiz: true
     };
     
     // Log what we're about to do (limiting content length for logging)
@@ -143,13 +150,26 @@ export class StoryContinuation extends LitElement {
           this._vocabularyItems = [];
         }
         
+        // Extract summary and quiz if available
+        if (data.summary) {
+          this._summary = data.summary;
+          console.log('Continuation summary:', this._summary);
+        }
+        
+        if (data.quiz && Array.isArray(data.quiz)) {
+          this._quiz = data.quiz;
+          console.log('Continuation quiz:', this._quiz);
+        }
+        
         // Dispatch event that continuation is ready
         const event = new CustomEvent('story-continued', { 
           detail: { 
             continuation: data.continuation_text,
-            difficulty: data.difficulty,
-            wordCount: data.word_count,
-            vocabulary: data.vocabulary
+            difficulty: data.difficulty || options.difficulty,
+            wordCount: data.word_count || 0,
+            vocabulary: data.vocabulary || [],
+            summary: this._summary,
+            quiz: this._quiz
           },
           bubbles: true,
           composed: true
@@ -171,6 +191,19 @@ export class StoryContinuation extends LitElement {
           this._vocabularyItems = [
             { term: "Sample Term 1", definition: "This is a sample definition for demonstration purposes." },
             { term: "Sample Term 2", definition: "Another sample definition to show how vocabulary works." }
+          ];
+          this._summary = "This is a mock summary of the continuation. It provides a brief overview of what happened in the story continuation.";
+          this._quiz = [
+            { 
+              question: "What did the characters do in the continuation?", 
+              options: ["They went home", "They continued their adventure", "They went to sleep", "They had lunch"],
+              correct_answer: 1
+            },
+            {
+              question: "What did the characters learn more about?",
+              options: ["History", "Math", "Their subject", "Geography"],
+              correct_answer: 2
+            }
           ];
           this.requestUpdate();
         }, 1500);
@@ -200,6 +233,9 @@ export class StoryContinuation extends LitElement {
         <continuation-result 
           .continuationContent=${this._continuationContent}
           .vocabularyItems=${this._vocabularyItems}
+          .summary=${this._summary}
+          .quiz=${this._quiz}
+          .difficulty=${this._settings.difficulty}
         ></continuation-result>
       `;
     }
