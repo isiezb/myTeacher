@@ -82,4 +82,8 @@ class SubmitButton extends LitElement {
   }
 }
 
-customElements.define('submit-button', SubmitButton); 
+
+// Guard against duplicate registration
+if (!customElements.get('submit-button')) {
+  customElements.define('submit-button'
+} 

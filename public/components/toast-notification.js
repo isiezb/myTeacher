@@ -142,4 +142,8 @@ export class ToastNotification extends LitElement {
   }
 }
 
-customElements.define('toast-notification', ToastNotification); 
+
+// Guard against duplicate registration
+if (!customElements.get('toast-notification')) {
+  customElements.define('toast-notification'
+} 

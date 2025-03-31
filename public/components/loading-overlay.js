@@ -133,7 +133,11 @@ export class LoadingOverlay extends LitElement {
   }
 }
 
-customElements.define('loading-overlay', LoadingOverlay);
+
+// Guard against duplicate registration
+if (!customElements.get('loading-overlay')) {
+  customElements.define('loading-overlay'
+}
 
 export function showLoading(message = 'Loading...') {
   window.showLoading(message);

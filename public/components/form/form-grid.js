@@ -26,4 +26,8 @@ class FormGrid extends LitElement {
   }
 }
 
-customElements.define('form-grid', FormGrid); 
+
+// Guard against duplicate registration
+if (!customElements.get('form-grid')) {
+  customElements.define('form-grid'
+} 

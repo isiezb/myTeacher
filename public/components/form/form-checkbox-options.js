@@ -25,4 +25,8 @@ class FormCheckboxOptions extends LitElement {
   }
 }
 
-customElements.define('form-checkbox-options', FormCheckboxOptions); 
+
+// Guard against duplicate registration
+if (!customElements.get('form-checkbox-options')) {
+  customElements.define('form-checkbox-options'
+} 

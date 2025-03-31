@@ -175,7 +175,11 @@ export class ToastContainer extends LitElement {
   }
 }
 
-customElements.define('toast-container', ToastContainer);
+
+// Guard against duplicate registration
+if (!customElements.get('toast-container')) {
+  customElements.define('toast-container'
+}
 
 export function showToast(message, type = 'info', duration = 4000) {
   window.showToast(message, type, duration);

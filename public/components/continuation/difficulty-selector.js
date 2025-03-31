@@ -149,4 +149,8 @@ export class DifficultySelector extends LitElement {
   }
 }
 
-customElements.define('difficulty-selector', DifficultySelector); 
+
+// Guard against duplicate registration
+if (!customElements.get('difficulty-selector')) {
+  customElements.define('difficulty-selector'
+} 

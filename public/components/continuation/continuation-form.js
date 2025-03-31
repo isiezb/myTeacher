@@ -199,4 +199,8 @@ export class ContinuationForm extends LitElement {
   }
 }
 
-customElements.define('continuation-form', ContinuationForm); 
+
+// Guard against duplicate registration
+if (!customElements.get('continuation-form')) {
+  customElements.define('continuation-form'
+} 

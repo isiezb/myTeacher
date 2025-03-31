@@ -5,45 +5,55 @@
  * migration to the modular component architecture.
  */
 
-// Original components  
-import '/components/toast-container.js';
-import '/components/loading-overlay.js';
-import '/components/story-form.js';
-import '/components/story-content.js';
-import '/components/story-continuation.js';
-import '/components/stories-grid.js';
-import '/components/quiz-component.js';
+// Load core dependencies first
+import { LitElement } from 'https://cdn.jsdelivr.net/gh/lit/dist@2/core/lit-core.min.js';
 
-// Refactored components
-import '/components/story-form-refactored.js';
-// import '/components/story-content-refactored.js'; // Removed - Loaded via index.html
-import '/components/story-continuation-refactored.js';
+// Utility function to ensure component is only loaded once
+const loadComponent = async (path) => {
+  const tagName = path.split('/').pop().replace('.js', '');
+  if (!customElements.get(tagName)) {
+    try {
+      await import(path);
+      console.log(`✅ Loaded component: ${tagName}`);
+    } catch (error) {
+      console.error(`❌ Failed to load component ${tagName}:`, error);
+    }
+  } else {
+    console.log(`⚠️ Component ${tagName} already registered, skipping load`);
+  }
+};
 
-// Form components
-import '/components/form/form-settings-card.js';
-import '/components/form/form-input-group.js';
-import '/components/form/form-grid.js';
-import '/components/form/form-checkbox-options.js';
-import '/components/form/submit-button.js';
+// Get configuration
+const config = window.componentConfig || {
+  LOAD_ORDER: []
+};
 
-// Story components
-import '/components/story/story-header.js';
-import '/components/story/story-text.js';
-import '/components/story/story-summary.js';
-import '/components/story/story-vocabulary.js';
-import '/components/story/story-quiz.js';
+// Load components in order
+async function loadComponents() {
+  console.log('🔄 Loading components in order...');
+  
+  // Load base components and sub-components first
+  for (const path of config.LOAD_ORDER) {
+    await loadComponent(path);
+  }
+  
+  // Load main components
+  console.log('Loading main components');
+  await Promise.all([
+    loadComponent('/components/story-form.js'),
+    loadComponent('/components/story-content.js'),
+    loadComponent('/components/story-continuation.js'),
+    loadComponent('/components/stories-grid.js'),
+    loadComponent('/components/quiz-component.js'),
+    loadComponent('/components/story-display.js'),
+    loadComponent('/components/story-card.js')
+  ]);
+  
+  // Dispatch event when all components are loaded
+  window.dispatchEvent(new CustomEvent('components-loaded'));
+}
 
-// Continuation components
-import '/components/continuation/difficulty-selector.js';
-import '/components/continuation/difficulty-description.js';
-import '/components/continuation/vocabulary-display.js';
-import '/components/continuation/continuation-form.js';
-import '/components/continuation/continuation-result.js';
-import '/components/continuation/error-message.js';
-
-// Re-export components for external use
-export * from './story-form.js';
-export * from './story-content.js';
-export * from './story-continuation.js';
-export * from './story-form-refactored.js';
-export * from './story-continuation-refactored.js'; 
+// Start loading components
+loadComponents().catch(error => {
+  console.error('Failed to load components:', error);
+}); 
