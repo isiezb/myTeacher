@@ -89,11 +89,24 @@
     // Show the story result area when a story is generated
     const storyResult = document.getElementById('story-result');
     if (storyResult) {
-      const storyDisplay = storyResult.querySelector('story-display');
-      if (storyDisplay) {
-        storyDisplay.addEventListener('story-updated', () => {
-          storyResult.classList.remove('hidden');
-        });
+      // We look for the component *inside* the container now
+      const storyContainer = storyResult.querySelector('#storyDisplayContainer');
+      if (storyContainer) {
+         // Wait briefly for component-loader to potentially add the component
+         setTimeout(() => {
+             const storyComponentTag = window.components?.StoryContent || 'story-content';
+             const storyComponent = storyContainer.querySelector(storyComponentTag);
+             if (storyComponent) {
+                 storyComponent.addEventListener('story-updated', () => {
+                   storyResult.classList.remove('hidden');
+                 });
+                 console.log(`Added story-updated listener to <${storyComponentTag}> inside #storyDisplayContainer`);
+             } else {
+                 console.warn(`Could not find <${storyComponentTag}> in #storyDisplayContainer during setup`);
+             }
+         }, 100); // 100ms delay
+      } else {
+          console.warn('#storyDisplayContainer not found during setup');
       }
     }
   }
@@ -126,16 +139,28 @@
       window.currentStory = story;
       console.log('Story saved to window.currentStory:', window.currentStory);
 
-      // Find story content component and update it
-      const storyContent = document.querySelector('#storyDisplay');
-      if (storyContent) {
-        storyContent.story = story;
-        // Trigger custom event for story update
-        storyContent.dispatchEvent(new CustomEvent('story-updated', {
-          bubbles: true,
-          composed: true,
-          detail: { story: story }
-        }));
+      // Find story content container and the component inside it
+      const storyContainer = document.querySelector('#storyDisplayContainer'); // Use the correct container ID
+      const storyComponentTag = window.components?.StoryContent || 'story-content'; // Get tag name dynamically
+      
+      if (storyContainer) {
+        const storyComponent = storyContainer.querySelector(storyComponentTag);
+        if (storyComponent) {
+          console.log(`Updating component <${storyComponentTag}> inside #storyDisplayContainer`);
+          storyComponent.story = story;
+          // Trigger custom event for story update
+          storyComponent.dispatchEvent(new CustomEvent('story-updated', {
+            bubbles: true,
+            composed: true,
+            detail: { story: story }
+          }));
+        } else {
+           console.error(`Could not find component <${storyComponentTag}> inside #storyDisplayContainer`);
+           window.showToast?.('Error updating display area.', 'error');
+        }
+      } else {
+        console.error('Could not find story display container #storyDisplayContainer');
+        window.showToast?.('Error finding display area.', 'error');
       }
 
       // Show the story result container if hidden
