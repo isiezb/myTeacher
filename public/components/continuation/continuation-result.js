@@ -180,6 +180,21 @@ export class ContinuationResult extends LitElement {
     this.focus = 'general';
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    console.log('ContinuationResult connected with quiz data:', this.quiz);
+  }
+
+  updated(changedProperties) {
+    if (changedProperties.has('quiz')) {
+      console.log('ContinuationResult quiz property updated:', {
+        quiz: this.quiz,
+        hasQuiz: !!this.quiz && Array.isArray(this.quiz) && this.quiz.length > 0,
+        quizLength: this.quiz ? this.quiz.length : 0
+      });
+    }
+  }
+
   firstUpdated() {
     // After the component is first rendered, scroll to the first paragraph of the content
     this._scrollToContent();
@@ -263,6 +278,15 @@ export class ContinuationResult extends LitElement {
     if (!this.continuationContent) {
       return html``;
     }
+
+    // Debug: Check quiz data at render time
+    console.log('ContinuationResult render: quiz data check', {
+      quiz: this.quiz,
+      quizType: typeof this.quiz,
+      isArray: Array.isArray(this.quiz),
+      quizLength: this.quiz && Array.isArray(this.quiz) ? this.quiz.length : 0,
+      quizItems: this.quiz && Array.isArray(this.quiz) ? JSON.stringify(this.quiz) : 'No quiz items'
+    });
 
     // Process the text with proper paragraph breaks
     const formattedContinuation = this.continuationContent
