@@ -29,6 +29,26 @@ export class StoryContent extends LitElement {
       color: var(--text-secondary, #6c757d);
       font-style: italic;
     }
+    
+    .continue-button {
+      display: block;
+      margin: 2rem auto 1rem auto;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: var(--primary, #5e7ce6);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .continue-button:hover {
+      background: var(--primary-600, #4a63b9);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1));
+    }
   `;
 
   constructor() {
@@ -98,6 +118,10 @@ export class StoryContent extends LitElement {
           html`<story-quiz .quiz=${this.story.quiz}></story-quiz>` : 
           ''
         }
+        
+        <button class="continue-button" @click=${this._handleContinueStory}>
+          Continue Story
+        </button>
       </div>
     `;
   }
