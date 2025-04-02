@@ -6,7 +6,7 @@ from ..models.lesson_models import (
     LessonGenerationRequest,
     LessonGenerationResponse,
     LessonContinuationRequest,
-    LessonContinuationResponse
+    # LessonContinuationResponse # This model does not exist, reuse LessonGenerationResponse
 )
 # Import the service functions
 from ..services import lesson_service
