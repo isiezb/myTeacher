@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="description" content="Generate educational stories based on grade level, subject, and custom elements">
   <meta name="keywords" content="education, stories, learning, children, teaching">
-  <title>EASY STORY EASY LIFE</title>
+  <title>EasyLesson - AI-Powered Educational Lessons</title>
   <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAJESURBVFhH7ZZNaBNBFMf/m93EJk1JW4OKFgQrKB56qCAIgop48KAHEVQQDx5E8KgHQQ8evIgexENB8KgHEUU8iYJ48CCCI0XxozQftE3SJN3NfvgmO4nZ3eyuYdGTPwgzb2bem/nvvJkJNcMwcJQRj7T/QcSK169fw7ZtTE5O4vHjx2hvbw+vHhwrKyuYmprC7OwsyuUyZmZm0NPTg0gkEl45GKyA+fl5jI2NYXR0FPF4HMlkEoVCAcPDw3j79i3OnTuHVCqFrq4u9Pb2IhaLQdM0JBIJ9PX1IRaLhXfcH1bA0tISrly5gqGhIbx8+RLPnz/Hp0+fUK1WcfLkSbx48QKPHj3CzZs3ce/ePVy/fh2XLl3C7du38fr1a9y5cwfnz5/H5cuXw7vujxVgmibevHmDhw8fYnFxEYqiQJZlvHr1CmNjY7h79y5kScL09DTu37+PJ0+eYGJiAm/evMGHDx8QjUbx+fNnLC8v4+vXr+Fd94cVQFOt6zpu3LiBgYEBnD59GvF4HMvLy/j+/TsymQyuXr2KTCaDrq4u5HI5fPz4EcViEfl8HhcvXkRHRwfa2trQ3t4e3nV/WAF0GvL5PEZGRpDNZpHL5aBpGnp6epBOp/Hw4UNks1mcOXMGt27dwuDgIEZGRpDJZNDf34+2tjZEo1FomhbedX+sgPX1dSwsLGB9fR2JRAIXL1xAIplEsVhEuVzGxsYGvn37hmQqhZMnTmBzcxNbW1vY3t6GLMtQVRV/d3bCO+4PK+BfwP4T/gn+qgDDMHZN078F/QECHYZz0p1SyAAAAABJRU5ErkJggg==">
   <!-- CSS Files -->
   <link rel="stylesheet" href="css/base.css">
@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="css/utilities.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
   
   <!-- Core configuration and services -->
   <script src="js/env.js"></script>
@@ -32,6 +32,94 @@
   
   <!-- App Initialization -->
   <script type="module" src="js/app.js"></script>
+
+  <!-- Styles -->
+  <style>
+    :root {
+      /* Colors */
+      --primary: #5e7ce6;
+      --primary-600: #4a63b9;
+      --text: #212529;
+      --text-secondary: #6c757d;
+      --bg: #f8f9fa;
+      --bg-hover: #e9ecef;
+      --border: rgba(0, 0, 0, 0.1);
+      --error: #dc3545;
+      --success: #28a745;
+      --danger: #dc3545;
+      
+      /* Shadows */
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      
+      /* Transitions */
+      --transition-normal: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body, 'Source Serif Pro', Georgia, 'Times New Roman', serif);
+      line-height: 1.5;
+      color: var(--text, #212529);
+      background: var(--bg, #f8f9fa);
+      min-height: 100vh;
+    }
+
+    #app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+      padding: 2rem 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background: white;
+      border-top: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+      color: var(--text-secondary, #6c757d);
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-links {
+      margin: 1rem 0;
+    }
+
+    .footer-links a {
+      color: var(--primary, #5e7ce6);
+      text-decoration: none;
+      margin: 0 1rem;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 1rem 0;
+      }
+
+      .footer-content {
+        padding: 0 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <toast-container position="top-right"></toast-container>
@@ -81,7 +169,12 @@
 
   <footer>
     <div class="container">
-      <p>&copy; 2023 EASY STORY EASY LIFE</p>
+      <p>&copy; 2024 EasyLesson. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Contact Us</a>
+      </div>
     </div>
   </footer>
 
@@ -310,5 +403,18 @@
       });
     });
   </script>
+
+  <!-- Components -->
+  <script type="module" src="/components/toast-container.js"></script>
+  <script type="module" src="/components/lesson-app.js"></script>
+  <script type="module" src="/components/lesson-form.js"></script>
+  <script type="module" src="/components/lesson-list.js"></script>
+  <script type="module" src="/components/lesson-page.js"></script>
+  <script type="module" src="/components/lesson-content.js"></script>
+  <script type="module" src="/components/lesson/lesson-header.js"></script>
+  <script type="module" src="/components/lesson/lesson-text.js"></script>
+  <script type="module" src="/components/lesson/lesson-summary.js"></script>
+  <script type="module" src="/components/lesson/lesson-vocabulary.js"></script>
+  <script type="module" src="/components/lesson/lesson-quiz.js"></script>
 </body>
 </html> 

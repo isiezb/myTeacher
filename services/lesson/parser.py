@@ -2,12 +2,12 @@
 Parser module for handling and validating LLM responses.
 
 This module handles parsing and validation of LLM response data
-for story generation and continuation.
+for lesson generation and continuation.
 """
 
 import json
 from typing import Dict, Any, List, Optional, Tuple
-from models.story import VocabularyItem, QuizItem, StoryGenerationRequest
+from models.lesson import VocabularyItem, QuizItem, LessonGenerationRequest
 
 def parse_json_response(json_str: str) -> Dict[str, Any]:
     """
@@ -35,9 +35,9 @@ def parse_json_response(json_str: str) -> Dict[str, Any]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON response from LLM: {e}") from e
 
-def validate_story_response(data: Dict[str, Any]) -> None:
+def validate_lesson_response(data: Dict[str, Any]) -> None:
     """
-    Validate that the story response has the required fields.
+    Validate that the lesson response has the required fields.
     
     Args:
         data: Parsed response data
@@ -45,8 +45,8 @@ def validate_story_response(data: Dict[str, Any]) -> None:
     Raises:
         ValueError: If required fields are missing
     """
-    if not all(k in data for k in ["title", "story_content"]):
-        raise ValueError("LLM response missing required keys 'title' or 'story_content'.")
+    if not all(k in data for k in ["title", "lesson_content"]):
+        raise ValueError("LLM response missing required keys 'title' or 'lesson_content'.")
 
 def validate_continuation_response(data: Dict[str, Any]) -> None:
     """
@@ -149,9 +149,9 @@ def calculate_word_count(text: str) -> int:
     """
     return len(text.split())
 
-def extract_story_content(data: Dict[str, Any], request: StoryGenerationRequest) -> Tuple[str, int, Optional[List[VocabularyItem]], Optional[List[QuizItem]]]:
+def extract_lesson_content(data: Dict[str, Any], request: LessonGenerationRequest) -> Tuple[str, int, Optional[List[VocabularyItem]], Optional[List[QuizItem]]]:
     """
-    Extract and validate all content from a story generation response.
+    Extract and validate all content from a lesson generation response.
     
     Args:
         data: Parsed response data
@@ -160,8 +160,8 @@ def extract_story_content(data: Dict[str, Any], request: StoryGenerationRequest)
     Returns:
         Tuple of (content, word_count, vocabulary_list, quiz_list)
     """
-    story_content = data.get("story_content", "")
-    word_count = calculate_word_count(story_content)
+    lesson_content = data.get("lesson_content", "")
+    word_count = calculate_word_count(lesson_content)
     
     # Process vocabulary if requested
     vocabulary_list = None
@@ -173,7 +173,7 @@ def extract_story_content(data: Dict[str, Any], request: StoryGenerationRequest)
     if request.generate_quiz and "quiz" in data:
         quiz_list = parse_quiz(data["quiz"])
             
-    return story_content, word_count, vocabulary_list, quiz_list
+    return lesson_content, word_count, vocabulary_list, quiz_list
 
 def extract_continuation_content(data: Dict[str, Any]) -> Tuple[str, int, List[Dict[str, str]], Optional[str], Optional[List[Dict[str, Any]]]]:
     """

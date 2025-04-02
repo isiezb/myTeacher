@@ -1,27 +1,27 @@
 """
-Story continuation module for extending existing educational stories.
+Lesson continuation module for extending existing educational lessons.
 
-This module handles the continuation of existing stories using the LLM
+This module handles the continuation of existing lessons using the LLM
 with specified parameters for length and difficulty.
 """
 
-from models.story import StoryContinuationRequest, StoryContinuationResponse
+from models.lesson import LessonContinuationRequest, LessonContinuationResponse
 from services.llm.client import generate_content
 from services.llm.prompting import build_continuation_prompt, get_system_prompt
-from services.story.parser import (
+from services.lesson.parser import (
     parse_json_response, 
     validate_continuation_response,
     extract_continuation_content
 )
 import logging
 
-async def continue_story_content(story_id: str, request: StoryContinuationRequest) -> StoryContinuationResponse:
+async def continue_lesson_content(lesson_id: str, request: LessonContinuationRequest) -> LessonContinuationResponse:
     """
-    Generate a continuation for an existing educational story.
+    Generate a continuation for an existing educational lesson.
     
     Args:
-        story_id: Identifier for the original story
-        request: Story continuation parameters
+        lesson_id: Identifier for the original lesson
+        request: Lesson continuation parameters
         
     Returns:
         Continuation response with generated text
@@ -31,11 +31,11 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
         Exception: For API or network errors
     """
     # Validate input
-    if not request.original_story_content:
-        raise ValueError("Original story content must be provided if story retrieval is not implemented.")
+    if not request.original_lesson_content:
+        raise ValueError("Original lesson content must be provided if lesson retrieval is not implemented.")
         
     # Build the prompt and schema for the LLM
-    prompt, output_format_description = build_continuation_prompt(story_id, request)
+    prompt, output_format_description = build_continuation_prompt(lesson_id, request)
     system_prompt = get_system_prompt(output_format_description)
     
     # Generate content using the LLM
@@ -59,8 +59,8 @@ async def continue_story_content(story_id: str, request: StoryContinuationReques
     logger.info(f"Quiz questions: {len(quiz) if quiz else 0}")
     
     # Build the final response object
-    response = StoryContinuationResponse(
-        story_id=story_id,
+    response = LessonContinuationResponse(
+        lesson_id=lesson_id,
         continuation_text=continuation_text,
         word_count=word_count,
         difficulty=request.difficulty,
