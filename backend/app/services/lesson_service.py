@@ -8,7 +8,6 @@ from ..models.lesson_models import (
     LessonGenerationRequest,
     LessonGenerationResponse,
     LessonContinuationRequest,
-    LessonContinuationResponse,
     VocabularyItem, # Import sub-models if needed for processing
     QuizItem,
     QuizOption # Needed for parsing
