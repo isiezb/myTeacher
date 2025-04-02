@@ -13,7 +13,7 @@ from ..models.lesson_models import (
 
 logger = logging.getLogger(__name__)
 
-# --- System Prompt --- 
+# --- System Prompt ---
 
 def build_system_prompt() -> str:
     """Builds the system prompt for the AI assistant, emphasizing JSON output."""
@@ -192,8 +192,7 @@ You MUST output the *complete, updated* lesson as a single, valid JSON object th
 - Echo back the original lesson's parameters (academic_grade, subject, topic, teacher_style, language) in the appropriate fields of the output JSON, unless the user requested a change to these.
 
 Remember to output ONLY the single, valid JSON object adhering to the schema."""
-
     logger.debug(f"Generated User Prompt (Continuation):\n{user_prompt[:500]}...")
     logger.debug(f"Generated System Prompt (Continuation):\n{system_prompt[:500]}...")
 
-    return system_prompt, user_prompt 
+    return system_prompt, user_prompt
