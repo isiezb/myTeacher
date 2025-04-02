@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Tuple, Dict, Any, Optional, List
 
-# Import models from the models directory
+# Import models from the models directory - Fixed indentation issues
 from ..models.lesson_models import (
     LessonGenerationRequest,
     LessonContinuationRequest,
