@@ -12,7 +12,39 @@ load_dotenv(dotenv_path=dotenv_path)
 
 _supabase_client: Client | None = None
 
-def get_supabase_client() -> Client:
+
+# Mock Supabase client for when no connection is available
+def create_mock_client(url):
+    """Creates a basic mock client that returns empty results instead of erroring."""
+    from unittest.mock import MagicMock
+    
+    # Create a mock response object similar to what Supabase would return
+    mock_response = MagicMock()
+    mock_response.data = []  # Empty data
+    mock_response.count = 0  # No records
+    
+    # Create the mock client
+    mock_client = MagicMock()
+    mock_client.table.return_value.select.return_value.execute.return_value = mock_response
+    mock_client.table.return_value.insert.return_value.execute.return_value = mock_response
+    mock_client.table.return_value.update.return_value.execute.return_value = mock_response
+    mock_client.table.return_value.delete.return_value.execute.return_value = mock_response
+    
+    # Add special method to tell if this is a mock
+    mock_client.is_mock = True
+    
+    logger.warning(f"Using MOCK Supabase client for URL: {url}")
+    return mock_client
+
+def get_supabase_client(mock_if_unavailable=True) -> Client:
+    """Initializes and returns a Supabase client instance using service key.
+
+    Args:
+        mock_if_unavailable: If True, return a mock client when Supabase is unavailable
+
+    Returns:
+        A configured Supabase client or mock client instance.
+    """
     """Initializes and returns a Supabase client instance using service key.
 
     Uses a simple singleton pattern to avoid recreating the client on every call.
@@ -32,9 +64,15 @@ def get_supabase_client() -> Client:
 
         if not supabase_url:
             logger.error("SUPABASE_URL environment variable not set.")
+            if mock_if_unavailable:
+                logger.warning("SUPABASE_URL not set. Using mock client.")
+                return create_mock_client("https://example.supabase.co")
             raise ValueError("SUPABASE_URL environment variable not set.")
         if not supabase_key:
             logger.error("SUPABASE_SERVICE_KEY environment variable not set.")
+            if mock_if_unavailable:
+                logger.warning("SUPABASE_SERVICE_KEY not set. Using mock client.")
+                return create_mock_client(supabase_url or "https://example.supabase.co")
             raise ValueError("SUPABASE_SERVICE_KEY environment variable not set.")
 
         try:

@@ -54,7 +54,7 @@ if [ $ENV_CHECK_RESULT -ne 0 ]; then
 fi
 
 # Initialize database if needed
-echo "Initializing database (creating tables if needed)..."
+echo "Checking database (optional, will continue if not available)..."
 python init_db.py
 DB_INIT_RESULT=$?
 if [ $DB_INIT_RESULT -ne 0 ]; then
