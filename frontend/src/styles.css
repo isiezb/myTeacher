@@ -1,0 +1,40 @@
+/* Basic Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Variables (example) */
+:root {
+  --primary-color: #4a63b9; /* Example primary color */
+  --background-color: #f4f7fc;
+  --text-color: #333;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+  --font-sans: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-serif: 'Source Serif Pro', Georgia, serif; /* Keep if used */
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#app {
+  flex-grow: 1;
+}
+
+/* Basic container */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Add other global styles, utility classes, etc. here */
