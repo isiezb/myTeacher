@@ -195,11 +195,10 @@ You MUST output the *complete, updated* lesson as a single, valid JSON object th
 - If modifying existing content, update the summary, vocabulary, and quiz accordingly to reflect the changes accurately.
 - Echo back the original lesson's parameters (academic_grade, subject, topic, teacher_style, language) in the appropriate fields of the output JSON, unless the user requested a change to these.
 
-Remember to output ONLY the single, valid JSON object adhering to the schema.
-"""
+Remember to output ONLY the single, valid JSON object adhering to the schema."""
 
-    logger.debug(f"Generated User Prompt (Continuation):\n{user_prompt[:500]}...")
-    logger.debug(f"Generated System Prompt (Continuation):\n{system_prompt[:500]}...")
+logger.debug(f"Generated User Prompt (Continuation):\n{user_prompt[:500]}...")
+logger.debug(f"Generated System Prompt (Continuation):\n{system_prompt[:500]}...")
 
-    # Return system prompt first, then user prompt (Corrected Indentation)
-    return system_prompt, user_prompt 
+# Return system prompt first, then user prompt
+return system_prompt, user_prompt
