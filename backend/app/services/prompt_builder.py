@@ -6,8 +6,8 @@ from typing import Tuple, Dict, Any, Optional, List
 from ..models.lesson_models import (
     LessonGenerationRequest,
     LessonContinuationRequest,
-    QuizItem, # Needed for schema definition
-    VocabularyItem, # Needed for schema definition
+    QuizItem,  # Needed for schema definition
+    VocabularyItem,  # Needed for schema definition
     LessonGenerationResponse
 )
 
@@ -21,7 +21,7 @@ def build_system_prompt() -> str:
     # Use triple quotes for the main string to avoid escaping issues with internal quotes
     schema_description = {
         "title": "string (Clear and engaging title for the lesson, max 15 words)",
-        "lesson_content": "string (The full lesson text, well-structured using Markdown (headings, lists, bold). Use paragraphs separated by double line breaks '\\\\n\\\\n'. Adhere strictly to the requested word count.)", # Double escaped newline
+        "lesson_content": "string (The full lesson text, well-structured using Markdown (headings, lists, bold). Use paragraphs separated by double line breaks '\\\\n\\\\n'. Adhere strictly to the requested word count.)",  # Double escaped newline
         "learning_objectives": "[string] (List of 3-5 specific, measurable learning objectives starting with action verbs)",
         "summary": "string (Optional: Concise 2-3 sentence summary of the core concepts covered)",
         # Use single quotes inside the double-quoted string for inner JSON keys/values if needed, or escape double quotes
@@ -79,7 +79,7 @@ def build_generation_prompt(request: LessonGenerationRequest) -> Tuple[str, str]
     """
     logger.debug(f"Building generation prompt for subject: {request.subject}, grade: {request.academic_grade}")
 
-    system_prompt = build_system_prompt() # Use the unified system prompt
+    system_prompt = build_system_prompt()  # Use the unified system prompt
 
     # Define teacher personalities/styles
     teacher_styles = {
@@ -118,7 +118,7 @@ def build_generation_prompt(request: LessonGenerationRequest) -> Tuple[str, str]
         prompt_lines.extend(requirements)
 
     if request.user_prompt_addition:
-         prompt_lines.append(f"\nAdditional User Instructions/Context:\n{request.user_prompt_addition}")
+        prompt_lines.append(f"\nAdditional User Instructions/Context:\n{request.user_prompt_addition}")
 
     prompt_lines.append("\nRemember to provide your response *only* as a single, valid JSON object adhering exactly to the schema described in the system prompt, including echoing back the requested parameters.")
 
@@ -141,9 +141,9 @@ def _build_continuation_output_schema(request: LessonContinuationRequest) -> Dic
     if request.include_summary:
         schema["summary"] = "string (Concise 2-3 sentence summary of *only* the continuation part.)"
     if request.include_vocabulary:
-         schema["vocabulary"] = '[{"term": "string", "definition": "string"}] (List of 3-5 *new* key vocabulary words/phrases introduced in the continuation with simple definitions)'
+        schema["vocabulary"] = '[{"term": "string", "definition": "string"}] (List of 3-5 *new* key vocabulary words/phrases introduced in the continuation with simple definitions)'
     if request.include_quiz:
-         schema["quiz"] = '[{"id": "uuid_string", "question": "string", "options": [{"id": "uuid_string", "text": "string"}], "correct_option_id": "uuid_string"}] (List of 3-5 multiple-choice questions based *only* on the continuation content.)'
+        schema["quiz"] = '[{"id": "uuid_string", "question": "string", "options": [{"id": "uuid_string", "text": "string"}], "correct_option_id": "uuid_string"}] (List of 3-5 multiple-choice questions based *only* on the continuation content.)'
     return schema
 
 def build_continuation_prompt(previous_lesson: LessonGenerationResponse, continuation_request_prompt: str) -> Tuple[str, str]:
@@ -196,4 +196,4 @@ Remember to output ONLY the single, valid JSON object adhering to the schema."""
     logger.debug(f"Generated User Prompt (Continuation):\n{user_prompt[:500]}...")
     logger.debug(f"Generated System Prompt (Continuation):\n{system_prompt[:500]}...")
 
-    return system_prompt, user_prompt
+    return system_prompt, user_prompt 
