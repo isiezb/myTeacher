@@ -156,22 +156,18 @@ def build_continuation_prompt(previous_lesson: LessonGenerationResponse, continu
     """
     logger.debug(f"Building continuation prompt for lesson: {previous_lesson.title}")
 
-    system_prompt = build_system_prompt() # Reuse the same system prompt
+    system_prompt = build_system_prompt()
 
-    # Serialize the previous lesson to JSON string to provide context
     try:
-        # Use Pydantic's serialization for reliable representation
         previous_lesson_json = previous_lesson.model_dump_json(indent=2)
     except Exception as e:
         logger.error(f"Failed to serialize previous lesson to JSON: {e}", exc_info=True)
-        # Fallback to basic dict conversion might lose info or fail on datetime
         try:
             previous_lesson_json = json.dumps(previous_lesson.model_dump(), indent=2, default=str)
         except Exception as inner_e:
-             logger.error(f"Fallback serialization also failed: {inner_e}", exc_info=True)
-             previous_lesson_json = "{\"error\": \"Could not serialize previous lesson\"}" # Provide minimal JSON
+            logger.error(f"Fallback serialization also failed: {inner_e}", exc_info=True)
+            previous_lesson_json = "{\"error\": \"Could not serialize previous lesson\"}"
 
-    # Use triple quotes for the f-string to simplify handling of internal quotes and newlines
     user_prompt = f"""You are tasked with continuing or modifying an existing lesson based on user instructions.
 
 Here is the complete data of the PREVIOUS lesson in JSON format:
@@ -195,10 +191,9 @@ You MUST output the *complete, updated* lesson as a single, valid JSON object th
 - If modifying existing content, update the summary, vocabulary, and quiz accordingly to reflect the changes accurately.
 - Echo back the original lesson's parameters (academic_grade, subject, topic, teacher_style, language) in the appropriate fields of the output JSON, unless the user requested a change to these.
 
-    Remember to output ONLY the single, valid JSON object adhering to the schema."""
+Remember to output ONLY the single, valid JSON object adhering to the schema."""
 
     logger.debug(f"Generated User Prompt (Continuation):\n{user_prompt[:500]}...")
     logger.debug(f"Generated System Prompt (Continuation):\n{system_prompt[:500]}...")
 
-    # Return system prompt first, then user prompt
     return system_prompt, user_prompt
