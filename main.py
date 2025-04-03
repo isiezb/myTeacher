@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from routers import story # Import the story router
+from routers import lesson # Import the lesson router
 import uvicorn
 import logging
 import os # Import os for environment variables
@@ -21,34 +21,29 @@ PUBLIC_DIR = pathlib.Path(__file__).parent / "public"
 INDEX_HTML = PUBLIC_DIR / "index.html"
 
 app = FastAPI(
-    title="EasyStory API & Frontend",
-    description="API for generating educational stories using OpenRouter and serving the frontend",
-    version="1.0.0",
+    title="EasyLesson API",
+    description="API for generating and managing educational lessons",
+    version="1.0.0"
 )
 
-# Configure CORS (Might still be needed if testing locally with different ports, less critical if served from same origin)
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost,http://localhost:8080,https://easystory.onrender.com") # Keep frontend URL just in case
-origins = [origin.strip() for origin in allowed_origins_str.split(',') if origin.strip()]
-
-logger.info(f"Configuring CORS for origins: {origins}")
-
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(","),
     allow_credentials=True,
-    allow_methods=["*"], # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"], # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# --- API Routers --- 
-# API routers should be included BEFORE static files/catch-all
-app.include_router(story.router) # Handles /stories/generate
+# Mount static files
+app.mount("/static", StaticFiles(directory="public"), name="static")
 
-@app.get("/status", tags=["health"])
-async def read_status():
-    """Check API status"""
-    logger.info("Status check requested")
-    return {"status": "ok", "message": "API is running"}
+# Include routers
+app.include_router(lesson.router, prefix="/api/lessons", tags=["lessons"])
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to EasyLesson API"}
 
 # --- Static Files --- 
 # Mount the entire public directory to be served at the root

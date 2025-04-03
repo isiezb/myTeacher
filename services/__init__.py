@@ -6,9 +6,14 @@ implementation details of the underlying modules.
 """
 
 # Re-export the main story generation and continuation functions
-from services.story.generator import generate_story_content
-from services.story.continuation import continue_story_content
+from services.lesson.generator import generate_lesson_content
+from services.lesson.continuation import continue_lesson_content
+from services.lesson.parser import parse_lesson_content
 
 # The original services module exposed these two functions,
 # so we maintain the same public API for compatibility
-__all__ = ['generate_story_content', 'continue_story_content']
+__all__ = [
+    'generate_lesson_content',
+    'continue_lesson_content',
+    'parse_lesson_content'
+]
